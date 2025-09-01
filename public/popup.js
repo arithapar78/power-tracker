@@ -66,6 +66,12 @@ class PopupManager {
     this.safeAddEventListener('submitCodeBtn', 'click', this.handleCodeSubmit.bind(this));
     this.safeAddEventListener('generatorCloseBtn', 'click', this.hidePromptGenerator.bind(this));
     
+    // Setup prompt generator events immediately (don't wait for generator to show)
+    this.setupPromptGeneratorEvents();
+    
+    // Add Enter key support for access code input
+    this.safeAddEventListener('accessCodeInput', 'keydown', this.handleCodeInputKeydown.bind(this));
+    
     // Model comparison and benchmarking
     this.safeAddEventListener('comparisonCloseBtn', 'click', this.hideComparisonModal.bind(this));
     this.safeAddEventListener('benchmarksCloseBtn', 'click', this.hideBenchmarksModal.bind(this));
@@ -2428,6 +2434,9 @@ class PopupManager {
       input.value = '';
       input.focus();
       this.hideCodeError();
+      
+      // Add click-to-close functionality for modal overlay
+      modal.addEventListener('click', this.handleModalOverlayClick.bind(this));
     }
   }
   
@@ -2435,21 +2444,34 @@ class PopupManager {
     const modal = document.getElementById('codeEntryModal');
     if (modal) {
       modal.style.display = 'none';
+      // Remove click handler to prevent memory leaks
+      modal.removeEventListener('click', this.handleModalOverlayClick.bind(this));
     }
     this.hideCodeError();
   }
   
   handleCodeSubmit() {
     const input = document.getElementById('accessCodeInput');
-    if (input) {
-      const code = input.value.trim();
-      if (this.validateAccessCode(code)) {
-        this.hideCodeEntryModal();
-        this.showPromptGenerator();
-        this.loadPromptGeneratorData();
-      } else {
-        this.showCodeError();
-      }
+    if (!input) {
+      console.error('[PopupManager] Access code input not found');
+      return;
+    }
+    
+    const code = input.value.trim();
+    console.log('[PopupManager] Attempting code validation for:', code ? 'code entered' : 'empty code');
+    
+    if (this.validateAccessCode(code)) {
+      console.log('[PopupManager] Access code validated successfully');
+      this.hideCodeEntryModal();
+      this.showPromptGenerator();
+      this.loadPromptGeneratorData();
+      this.showToast('Access granted! Prompt generator unlocked.', 'success');
+    } else {
+      console.log('[PopupManager] Invalid access code entered');
+      this.showCodeError();
+      // Clear the input and refocus for retry
+      input.value = '';
+      input.focus();
     }
   }
   
@@ -2476,7 +2498,7 @@ class PopupManager {
     const generator = document.getElementById('promptGeneratorSection');
     if (generator) {
       generator.style.display = 'block';
-      this.setupPromptGeneratorEvents();
+      // Events are already set up in setupEventListeners
     }
   }
   
@@ -2493,14 +2515,23 @@ class PopupManager {
     this.safeAddEventListener('copyResultBtn', 'click', this.handleCopyResult.bind(this));
     this.safeAddEventListener('newOptimizationBtn', 'click', this.handleNewOptimization.bind(this));
     
-    // Add modal overlay click to close
-    const modal = document.getElementById('codeEntryModal');
-    if (modal) {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          this.hideCodeEntryModal();
-        }
-      });
+    // Modal overlay click functionality is now handled in showCodeEntryModal/hideCodeEntryModal
+  }
+  
+  handleCodeInputKeydown(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.handleCodeSubmit();
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      this.hideCodeEntryModal();
+    }
+  }
+  
+  handleModalOverlayClick(event) {
+    // Close modal if clicking on the overlay (not the modal content)
+    if (event.target === event.currentTarget) {
+      this.hideCodeEntryModal();
     }
   }
   
