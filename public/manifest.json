@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Power Tracker",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Monitor and track your browser's power consumption in watts to optimize energy efficiency.",
 
   "permissions": [
@@ -37,12 +37,5 @@
 
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline'"
-  },
-
-  "web_accessible_resources": [
-    {
-      "resources": ["styles/*", "images/*", "content-script-notifications.js"],
-      "matches": ["<all_urls>"]
-    }
-  ]
+  }
 }
