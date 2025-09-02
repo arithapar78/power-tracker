@@ -471,23 +471,46 @@ class EnergyTracker {
       return true;
     });
 
-    // Alarms (keep SW warm + cleanup)
-    chrome.alarms.onAlarm.addListener(async (alarm) => {
-      try {
-        if (alarm.name === 'et_process') {
-          await this.periodicCleanup();
+    // Alarms (keep SW warm + cleanup) - WITH DIAGNOSTIC LOGGING
+    console.log('[EnergyTracker] DIAGNOSTIC: Checking chrome.alarms availability');
+    console.log('[EnergyTracker] DIAGNOSTIC: chrome object exists:', typeof chrome !== 'undefined');
+    console.log('[EnergyTracker] DIAGNOSTIC: chrome.alarms exists:', typeof chrome?.alarms !== 'undefined');
+    
+    if (typeof chrome !== 'undefined' && chrome.alarms && chrome.alarms.onAlarm) {
+      console.log('[EnergyTracker] DIAGNOSTIC: Alarms API available - setting up alarm listener');
+      chrome.alarms.onAlarm.addListener(async (alarm) => {
+        try {
+          console.log('[EnergyTracker] DIAGNOSTIC: Alarm triggered:', alarm.name);
+          if (alarm.name === 'et_process') {
+            await this.periodicCleanup();
+          }
+        } catch (e) {
+          console.warn('[EnergyTracker] alarm error:', e);
         }
-      } catch (e) {
-        console.warn('[EnergyTracker] alarm error:', e);
-      }
-    });
+      });
+    } else {
+      console.error('[EnergyTracker] DIAGNOSTIC: Alarms API not available - missing "alarms" permission in manifest.json');
+      console.error('[EnergyTracker] DIAGNOSTIC: This will cause onAlarm errors throughout the extension');
+    }
   }
 
   setupKeepAlive() {
-    // 1) periodic alarm keeps the SW from going cold forever
+    // 1) periodic alarm keeps the SW from going cold forever - WITH DIAGNOSTIC LOGGING
+    console.log('[EnergyTracker] DIAGNOSTIC: Attempting to create keep-alive alarm');
+    console.log('[EnergyTracker] DIAGNOSTIC: chrome.alarms.create available:', typeof chrome?.alarms?.create === 'function');
+    
     try {
-      chrome.alarms.create('et_process', { periodInMinutes: 1 });
+      if (typeof chrome !== 'undefined' && chrome.alarms && chrome.alarms.create) {
+        console.log('[EnergyTracker] DIAGNOSTIC: Creating et_process alarm with 1 minute interval');
+        chrome.alarms.create('et_process', { periodInMinutes: 1 });
+        console.log('[EnergyTracker] DIAGNOSTIC: Alarm created successfully');
+      } else {
+        console.error('[EnergyTracker] DIAGNOSTIC: Cannot create alarm - chrome.alarms.create not available');
+        console.error('[EnergyTracker] DIAGNOSTIC: This indicates missing "alarms" permission in manifest.json');
+        console.warn('[EnergyTracker] Service worker keep-alive disabled due to missing alarms permission');
+      }
     } catch (e) {
+      console.error('[EnergyTracker] DIAGNOSTIC: Exception creating alarm:', e.name, e.message);
       console.warn('[EnergyTracker] failed to create alarm:', e);
     }
   }

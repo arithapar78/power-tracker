@@ -5,7 +5,8 @@
   "description": "Monitor and track your browser's power consumption in watts to optimize energy efficiency.",
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "alarms"
   ],
   "background": {
     "service_worker": "service-worker.js"
