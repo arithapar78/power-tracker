@@ -4,8 +4,13 @@
   "version": "2.0.0",
   "description": "Monitor and track your browser's power consumption in watts to optimize energy efficiency.",
 
-  "permissions": ["storage", "tabs", "scripting", "activeTab", "notifications", "alarms", "background"],
-  "host_permissions": ["<all_urls>"],
+  "permissions": [
+    "storage",
+    "activeTab",
+    "notifications",
+    "alarms",
+    "background"
+  ],
 
   "background": {
     "service_worker": "service-worker.js"
