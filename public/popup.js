@@ -1703,12 +1703,60 @@ class PopupManager {
    * Estimates power consumption based on DOM node count
    */
   estimatePowerFromDOMNodes(domNodes) {
-    // Research-based estimation: more DOM nodes = higher power consumption
-    if (domNodes < 500) return 8.0;   // Simple page
-    if (domNodes < 1500) return 12.0; // Normal page
-    if (domNodes < 3000) return 18.0; // Complex page
-    if (domNodes < 5000) return 25.0; // Heavy page
-    return 35.0; // Very heavy page
+    // Base power consumption starts lower for simple pages
+    let basePower = 3.5; // Start with lower baseline
+    
+    // Dynamic scaling based on DOM complexity
+    if (domNodes >= 100) {
+      // Gradual increase: 0.01W per node for first 500 nodes
+      const nodesInRange = Math.min(domNodes - 100, 400);
+      basePower += (nodesInRange * 0.01);
+    }
+    
+    if (domNodes >= 500) {
+      // Medium complexity: 0.015W per node for next 1000 nodes
+      const nodesInRange = Math.min(domNodes - 500, 1000);
+      basePower += (nodesInRange * 0.015);
+    }
+    
+    if (domNodes >= 1500) {
+      // High complexity: 0.02W per node for next 1500 nodes
+      const nodesInRange = Math.min(domNodes - 1500, 1500);
+      basePower += (nodesInRange * 0.02);
+    }
+    
+    if (domNodes >= 3000) {
+      // Very high complexity: 0.025W per node above 3000
+      const nodesInRange = domNodes - 3000;
+      basePower += (nodesInRange * 0.025);
+    }
+    
+    // Add dynamic factors if available
+    if (this.currentTabData) {
+      // Network activity bonus
+      if (this.currentTabData.url && this.currentTabData.url.includes('https')) {
+        basePower += 0.8; // HTTPS overhead
+      }
+      
+      // Page type detection bonus
+      const url = this.currentTabData.url || '';
+      if (url.includes('video') || url.includes('youtube') || url.includes('stream')) {
+        basePower += 2.5; // Video content
+      } else if (url.includes('social') || url.includes('facebook') || url.includes('twitter')) {
+        basePower += 1.5; // Social media
+      } else if (url.includes('shop') || url.includes('ecommerce') || url.includes('store')) {
+        basePower += 1.2; // E-commerce sites
+      }
+      
+      // Time-based activity bonus
+      const duration = this.currentTabData.duration || 0;
+      if (duration > 300000) { // More than 5 minutes
+        basePower += 0.5; // Long session bonus
+      }
+    }
+    
+    // Ensure reasonable bounds: minimum 3.5W, maximum 45W
+    return Math.max(3.5, Math.min(45, Math.round(basePower * 10) / 10));
   }
   
   /**
