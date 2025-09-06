@@ -2458,16 +2458,22 @@ class PopupManager {
     }
     
     const code = input.value.trim();
-    console.log('[PopupManager] Attempting code validation for:', code ? 'code entered' : 'empty code');
+    console.log('[PopupManager] Attempting code validation for:', code ? `"${code}"` : 'empty code');
     
     if (this.validateAccessCode(code)) {
-      console.log('[PopupManager] Access code validated successfully');
-      this.hideCodeEntryModal();
-      this.showPromptGenerator();
-      this.loadPromptGeneratorData();
-      this.showToast('Access granted! Prompt generator unlocked.', 'success');
+      console.log('[PopupManager] ✅ Access code validated successfully');
+      try {
+        this.hideCodeEntryModal();
+        console.log('[PopupManager] Modal hidden, now showing prompt generator...');
+        this.showPromptGenerator();
+        this.loadPromptGeneratorData();
+        this.showToast('Access granted! Prompt generator unlocked.', 'success');
+      } catch (error) {
+        console.error('[PopupManager] Error showing prompt generator:', error);
+        this.showToast('Error opening prompt generator', 'error');
+      }
     } else {
-      console.log('[PopupManager] Invalid access code entered');
+      console.log('[PopupManager] ❌ Invalid access code entered:', code);
       this.showCodeError();
       // Clear the input and refocus for retry
       input.value = '';
@@ -2495,10 +2501,33 @@ class PopupManager {
   }
   
   showPromptGenerator() {
+    console.log('[PopupManager] 🔍 Looking for promptGeneratorSection element...');
     const generator = document.getElementById('promptGeneratorSection');
+    
     if (generator) {
+      console.log('[PopupManager] ✅ Found promptGeneratorSection, making it visible...');
       generator.style.display = 'block';
+      console.log('[PopupManager] ✅ Prompt generator should now be visible');
+      
+      // Scroll to the generator section for better UX
+      try {
+        generator.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (scrollError) {
+        console.warn('[PopupManager] Failed to scroll to generator:', scrollError);
+      }
+      
+      // Focus on the prompt input for immediate use
+      setTimeout(() => {
+        const promptInput = document.getElementById('promptInput');
+        if (promptInput) {
+          promptInput.focus();
+        }
+      }, 100);
+      
       // Events are already set up in setupEventListeners
+    } else {
+      console.error('[PopupManager] ❌ promptGeneratorSection element not found in DOM!');
+      this.showToast('Error: Prompt generator element not found', 'error');
     }
   }
   
