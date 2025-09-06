@@ -1,12 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Power Tracker",
-  "version": "2.0.5",
-  "description": "Monitor and track your browser's power consumption in watts to optimize energy efficiency.",
+  "version": "2.0.6",
+  "description": "Monitor and track your browser's power consumption in watts, save usage history, and export your data into a JSON file for backup or analysis.",
   "permissions": [
     "activeTab",
     "storage",
-    "alarms"
+    "alarms",
+    "downloads"
   ],
   "background": {
     "service_worker": "service-worker.js"
