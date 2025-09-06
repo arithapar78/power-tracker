@@ -564,6 +564,7 @@ class PopupManager {
       // Process the retrieved data
       if (energyDataFound) {
         const energyDataKeys = Object.keys(this.energyData);
+        console.log('=== DATA PROCESSING DIAGNOSTIC ===');
         console.log('Available tab IDs:', energyDataKeys);
         console.log('Energy data details:', energyDataKeys.map(tabId => {
           const tabData = this.energyData[tabId] || {};
@@ -572,12 +573,14 @@ class PopupManager {
             url: this.safeSubstring(tabData.url, 0, 50),
             energyScore: tabData.energyScore ?? 0,
             powerWatts: tabData.powerWatts ?? 0,
+            domNodes: tabData.domNodes ?? 0,
             timestamp: tabData.timestamp ? new Date(tabData.timestamp).toLocaleTimeString() : null,
             dataSource: tabData.dataSource || 'live'
           };
         }));
 
         const tabId = currentTab?.id;
+        console.log('Current tab ID:', tabId, 'looking for matching data...');
         this.currentTabData = (tabId && this.energyData[tabId]) ? this.energyData[tabId] : null;
         
         if (this.currentTabData) {
@@ -588,13 +591,16 @@ class PopupManager {
             age: this.currentTabData.timestamp ? (Date.now() - this.currentTabData.timestamp) + 'ms ago' : 'unknown',
             source: this.currentTabData.dataSource || 'live'
           });
+          console.log('Raw currentTabData object:', this.currentTabData);
           return; // SUCCESS - exit early
         } else {
           console.log('❌ No energy data found for current tab ID, checking similar URLs...');
+          console.log('Energy data keys vs current tab ID:', { energyDataKeys, currentTabId: tabId });
           const similarTabData = this.findSimilarTabData(currentTab?.url);
           if (similarTabData) {
             console.log('Found similar URL data:', this.safeSubstring(similarTabData.url, 0, 50));
             this.currentTabData = similarTabData;
+            console.log('Using similar tab data:', this.currentTabData);
             return; // SUCCESS with similar data
           }
         }
@@ -705,6 +711,7 @@ class PopupManager {
   
   // Helper method to create fallback tab data and search history
   async createFallbackTabData(currentTab) {
+    console.log('=== FALLBACK DATA CREATION ===');
     console.log('Creating fallback tab data for:', currentTab.url?.substring(0, 50));
     
     // Try to find historical data for this tab/URL
@@ -719,17 +726,32 @@ class PopupManager {
       timestamp: Date.now(),
       tabId: currentTab.id,
       isEstimated: true,
-      dataSource: historicalData ? 'historical' : 'fallback'
+      dataSource: historicalData ? 'historical' : 'fallback',
+      // ADD: Explicitly set powerWatts if we have energyScore from historical data
+      powerWatts: historicalData?.averageEnergyScore ? this.migrateLegacyScore(historicalData.averageEnergyScore) : null
     };
     
     if (historicalData) {
       console.log('✅ Using historical data for estimates:', {
         averageEnergyScore: historicalData.averageEnergyScore,
+        averageDomNodes: historicalData.averageDomNodes,
+        estimatedPowerWatts: this.currentTabData.powerWatts,
         visits: historicalData.visits
       });
     } else {
       console.log('⚠️ Using basic fallback data (no history available)');
+      // Generate reasonable estimates for completely unknown URLs
+      this.currentTabData.domNodes = 1500; // Reasonable estimate
+      this.currentTabData.energyScore = 25; // Medium energy score
+      this.currentTabData.powerWatts = this.estimatePowerFromURL(currentTab.url);
+      console.log('Generated fallback estimates:', {
+        domNodes: this.currentTabData.domNodes,
+        energyScore: this.currentTabData.energyScore,
+        powerWatts: this.currentTabData.powerWatts
+      });
     }
+    
+    console.log('Final fallback currentTabData:', this.currentTabData);
   }
   
   // Helper method to find historical data for a URL with enhanced safety
@@ -1527,33 +1549,63 @@ class PopupManager {
    * Calculates base browser power consumption (original logic)
    */
   calculateBaseBrowserPower() {
+    console.log('=== POWER CALCULATION DIAGNOSTIC ===');
+    console.log('Current tab data:', this.currentTabData);
+    
     // Priority 1: Direct power measurement
     if (this.currentTabData?.powerWatts &&
         !isNaN(this.currentTabData.powerWatts) &&
         this.currentTabData.powerWatts > 0) {
-      return Math.max(5, Math.min(65, this.currentTabData.powerWatts)); // Bound to realistic range
+      const power = Math.max(5, Math.min(65, this.currentTabData.powerWatts));
+      console.log('✅ Priority 1: Using direct power measurement:', power + 'W');
+      return power;
+    } else {
+      console.log('❌ Priority 1 failed: powerWatts =', this.currentTabData?.powerWatts);
     }
     
     // Priority 2: Legacy energy score migration
     if (this.currentTabData?.energyScore &&
         !isNaN(this.currentTabData.energyScore) &&
         this.currentTabData.energyScore >= 0) {
-      return this.migrateLegacyScore(this.currentTabData.energyScore);
+      const power = this.migrateLegacyScore(this.currentTabData.energyScore);
+      console.log('✅ Priority 2: Using legacy energy score migration:', power + 'W (from score:', this.currentTabData.energyScore + ')');
+      return power;
+    } else {
+      console.log('❌ Priority 2 failed: energyScore =', this.currentTabData?.energyScore);
     }
     
     // Priority 3: Estimate based on DOM complexity
     if (this.currentTabData?.domNodes &&
         !isNaN(this.currentTabData.domNodes) &&
         this.currentTabData.domNodes > 0) {
-      return this.estimatePowerFromDOMNodes(this.currentTabData.domNodes);
+      const power = this.estimatePowerFromDOMNodes(this.currentTabData.domNodes);
+      console.log('✅ Priority 3: Using DOM complexity estimation:', power + 'W (from', this.currentTabData.domNodes, 'nodes)');
+      return power;
+    } else {
+      console.log('❌ Priority 3 failed: domNodes =', this.currentTabData?.domNodes);
     }
     
     // Priority 4: URL-based estimation (includes AI site detection)
     if (this.currentTabData?.url) {
-      return this.estimatePowerFromURL(this.currentTabData.url);
+      const power = this.estimatePowerFromURL(this.currentTabData.url);
+      console.log('✅ Priority 4: Using URL-based estimation:', power + 'W (from URL:', this.currentTabData.url.substring(0, 50) + ')');
+      return power;
+    } else {
+      console.log('❌ Priority 4 failed: url =', this.currentTabData?.url);
     }
     
     // Priority 5: Fallback default
+    console.log('⚠️ Priority 5: Using fallback default: 8.0W');
+    console.log('Current tab data state:', {
+      hasCurrentTabData: !!this.currentTabData,
+      powerWatts: this.currentTabData?.powerWatts,
+      energyScore: this.currentTabData?.energyScore,
+      domNodes: this.currentTabData?.domNodes,
+      url: this.currentTabData?.url?.substring(0, 50),
+      isEstimated: this.currentTabData?.isEstimated,
+      isUnavailable: this.currentTabData?.isUnavailable,
+      dataSource: this.currentTabData?.dataSource
+    });
     return 8.0; // Conservative default for light browsing
   }
   
