@@ -1,28 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Power Tracker",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "Monitor and track your browser's power consumption in watts, save usage history, and export your data into a JSON file for backup or analysis.",
-  "permissions": [
-    "activeTab",
-    "storage",
-    "alarms",
-    "downloads"
-  ],
-  "background": {
-    "service_worker": "service-worker.js"
-  },
+  "permissions": ["activeTab", "storage", "alarms", "downloads"],
+  "background": { "service_worker": "service-worker.js" },
   "action": {
     "default_popup": "popup.html",
-    "default_icon": {
-      "16": "icon-16.png",
-      "48": "icon-48.png",
-      "128": "icon-128.png"
-    }
+    "default_icon": { "16": "icon-16.png", "48": "icon-48.png", "128": "icon-128.png" }
   },
-  "icons": {
-    "16": "icon-16.png",
-    "48": "icon-48.png",
-    "128": "icon-128.png"
-  }
+  "icons": { "16": "icon-16.png", "48": "icon-48.png", "128": "icon-128.png" }
 }
