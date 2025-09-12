@@ -150,8 +150,8 @@ class OptionsManager {
             this.testModalWithData(e.target.dataset.testSite);
           }
         }
-        // Theme toggle
-        else if (e.target.id === 'themeToggle') {
+        // Theme toggle - handle clicks on button or its child elements
+        else if (e.target.id === 'themeToggle' || e.target.closest('#themeToggle')) {
           e.preventDefault();
           this.handleThemeToggle();
         }
@@ -2748,8 +2748,8 @@ class OptionsManager {
   async handleThemeToggle() {
     try {
       const container = document.querySelector('.container');
-      const currentTheme = container?.getAttribute('data-theme') || 'light';
-      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      const currentTheme = container?.getAttribute('data-theme') || 'dark';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
       
       await this.setTheme(newTheme);
       console.log('[OptionsManager] Theme toggled to:', newTheme);
@@ -2761,24 +2761,29 @@ class OptionsManager {
 
   async loadTheme() {
     try {
-      const defaultTheme = 'light';
+      const defaultTheme = 'dark';
+      let savedTheme = defaultTheme;
       
-      // Check if Chrome APIs are available
-      if (!this.isChromeApiAvailable()) {
-        console.log('[OptionsManager] Chrome APIs not available, using default theme');
-        this.setThemeUI(defaultTheme);
-        return;
+      // Try Chrome storage first if available
+      if (this.isChromeApiAvailable()) {
+        try {
+          const result = await chrome.storage.sync.get(['theme']);
+          savedTheme = result.theme || defaultTheme;
+          console.log('[OptionsManager] Theme loaded from Chrome storage:', savedTheme);
+        } catch (error) {
+          console.warn('[OptionsManager] Chrome storage failed, falling back to localStorage:', error);
+          savedTheme = localStorage.getItem('power-tracker-theme') || defaultTheme;
+        }
+      } else {
+        // Fallback to localStorage
+        savedTheme = localStorage.getItem('power-tracker-theme') || defaultTheme;
+        console.log('[OptionsManager] Theme loaded from localStorage:', savedTheme);
       }
-
-      // Get saved theme preference
-      const result = await chrome.storage.sync.get(['theme']);
-      const savedTheme = result.theme || defaultTheme;
       
       this.setThemeUI(savedTheme);
-      console.log('[OptionsManager] Theme loaded:', savedTheme);
     } catch (error) {
       console.error('[OptionsManager] Failed to load theme:', error);
-      this.setThemeUI('light');
+      this.setThemeUI(defaultTheme);
     }
   }
 
@@ -2787,9 +2792,19 @@ class OptionsManager {
       // Update UI immediately
       this.setThemeUI(theme);
       
-      // Save theme preference if Chrome APIs are available
+      // Save theme preference
       if (this.isChromeApiAvailable()) {
-        await chrome.storage.sync.set({ theme });
+        try {
+          await chrome.storage.sync.set({ theme });
+          console.log('[OptionsManager] Theme saved to Chrome storage:', theme);
+        } catch (error) {
+          console.warn('[OptionsManager] Chrome storage failed, using localStorage:', error);
+          localStorage.setItem('power-tracker-theme', theme);
+        }
+      } else {
+        // Fallback to localStorage
+        localStorage.setItem('power-tracker-theme', theme);
+        console.log('[OptionsManager] Theme saved to localStorage:', theme);
       }
     } catch (error) {
       console.error('[OptionsManager] Failed to set theme:', error);
@@ -2806,8 +2821,15 @@ class OptionsManager {
       }
       
       if (themeToggle) {
-        // Update theme toggle button icon
-        themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+        // Update theme toggle button icon - find the icon span or update the button content properly
+        const themeIcon = themeToggle.querySelector('.theme-icon');
+        if (themeIcon) {
+          themeIcon.textContent = theme === 'light' ? '🌙' : '☀️';
+        } else {
+          // Fallback: update button content while preserving structure
+          themeToggle.innerHTML = `<span class="theme-icon">${theme === 'light' ? '🌙' : '☀️'}</span>`;
+        }
+        
         themeToggle.setAttribute('aria-label',
           theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
         themeToggle.setAttribute('title',
