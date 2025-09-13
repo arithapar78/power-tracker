@@ -18,10 +18,16 @@ class PopupManager {
     this.currentAIUsage = null;
     this.enhancedAIData = null;
     
-    // Initialize Backend Power Calculator
-    this.backendPowerCalculator = typeof BackendPowerCalculator !== 'undefined'
-      ? new BackendPowerCalculator()
-      : null;
+    // Initialize AI Model Power Calculator
+    this.aiModelPowerCalculator = new AIModelPowerCalculator();
+    
+    // Initialize Backend Power Calculator (legacy compatibility)
+    this.backendPowerCalculator = this.aiModelPowerCalculator;
+    
+    // Initialize System Integration Manager
+    this.systemIntegrationManager = null;
+    this.performanceOptimizer = null;
+    this.integrationTestSuite = null;
     
     this.init();
   }
@@ -30,6 +36,12 @@ class PopupManager {
     console.log('[PopupManager] Initializing popup...');
     
     try {
+      // Initialize System Integration Manager first for performance optimization
+      await this.initializeSystemIntegration();
+      
+      // Initialize advanced features
+      this.initializeAdvancedFeatures();
+      
       // Set up event listeners
       this.setupEventListeners();
       
@@ -39,13 +51,154 @@ class PopupManager {
       // Start periodic updates
       this.startPeriodicUpdates();
       
+      // Run integration tests in development mode
+      if (this.isDevelopmentMode()) {
+        await this.runIntegrationTests();
+        await this.runSystemValidation();
+      }
+      
       // Hide loading overlay
       this.hideLoadingOverlay();
+      
+      console.log('[PopupManager] ✅ Popup initialization completed successfully');
       
     } catch (error) {
       console.error('[PopupManager] Initialization failed:', error);
       this.showError('Failed to initialize. Please try again.');
     }
+  }
+  
+  /**
+   * Initialize system integration and performance optimization
+   */
+  async initializeSystemIntegration() {
+    try {
+      // Initialize System Integration Manager
+      if (typeof SystemIntegrationManager !== 'undefined') {
+        this.systemIntegrationManager = new SystemIntegrationManager();
+        const initResult = await this.systemIntegrationManager.initialize();
+        
+        if (initResult.success) {
+          console.log(`[PopupManager] System integration initialized in ${initResult.initializationTime}ms`);
+          
+          // Get references to optimized systems
+          this.performanceOptimizer = this.systemIntegrationManager.getSystem('performanceOptimizer');
+          this.integrationTestSuite = this.systemIntegrationManager.getSystem('integrationTestSuite');
+          
+          // Override system references with optimized versions
+          const optimizedTokenCounter = this.systemIntegrationManager.getSystem('tokenCounter');
+          const optimizedPowerCalculator = this.systemIntegrationManager.getSystem('powerCalculator');
+          const optimizedPromptOptimizer = this.systemIntegrationManager.getSystem('promptOptimizer');
+          
+          if (optimizedTokenCounter) this.tokenCounter = optimizedTokenCounter;
+          if (optimizedPowerCalculator) this.aiModelPowerCalculator = optimizedPowerCalculator;
+          if (optimizedPromptOptimizer) this.advancedOptimizer = optimizedPromptOptimizer;
+          
+        } else {
+          console.warn('[PopupManager] System integration initialization failed:', initResult.error);
+        }
+      } else {
+        console.warn('[PopupManager] SystemIntegrationManager not available');
+      }
+    } catch (error) {
+      console.error('[PopupManager] Failed to initialize system integration:', error);
+    }
+  }
+  
+  /**
+   * Initialize advanced features with performance monitoring
+   */
+  initializeAdvancedFeatures() {
+    const startTime = performance.now();
+    
+    try {
+      // Initialize token counting systems if not already done by system integration
+      if (!this.tokenCounter) {
+        this.initializeTokenCounters();
+      }
+      
+      // Store reference to window for global access
+      window.popupManager = this;
+      
+      const duration = performance.now() - startTime;
+      if (this.performanceOptimizer) {
+        this.performanceOptimizer.recordMetric('advancedFeaturesInit', duration);
+      }
+      
+      console.log(`[PopupManager] Advanced features initialized in ${Math.round(duration)}ms`);
+      
+    } catch (error) {
+      console.error('[PopupManager] Failed to initialize advanced features:', error);
+    }
+  }
+  
+  /**
+   * Check if running in development mode
+   */
+  isDevelopmentMode() {
+    // Check for development indicators
+    return window.location.protocol === 'file:' ||
+           window.location.hostname === 'localhost' ||
+           window.location.hostname === '127.0.0.1' ||
+           (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id &&
+            chrome.runtime.id.includes('unpacked'));
+  }
+  
+  /**
+   * Run integration tests in development mode
+   */
+  async runIntegrationTests() {
+    if (!this.integrationTestSuite) {
+      console.log('[PopupManager] Integration test suite not available, skipping tests');
+      return;
+    }
+    
+    try {
+      console.log('[PopupManager] 🧪 Running integration tests in development mode...');
+      const testResults = await this.integrationTestSuite.runAllTests();
+      
+      if (testResults.summary.failedTests > 0) {
+        console.warn(`[PopupManager] ⚠️ ${testResults.summary.failedTests}/${testResults.summary.totalTests} integration tests failed`);
+        console.table(testResults.testDetails);
+      } else {
+        console.log(`[PopupManager] ✅ All ${testResults.summary.totalTests} integration tests passed`);
+      }
+      
+      // Store test results for performance report
+      this.lastIntegrationTestResults = testResults;
+      
+    } catch (error) {
+      console.error('[PopupManager] Failed to run integration tests:', error);
+    }
+  }
+  
+  /**
+   * Get system performance report
+   */
+  getPerformanceReport() {
+    if (!this.systemIntegrationManager) {
+      return {
+        systemIntegrationManager: 'not available',
+        basicMetrics: {
+          initializationTime: Date.now() - this.startTime
+        }
+      };
+    }
+    
+    const report = this.systemIntegrationManager.getPerformanceReport();
+    
+    // Add popup-specific metrics
+    report.popupSpecific = {
+      lastIntegrationTestResults: this.lastIntegrationTestResults,
+      systemsAvailable: {
+        tokenCounter: !!this.tokenCounter,
+        performanceOptimizer: !!this.performanceOptimizer,
+        advancedOptimizer: !!this.advancedOptimizer,
+        integrationTestSuite: !!this.integrationTestSuite
+      }
+    };
+    
+    return report;
   }
   
   setupEventListeners() {
@@ -1499,8 +1652,8 @@ class PopupManager {
    * Enhanced backend power calculation for total energy mode using real-time AI model data
    */
   calculateBackendPowerForTotal() {
-    // Return 0 if no AI model detected or backend calculator unavailable
-    if (!this.detectedAIModel || !this.backendPowerCalculator) {
+    // Return 0 if no AI model detected or calculator unavailable
+    if (!this.detectedAIModel || !this.aiModelPowerCalculator) {
       return 0;
     }
     
@@ -1514,35 +1667,231 @@ class PopupManager {
       timestamp: Date.now()
     };
     
-    // Calculate real-time backend power consumption
-    const backendPower = this.backendPowerCalculator.calculateBackendPower(
+    // Calculate real-time backend power consumption using new calculator
+    const backendPower = this.aiModelPowerCalculator.calculateBackendPower(
       this.detectedAIModel,
       this.currentTabData,
       context
     );
     
-    console.log('[PopupManager] Backend power calculated:', {
-      model: this.detectedAIModel.model.name,
-      category: this.detectedAIModel.model.category,
-      energyPerQuery: this.detectedAIModel.model.energy.meanCombined + ' Wh',
+    // Get environmental impact for additional insights
+    const environmentalImpact = this.aiModelPowerCalculator.calculateEnvironmentalImpact(
+      backendPower,
+      3600000, // 1 hour duration
+      'global'
+    );
+    
+    console.log('[PopupManager] Backend power calculated with AI Power Calculator:', {
+      model: this.detectedAIModel.model?.name || 'Unknown',
+      category: this.detectedAIModel.model?.category || 'unknown',
       backendPowerW: backendPower.toFixed(2) + 'W',
       confidence: this.detectedAIModel.confidence,
+      environmentalImpact: {
+        carbonEmissionsG: environmentalImpact.carbonEmissionsG.toFixed(2) + 'g CO₂',
+        waterUsageL: environmentalImpact.waterUsageL.toFixed(2) + 'L',
+        treeOffsetDays: environmentalImpact.treeOffsetDays.toFixed(2) + ' tree-days'
+      },
       context: {
         userEngagement: context.userEngagement,
         batteryLevel: context.batteryLevel,
-        userActivity: context.userActivity
+        userActivity: context.userActivity,
+        performanceMode: context.performanceMode
       }
     });
     
-    // Cap backend power at reasonable limits based on model category
-    const modelCategory = this.detectedAIModel.model.category || 'balanced-performance';
-    let maxBackendPower = 50; // Default cap
+    // Store environmental impact for UI display
+    this.lastEnvironmentalImpact = environmentalImpact;
     
-    if (modelCategory.includes('reasoning-specialized')) maxBackendPower = 80;  // DeepSeek R1
-    else if (modelCategory.includes('frontier-large')) maxBackendPower = 60;   // GPT-5, Grok-4
-    else if (modelCategory.includes('ultra-efficient')) maxBackendPower = 20;  // Llama-4 Maverick
+    // Cap backend power at reasonable limits
+    return Math.min(80, Math.max(0, backendPower));
+  }
+  
+  /**
+   * Calculate wattage savings from prompt optimization
+   */
+  calculateWattageSavings(originalTokens, optimizedTokens, targetModel = 'gpt-4') {
+    if (!this.aiModelPowerCalculator) return { savings: 0, percentage: 0 };
     
-    return Math.min(maxBackendPower, Math.max(0, backendPower));
+    try {
+      // Get model power profile
+      const modelKey = this.aiModelPowerCalculator.inferModelKey({ name: targetModel });
+      const profile = this.aiModelPowerCalculator.modelPowerProfiles[modelKey];
+      
+      if (!profile) {
+        console.warn('[PopupManager] No profile found for model:', modelKey);
+        return { savings: 0, percentage: 0 };
+      }
+      
+      // Calculate energy per token (Wh per token)
+      const energyPerToken = profile.energyPerQuery / 1000; // Convert to Wh per token (rough estimate)
+      
+      // Calculate energy savings
+      const tokensSaved = Math.max(0, originalTokens - optimizedTokens);
+      const energySavedWh = tokensSaved * energyPerToken;
+      
+      // Convert to power savings (assuming 1-hour duration)
+      const powerSavingsW = energySavedWh;
+      
+      // Calculate percentage savings
+      const percentageSavings = originalTokens > 0 ?
+        Math.round((tokensSaved / originalTokens) * 100) : 0;
+      
+      // Calculate cost savings
+      const costSavings = this.aiModelPowerCalculator.calculateQueryCost(
+        modelKey,
+        tokensSaved,
+        'global'
+      );
+      
+      // Environmental impact savings
+      const environmentalSavings = this.aiModelPowerCalculator.calculateEnvironmentalImpact(
+        powerSavingsW,
+        3600000, // 1 hour
+        'global'
+      );
+      
+      const result = {
+        savings: powerSavingsW,
+        percentage: percentageSavings,
+        tokensSaved: tokensSaved,
+        costSavings: costSavings.total,
+        environmental: {
+          carbonSavedG: environmentalSavings.carbonEmissionsG,
+          waterSavedL: environmentalSavings.waterUsageL,
+          treeDaysOffset: environmentalSavings.treeOffsetDays
+        },
+        model: profile.name
+      };
+      
+      console.log('[PopupManager] Wattage savings calculated:', result);
+      
+      return result;
+      
+    } catch (error) {
+      console.error('[PopupManager] Error calculating wattage savings:', error);
+      return { savings: 0, percentage: 0 };
+    }
+  }
+  
+  /**
+   * Update wattage-based power savings display in real-time
+   */
+  updatePowerSavingsDisplay() {
+    try {
+      // Get current token analysis
+      if (!this.currentTokenAnalysis || !this.optimizedTokenAnalysis) {
+        return;
+      }
+      
+      const targetModel = document.getElementById('targetModel')?.value || 'gpt-4';
+      const originalTokens = this.currentTokenAnalysis.gpt;
+      const optimizedTokens = this.optimizedTokenAnalysis.gpt;
+      
+      // Calculate savings
+      const savings = this.calculateWattageSavings(originalTokens, optimizedTokens, targetModel);
+      
+      // Update power savings display elements
+      const powerSavingsElement = document.getElementById('powerSavingsDisplay');
+      const carbonSavingsElement = document.getElementById('carbonSavingsDisplay');
+      const costSavingsElement = document.getElementById('costSavingsDisplay');
+      
+      if (powerSavingsElement) {
+        if (savings.savings >= 0.001) {
+          powerSavingsElement.textContent = `${savings.savings.toFixed(3)} Wh saved`;
+          powerSavingsElement.className = 'power-savings positive';
+        } else {
+          powerSavingsElement.textContent = 'No power savings';
+          powerSavingsElement.className = 'power-savings neutral';
+        }
+      }
+      
+      if (carbonSavingsElement && savings.environmental) {
+        if (savings.environmental.carbonSavedG > 0.1) {
+          carbonSavingsElement.textContent = `${savings.environmental.carbonSavedG.toFixed(2)}g CO₂ saved`;
+          carbonSavingsElement.className = 'carbon-savings positive';
+        } else {
+          carbonSavingsElement.textContent = 'Minimal carbon savings';
+          carbonSavingsElement.className = 'carbon-savings neutral';
+        }
+      }
+      
+      if (costSavingsElement) {
+        if (savings.costSavings > 0.0001) {
+          costSavingsElement.textContent = `$${savings.costSavings.toFixed(4)} saved`;
+          costSavingsElement.className = 'cost-savings positive';
+        } else {
+          costSavingsElement.textContent = 'Minimal cost savings';
+          costSavingsElement.className = 'cost-savings neutral';
+        }
+      }
+      
+      // Update comprehensive savings summary
+      this.updateComprehensiveSavingsSummary(savings);
+      
+    } catch (error) {
+      console.error('[PopupManager] Error updating power savings display:', error);
+    }
+  }
+  
+  /**
+   * Update comprehensive savings summary panel
+   */
+  updateComprehensiveSavingsSummary(savings) {
+    const summaryPanel = document.getElementById('savingsSummaryPanel');
+    if (!summaryPanel) return;
+    
+    if (savings.percentage > 0) {
+      summaryPanel.style.display = 'block';
+      
+      let summaryHTML = `
+        <div class="savings-summary">
+          <h4>💰 Optimization Savings Summary</h4>
+          <div class="savings-grid">
+            <div class="savings-item">
+              <span class="savings-label">Token Reduction:</span>
+              <span class="savings-value">${savings.tokensSaved} tokens (${savings.percentage}%)</span>
+            </div>
+            <div class="savings-item">
+              <span class="savings-label">Power Saved:</span>
+              <span class="savings-value">${savings.savings >= 0.001 ? savings.savings.toFixed(3) + ' Wh' : 'Minimal'}</span>
+            </div>
+            <div class="savings-item">
+              <span class="savings-label">Cost Saved:</span>
+              <span class="savings-value">$${savings.costSavings.toFixed(4)}</span>
+            </div>
+          </div>
+      `;
+      
+      if (savings.environmental) {
+        summaryHTML += `
+          <div class="environmental-impact">
+            <h5>🌱 Environmental Impact</h5>
+            <div class="impact-items">
+              <div class="impact-item">
+                <span>Carbon: ${savings.environmental.carbonSavedG.toFixed(2)}g CO₂ saved</span>
+              </div>
+              <div class="impact-item">
+                <span>Water: ${savings.environmental.waterSavedL.toFixed(2)}L saved</span>
+              </div>
+              <div class="impact-item">
+                <span>Equivalent: ${savings.environmental.treeDaysOffset.toFixed(2)} tree-days of carbon absorption</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      summaryHTML += `
+          <div class="model-info">
+            <small>Calculations for ${savings.model || 'Default Model'}</small>
+          </div>
+        </div>
+      `;
+      
+      summaryPanel.innerHTML = summaryHTML;
+    } else {
+      summaryPanel.style.display = 'none';
+    }
   }
   
   /**
@@ -2644,6 +2993,9 @@ class PopupManager {
     this.safeAddEventListener('copyResultBtn', 'click', this.handleCopyResult.bind(this));
     this.safeAddEventListener('newOptimizationBtn', 'click', this.handleNewOptimization.bind(this));
     
+    // Setup real-time token counting with debouncing
+    this.setupRealTimeTokenCounting();
+    
     // Modal overlay click functionality is now handled in showCodeEntryModal/hideCodeEntryModal
   }
   
@@ -2716,8 +3068,2813 @@ class PopupManager {
     }, 1500);
   }
   
+  // ===== ADVANCED TOKEN COUNTING SYSTEM =====
+  
+  /**
+   * Advanced TokenCounter class with multiple counting methodologies
+   */
+  initializeTokenCounters() {
+    if (!this.tokenCounter) {
+      this.tokenCounter = new TokenCounter();
+    }
+    if (!this.tokenComparison) {
+      this.tokenComparison = new TokenComparison();
+    }
+  }
+  
+  /**
+   * Sets up real-time token counting with debouncing
+   */
+  setupRealTimeTokenCounting() {
+    console.log('[PopupManager] Setting up real-time token counting with debouncing');
+    
+    // Initialize debounced token counting
+    this.tokenCountingDebounceTimer = null;
+    this.currentTokenAnalysis = null;
+    this.lastPromptText = '';
+    
+    // Get prompt input element
+    const promptInput = document.getElementById('promptInput');
+    const optimizedPrompt = document.getElementById('optimizedPrompt');
+    
+    if (promptInput) {
+      // Add event listeners with debouncing
+      promptInput.addEventListener('input', this.handlePromptInputChange.bind(this));
+      promptInput.addEventListener('paste', this.handlePromptPaste.bind(this));
+      promptInput.addEventListener('keyup', this.handlePromptInputChange.bind(this));
+      
+      console.log('[PopupManager] Real-time token counting events attached to promptInput');
+    } else {
+      console.warn('[PopupManager] promptInput element not found for real-time counting');
+    }
+    
+    if (optimizedPrompt) {
+      // Also monitor optimized prompt for comparison
+      optimizedPrompt.addEventListener('input', this.handleOptimizedPromptChange.bind(this));
+      console.log('[PopupManager] Real-time token counting events attached to optimizedPrompt');
+    }
+    
+    // Initialize token analysis display
+    this.initializeTokenAnalysisDisplay();
+  }
+  
+  /**
+   * Handles prompt input changes with debouncing
+   */
+  handlePromptInputChange(event) {
+    const text = event.target.value;
+    
+    // Clear existing timer
+    if (this.tokenCountingDebounceTimer) {
+      clearTimeout(this.tokenCountingDebounceTimer);
+    }
+    
+    // Set new timer with 300ms debounce
+    this.tokenCountingDebounceTimer = setTimeout(() => {
+      this.updateRealTimeTokenCounts(text, 'original');
+    }, 300);
+    
+    // Immediate basic count for responsiveness (no debounce for character count)
+    this.updateBasicCounts(text, 'original');
+  }
+  
+  /**
+   * Handles paste events for immediate analysis
+   */
+  handlePromptPaste(event) {
+    // Wait for paste to complete
+    setTimeout(() => {
+      const text = event.target.value;
+      this.updateRealTimeTokenCounts(text, 'original');
+      this.updateBasicCounts(text, 'original');
+    }, 10);
+  }
+  
+  /**
+   * Handles optimized prompt changes
+   */
+  handleOptimizedPromptChange(event) {
+    const text = event.target.value;
+    
+    // Clear existing timer
+    if (this.optimizedTokenCountingTimer) {
+      clearTimeout(this.optimizedTokenCountingTimer);
+    }
+    
+    // Set new timer with 300ms debounce
+    this.optimizedTokenCountingTimer = setTimeout(() => {
+      this.updateRealTimeTokenCounts(text, 'optimized');
+      this.updateTokenComparison();
+    }, 300);
+    
+    this.updateBasicCounts(text, 'optimized');
+  }
+  
+  /**
+   * Updates real-time token counts with full analysis
+   */
+  updateRealTimeTokenCounts(text, type = 'original') {
+    if (!text || text === this.lastPromptText) return;
+    
+    console.log(`[PopupManager] Updating real-time token counts for ${type}:`, text.substring(0, 50) + '...');
+    
+    // Initialize token counters if needed
+    this.initializeTokenCounters();
+    
+    // Get selected model for accurate counting
+    const targetModel = document.getElementById('targetModel')?.value || 'gpt-4';
+    
+    // Perform comprehensive token analysis
+    const analysis = this.tokenCounter.analyzeTokens(text, targetModel);
+    
+    // Store analysis
+    if (type === 'original') {
+      this.currentTokenAnalysis = analysis;
+      this.lastPromptText = text;
+    } else {
+      this.optimizedTokenAnalysis = analysis;
+    }
+    
+    // Update UI with analysis
+    this.displayTokenAnalysis(analysis, type);
+    
+    // Update wattage estimates
+    this.updateTokenBasedWattageEstimate(analysis, type);
+    
+    // Update comparison if we have both
+    if (type === 'optimized' && this.currentTokenAnalysis) {
+      this.updateTokenComparison();
+    }
+    
+    console.log(`[PopupManager] Token analysis complete for ${type}:`, {
+      model: analysis.model,
+      tokens: analysis.gpt,
+      chars: analysis.chars,
+      words: analysis.words,
+      analysis: analysis.analysis
+    });
+  }
+  
+  /**
+   * Updates basic counts immediately (no debounce)
+   */
+  updateBasicCounts(text, type) {
+    const chars = text.length;
+    const words = text.split(/\s+/).filter(w => w.length > 0).length;
+    
+    // Update character and word counts immediately
+    const prefix = type === 'original' ? 'original' : 'optimized';
+    const charElement = document.getElementById(`${prefix}CharCount`);
+    const wordElement = document.getElementById(`${prefix}WordCount`);
+    
+    if (charElement) charElement.textContent = chars.toLocaleString();
+    if (wordElement) wordElement.textContent = words.toLocaleString();
+  }
+  
+  /**
+   * Displays comprehensive token analysis in UI
+   */
+  displayTokenAnalysis(analysis, type) {
+    const prefix = type === 'original' ? 'original' : 'optimized';
+    
+    // Update token counts for different models
+    const gptTokens = document.getElementById(`${prefix}GptTokens`);
+    const claudeTokens = document.getElementById(`${prefix}ClaudeTokens`);
+    const tokenEfficiency = document.getElementById(`${prefix}TokenEfficiency`);
+    const tokenInsights = document.getElementById(`${prefix}TokenInsights`);
+    
+    if (gptTokens) gptTokens.textContent = analysis.gpt.toLocaleString();
+    if (claudeTokens) claudeTokens.textContent = analysis.claude.toLocaleString();
+    
+    // Calculate efficiency score
+    const efficiency = this.calculateTokenEfficiency(analysis);
+    if (tokenEfficiency) {
+      tokenEfficiency.textContent = efficiency.score + '%';
+      tokenEfficiency.className = `efficiency-score ${efficiency.level}`;
+    }
+    
+    // Display insights
+    if (tokenInsights) {
+      tokenInsights.textContent = analysis.analysis || 'Analysis complete';
+      tokenInsights.className = `token-insights ${this.getInsightLevel(analysis.analysis)}`;
+    }
+  }
+  
+  /**
+   * Calculates token efficiency score
+   */
+  calculateTokenEfficiency(analysis) {
+    const avgCharsPerToken = analysis.chars / Math.max(1, analysis.gpt);
+    const avgWordsPerToken = analysis.words / Math.max(1, analysis.gpt);
+    
+    // Ideal ratios for efficiency
+    const idealCharRatio = 4.0;  // ~4 chars per token is efficient
+    const idealWordRatio = 0.75; // ~0.75 words per token is efficient
+    
+    // Calculate efficiency (100% = ideal, higher = more efficient)
+    const charEfficiency = Math.min(100, (avgCharsPerToken / idealCharRatio) * 100);
+    const wordEfficiency = Math.min(100, (avgWordsPerToken / idealWordRatio) * 100);
+    
+    const overallScore = Math.round((charEfficiency + wordEfficiency) / 2);
+    
+    let level = 'poor';
+    if (overallScore >= 85) level = 'excellent';
+    else if (overallScore >= 70) level = 'good';
+    else if (overallScore >= 50) level = 'average';
+    
+    return { score: overallScore, level };
+  }
+  
+  /**
+   * Gets insight level for styling
+   */
+  getInsightLevel(analysisText) {
+    if (!analysisText) return 'neutral';
+    
+    const text = analysisText.toLowerCase();
+    if (text.includes('well-optimized') || text.includes('excellent')) return 'positive';
+    if (text.includes('long sentences') || text.includes('complex') || text.includes('repetitive')) return 'warning';
+    if (text.includes('error') || text.includes('issue')) return 'negative';
+    
+    return 'neutral';
+  }
+  
+  /**
+   * Updates wattage estimate based on token analysis
+   */
+  updateTokenBasedWattageEstimate(analysis, type) {
+    const targetModel = document.getElementById('targetModel')?.value || 'gpt-4';
+    const tokens = analysis.gpt; // Use GPT tokens as baseline
+    
+    // Use AI Model Power Calculator for more accurate estimates
+    if (this.aiModelPowerCalculator) {
+      const modelKey = this.aiModelPowerCalculator.inferModelKey({ name: targetModel });
+      const profile = this.aiModelPowerCalculator.modelPowerProfiles[modelKey];
+      
+      let estimatedWh;
+      if (profile) {
+        // More accurate calculation using model profile
+        estimatedWh = (tokens / 1000) * (profile.energyPerQuery / 1000); // Convert to Wh per token
+        console.log(`[PopupManager] Using AI Power Calculator profile for ${profile.name}:`, {
+          tokens,
+          energyPerQuery: profile.energyPerQuery,
+          estimatedWh: estimatedWh.toFixed(4) + ' Wh'
+        });
+      } else {
+        // Fallback to basic rates
+        const modelWattageRates = {
+          'gpt-4': 0.8,      // ~0.8 Wh per 1000 tokens
+          'gpt-3.5': 0.3,    // ~0.3 Wh per 1000 tokens
+          'claude': 0.6,     // ~0.6 Wh per 1000 tokens
+          'gemini': 0.4      // ~0.4 Wh per 1000 tokens
+        };
+        
+        const ratePerThousand = modelWattageRates[targetModel] || modelWattageRates['gpt-4'];
+        estimatedWh = (tokens / 1000) * ratePerThousand;
+      }
+      
+      // Display wattage estimate
+      const prefix = type === 'original' ? 'original' : 'optimized';
+      const wattageElement = document.getElementById(`${prefix}WattageEstimate`);
+      
+      if (wattageElement) {
+        if (estimatedWh >= 1) {
+          wattageElement.textContent = `~${estimatedWh.toFixed(2)} Wh`;
+        } else if (estimatedWh >= 0.001) {
+          wattageElement.textContent = `~${(estimatedWh * 1000).toFixed(0)} mWh`;
+        } else {
+          wattageElement.textContent = `~${(estimatedWh * 1000000).toFixed(0)} μWh`;
+        }
+        
+        // Add styling based on efficiency with enhanced classes
+        wattageElement.className = this.getWattageEfficiencyClass(estimatedWh) +
+          (profile ? ' ai-calculated' : ' estimated');
+      }
+      
+      // Store wattage for comparison calculations
+      if (type === 'original') {
+        this.originalWattage = estimatedWh;
+      } else {
+        this.optimizedWattage = estimatedWh;
+      }
+      
+      console.log(`[PopupManager] Enhanced wattage estimate for ${type} (${targetModel}):`, {
+        tokens,
+        modelProfile: profile?.name || 'fallback',
+        estimatedWh: estimatedWh.toFixed(4) + ' Wh',
+        efficiency: this.getWattageEfficiencyClass(estimatedWh)
+      });
+    }
+  }
+  
+  /**
+   * Gets CSS class for wattage efficiency styling
+   */
+  getWattageEfficiencyClass(wattageWh) {
+    const baseClass = 'wattage-estimate';
+    
+    if (wattageWh < 0.1) return `${baseClass} very-efficient`;      // < 0.1 Wh
+    if (wattageWh < 0.5) return `${baseClass} efficient`;           // < 0.5 Wh
+    if (wattageWh < 1.0) return `${baseClass} moderate`;            // < 1.0 Wh
+    if (wattageWh < 2.0) return `${baseClass} high`;               // < 2.0 Wh
+    return `${baseClass} very-high`;                               // >= 2.0 Wh
+  }
+  
+  /**
+   * Updates token comparison between original and optimized
+   */
+  updateTokenComparison() {
+    if (!this.currentTokenAnalysis || !this.optimizedTokenAnalysis) return;
+    
+    console.log('[PopupManager] Updating token comparison between original and optimized');
+    
+    // Get current text from inputs
+    const originalText = document.getElementById('promptInput')?.value || '';
+    const optimizedText = document.getElementById('optimizedPrompt')?.value || '';
+    
+    if (!originalText || !optimizedText) return;
+    
+    // Use comparison engine
+    const targetModel = document.getElementById('targetModel')?.value || 'gpt-4';
+    const comparison = this.tokenComparison.comparePrompts(originalText, optimizedText, targetModel);
+    
+    // Display comparison results
+    this.displayTokenComparison(comparison);
+    
+    // Update power savings display with wattage calculations
+    this.updatePowerSavingsDisplay();
+  }
+  
+  /**
+   * Displays token comparison results
+   */
+  displayTokenComparison(comparison) {
+    const comparisonSection = document.getElementById('tokenComparisonSection');
+    const tokensSaved = document.getElementById('tokensSaved');
+    const percentReduction = document.getElementById('percentReduction');
+    const costSavings = document.getElementById('costSavings');
+    const qualityScore = document.getElementById('optimizationQualityScore');
+    
+    if (comparisonSection) comparisonSection.style.display = 'block';
+    
+    if (tokensSaved) {
+      tokensSaved.textContent = comparison.reduction.tokensSaved.toLocaleString();
+    }
+    
+    if (percentReduction) {
+      percentReduction.textContent = comparison.reduction.percentReduction + '%';
+      percentReduction.className = this.getReductionEfficiencyClass(comparison.reduction.percentReduction);
+    }
+    
+    if (costSavings) {
+      const savings = comparison.reduction.costSavings;
+      if (savings >= 0.01) {
+        costSavings.textContent = '$' + savings.toFixed(3);
+      } else {
+        costSavings.textContent = '$' + (savings * 1000).toFixed(1) + 'e-3';
+      }
+    }
+    
+    if (qualityScore) {
+      const score = comparison.analysis.efficiencyScore;
+      qualityScore.textContent = score + '/100';
+      qualityScore.className = this.getQualityScoreClass(score);
+    }
+    
+    // Update detailed analysis
+    this.updateDetailedComparison(comparison);
+    
+    console.log('[PopupManager] Token comparison displayed:', {
+      tokensSaved: comparison.reduction.tokensSaved,
+      percentReduction: comparison.reduction.percentReduction + '%',
+      costSavings: '$' + comparison.reduction.costSavings.toFixed(4),
+      qualityScore: comparison.analysis.efficiencyScore
+    });
+  }
+  
+  /**
+   * Updates detailed comparison analysis
+   */
+  updateDetailedComparison(comparison) {
+    const removedWords = document.getElementById('removedWordsList');
+    const restructuredSentences = document.getElementById('restructuredSentencesList');
+    
+    if (removedWords && comparison.analysis.removedWords.length > 0) {
+      removedWords.innerHTML = comparison.analysis.removedWords
+        .slice(0, 8)
+        .map(word => `<span class="removed-word">${word}</span>`)
+        .join(' ');
+    }
+    
+    if (restructuredSentences && comparison.analysis.restructuredSentences.length > 0) {
+      let html = '';
+      comparison.analysis.restructuredSentences.slice(0, 3).forEach(restructure => {
+        html += `
+          <div class="sentence-comparison">
+            <div class="original-sentence">Before: "${restructure.original}"</div>
+            <div class="optimized-sentence">After: "${restructure.optimized}"</div>
+            <div class="reduction-amount">${restructure.reduction}% shorter</div>
+          </div>
+        `;
+      });
+      restructuredSentences.innerHTML = html;
+    }
+  }
+  
+  /**
+   * Gets CSS class for reduction efficiency
+   */
+  getReductionEfficiencyClass(percent) {
+    const baseClass = 'percent-reduction';
+    
+    if (percent >= 40) return `${baseClass} excellent`;        // >= 40% reduction
+    if (percent >= 25) return `${baseClass} good`;             // >= 25% reduction
+    if (percent >= 15) return `${baseClass} moderate`;         // >= 15% reduction
+    if (percent >= 5) return `${baseClass} low`;              // >= 5% reduction
+    return `${baseClass} minimal`;                             // < 5% reduction
+  }
+  
+  /**
+   * Gets CSS class for quality score
+   */
+  getQualityScoreClass(score) {
+    const baseClass = 'quality-score';
+    
+    if (score >= 90) return `${baseClass} excellent`;
+    if (score >= 75) return `${baseClass} good`;
+    if (score >= 60) return `${baseClass} moderate`;
+    if (score >= 40) return `${baseClass} poor`;
+    return `${baseClass} very-poor`;
+  }
+  
+  /**
+   * Initializes token analysis display elements
+   */
+  initializeTokenAnalysisDisplay() {
+    console.log('[PopupManager] Initializing token analysis display');
+    
+    // Clear any existing analysis
+    this.currentTokenAnalysis = null;
+    this.optimizedTokenAnalysis = null;
+    
+    // Initialize displays with zero values
+    const elements = [
+      'originalCharCount', 'originalWordCount', 'originalGptTokens', 'originalClaudeTokens',
+      'optimizedCharCount', 'optimizedWordCount', 'optimizedGptTokens', 'optimizedClaudeTokens',
+      'originalTokenEfficiency', 'optimizedTokenEfficiency',
+      'originalWattageEstimate', 'optimizedWattageEstimate'
+    ];
+    
+    elements.forEach(elementId => {
+      const element = document.getElementById(elementId);
+      if (element) {
+        if (elementId.includes('Count') || elementId.includes('Tokens')) {
+          element.textContent = '0';
+        } else if (elementId.includes('Efficiency')) {
+          element.textContent = '--';
+          element.className = 'efficiency-score neutral';
+        } else if (elementId.includes('Wattage')) {
+          element.textContent = '0 mWh';
+          element.className = 'wattage-estimate neutral';
+        }
+      }
+    });
+    
+    // Hide comparison section initially
+    const comparisonSection = document.getElementById('tokenComparisonSection');
+    if (comparisonSection) comparisonSection.style.display = 'none';
+  }
+}
+
+/**
+ * TokenCounter class - Advanced token counting with multiple methodologies
+ */
+class TokenCounter {
+  constructor() {
+    console.log('[TokenCounter] Initializing advanced token counter');
+    
+    // Model-specific token ratios (chars per token approximations)
+    this.modelRatios = {
+      'gpt-4': 3.8,      // ~3.8 characters per token
+      'gpt-3.5': 4.0,    // ~4.0 characters per token
+      'claude': 3.5,     // ~3.5 characters per token
+      'gemini': 3.6,     // ~3.6 characters per token
+      'default': 3.8
+    };
+    
+    // Special token patterns and their weights
+    this.specialPatterns = {
+      codeBlocks: /```[\s\S]*?```/g,
+      inlineCode: /`[^`]+`/g,
+      urls: /https?:\/\/[^\s]+/g,
+      emails: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+      numbers: /\b\d+\.?\d*\b/g,
+      punctuation: /[.,;:!?(){}\[\]"'-]/g,
+      whitespace: /\s+/g
+    };
+  }
+  
+  /**
+   * GPT-style tokenization (approximation)
+   * Uses word-based approximation with character adjustment
+   */
+  countTokensGPT(text, model = 'gpt-4') {
+    if (!text || typeof text !== 'string') return 0;
+    
+    const ratio = this.modelRatios[model] || this.modelRatios.default;
+    
+    // Base character count approach
+    let baseTokens = Math.ceil(text.length / ratio);
+    
+    // Adjust for special patterns that affect tokenization
+    const adjustments = this.calculateSpecialPatternAdjustments(text, 'gpt');
+    
+    // Word boundary bonus (GPT tokenizer respects word boundaries)
+    const words = text.split(/\s+/).filter(w => w.length > 0);
+    const wordBoundaryAdjustment = Math.floor(words.length * 0.1);
+    
+    const totalTokens = Math.max(1, baseTokens + adjustments - wordBoundaryAdjustment);
+    
+    console.log(`[TokenCounter] GPT tokens (${model}):`, {
+      text: text.substring(0, 50) + '...',
+      baseTokens,
+      adjustments,
+      wordBoundaryAdjustment,
+      totalTokens
+    });
+    
+    return totalTokens;
+  }
+  
+  /**
+   * Claude-style tokenization (approximation)
+   * Better handling of natural language, different ratio
+   */
+  countTokensClaude(text) {
+    if (!text || typeof text !== 'string') return 0;
+    
+    const ratio = this.modelRatios.claude;
+    
+    // Claude tends to handle natural language more efficiently
+    let baseTokens = Math.ceil(text.length / ratio);
+    
+    // Claude-specific adjustments
+    const adjustments = this.calculateSpecialPatternAdjustments(text, 'claude');
+    
+    // Natural language bonus (Claude is optimized for conversational text)
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const naturalLanguageBonus = Math.floor(sentences.length * 0.05);
+    
+    const totalTokens = Math.max(1, baseTokens + adjustments - naturalLanguageBonus);
+    
+    console.log('[TokenCounter] Claude tokens:', {
+      text: text.substring(0, 50) + '...',
+      baseTokens,
+      adjustments,
+      naturalLanguageBonus,
+      totalTokens
+    });
+    
+    return totalTokens;
+  }
+  
+  /**
+   * Character-based counting with options
+   */
+  countChars(text, includeSpaces = true, includeSpecialChars = true) {
+    if (!text || typeof text !== 'string') return 0;
+    
+    let charCount = text.length;
+    
+    if (!includeSpaces) {
+      charCount = text.replace(/\s/g, '').length;
+    }
+    
+    if (!includeSpecialChars) {
+      charCount = text.replace(/[^\w\s]/g, '').length;
+      if (!includeSpaces) {
+        charCount = text.replace(/[^\w]/g, '').length;
+      }
+    }
+    
+    return charCount;
+  }
+  
+  /**
+   * Word-based counting with smart handling
+   */
+  countWords(text) {
+    if (!text || typeof text !== 'string') return 0;
+    
+    // Handle contractions as single words
+    const words = text
+      .replace(/[^\w\s'-]/g, ' ')  // Replace punctuation with spaces, keep apostrophes and hyphens
+      .split(/\s+/)
+      .filter(word => word.length > 0 && /\w/.test(word)); // Must contain at least one letter/number
+    
+    return words.length;
+  }
+  
+  /**
+   * Calculate adjustments for special patterns
+   */
+  calculateSpecialPatternAdjustments(text, model) {
+    let adjustment = 0;
+    
+    // Code blocks are token-expensive
+    const codeBlocks = text.match(this.specialPatterns.codeBlocks) || [];
+    adjustment += codeBlocks.length * (model === 'claude' ? 8 : 10);
+    
+    // URLs and emails are usually single tokens but take more characters
+    const urls = text.match(this.specialPatterns.urls) || [];
+    const emails = text.match(this.specialPatterns.emails) || [];
+    adjustment -= (urls.length + emails.length) * 2; // Reduction because they're efficient
+    
+    // Numbers can be variable
+    const numbers = text.match(this.specialPatterns.numbers) || [];
+    adjustment += numbers.length * 0.5;
+    
+    // Punctuation density affects tokenization
+    const punctuation = text.match(this.specialPatterns.punctuation) || [];
+    const punctuationDensity = punctuation.length / text.length;
+    if (punctuationDensity > 0.1) {
+      adjustment += Math.floor(punctuation.length * 0.3);
+    }
+    
+    return Math.round(adjustment);
+  }
+  
+  /**
+   * Get comprehensive token analysis
+   */
+  analyzeTokens(text, model = 'gpt-4') {
+    if (!text || typeof text !== 'string') {
+      return {
+        gpt: 0,
+        claude: 0,
+        chars: 0,
+        charsNoSpaces: 0,
+        words: 0,
+        sentences: 0,
+        model: model,
+        analysis: 'Empty text'
+      };
+    }
+    
+    const analysis = {
+      gpt: this.countTokensGPT(text, model),
+      claude: this.countTokensClaude(text),
+      chars: this.countChars(text, true, true),
+      charsNoSpaces: this.countChars(text, false, true),
+      words: this.countWords(text),
+      sentences: text.split(/[.!?]+/).filter(s => s.trim().length > 0).length,
+      model: model,
+      analysis: this.generateTokenAnalysis(text, model)
+    };
+    
+    console.log('[TokenCounter] Comprehensive analysis:', analysis);
+    
+    return analysis;
+  }
+  
+  /**
+   * Generate text analysis insights
+   */
+  generateTokenAnalysis(text, model) {
+    const ratio = this.modelRatios[model] || this.modelRatios.default;
+    const avgWordsPerSentence = this.countWords(text) / Math.max(1, text.split(/[.!?]+/).length - 1);
+    const avgCharsPerWord = text.length / Math.max(1, this.countWords(text));
+    
+    let insights = [];
+    
+    if (avgWordsPerSentence > 25) {
+      insights.push('Long sentences detected - consider breaking up');
+    }
+    
+    if (avgCharsPerWord > 6) {
+      insights.push('Complex vocabulary - may increase token count');
+    }
+    
+    if (text.includes('```')) {
+      insights.push('Code blocks detected - tokens may be higher than estimated');
+    }
+    
+    const repetitionCheck = this.detectRepetition(text);
+    if (repetitionCheck.hasRepetition) {
+      insights.push(`Repetitive content detected - ${repetitionCheck.count} repeated phrases`);
+    }
+    
+    return insights.length > 0 ? insights.join('; ') : 'Text appears well-optimized';
+  }
+  
+  /**
+   * Detect repetitive content
+   */
+  detectRepetition(text) {
+    const words = text.toLowerCase().split(/\s+/);
+    const phrases = new Map();
+    let repetitionCount = 0;
+    
+    // Check for repeated 3-word phrases
+    for (let i = 0; i < words.length - 2; i++) {
+      const phrase = words.slice(i, i + 3).join(' ');
+      if (phrase.length > 10) { // Only meaningful phrases
+        phrases.set(phrase, (phrases.get(phrase) || 0) + 1);
+      }
+    }
+    
+    phrases.forEach(count => {
+      if (count > 1) repetitionCount++;
+    });
+    
+    return {
+      hasRepetition: repetitionCount > 0,
+      count: repetitionCount
+    };
+  }
+}
+
+/**
+ * TokenComparison class - Advanced comparison engine
+ */
+class TokenComparison {
+  constructor() {
+    console.log('[TokenComparison] Initializing token comparison engine');
+    
+    // Model cost estimates (per 1k tokens)
+    this.costEstimates = {
+      'gpt-4': { input: 0.03, output: 0.06 },
+      'gpt-3.5': { input: 0.0015, output: 0.002 },
+      'claude': { input: 0.008, output: 0.024 },
+      'gemini': { input: 0.00025, output: 0.0005 }
+    };
+  }
+  
+  /**
+   * Compare two prompts and provide detailed analysis
+   */
+  comparePrompts(originalText, optimizedText, model = 'gpt-4') {
+    console.log('[TokenComparison] Comparing prompts for model:', model);
+    
+    if (!this.tokenCounter) {
+      window.popupManager.initializeTokenCounters();
+      this.tokenCounter = window.popupManager.tokenCounter;
+    }
+    
+    const original = this.tokenCounter.analyzeTokens(originalText, model);
+    const optimized = this.tokenCounter.analyzeTokens(optimizedText, model);
+    
+    const modelTokensOriginal = original[model.includes('gpt') ? 'gpt' : 'claude'];
+    const modelTokensOptimized = optimized[model.includes('gpt') ? 'gpt' : 'claude'];
+    
+    const tokensSaved = Math.max(0, modelTokensOriginal - modelTokensOptimized);
+    const percentReduction = modelTokensOriginal > 0 ?
+      Math.round((tokensSaved / modelTokensOriginal) * 100) : 0;
+    
+    const costs = this.costEstimates[model] || this.costEstimates['gpt-4'];
+    const originalCost = (modelTokensOriginal / 1000) * costs.input;
+    const optimizedCost = (modelTokensOptimized / 1000) * costs.input;
+    const costSavings = Math.max(0, originalCost - optimizedCost);
+    
+    const comparison = {
+      original: {
+        tokens: modelTokensOriginal,
+        characters: original.chars,
+        words: original.words,
+        sentences: original.sentences,
+        estimatedCost: originalCost,
+        analysis: original.analysis
+      },
+      optimized: {
+        tokens: modelTokensOptimized,
+        characters: optimized.chars,
+        words: optimized.words,
+        sentences: optimized.sentences,
+        estimatedCost: optimizedCost,
+        analysis: optimized.analysis
+      },
+      reduction: {
+        tokensSaved: tokensSaved,
+        percentReduction: percentReduction,
+        costSavings: costSavings,
+        charactersSaved: Math.max(0, original.chars - optimized.chars),
+        wordsSaved: Math.max(0, original.words - optimized.words)
+      },
+      analysis: {
+        removedWords: this.identifyRemovedWords(originalText, optimizedText),
+        restructuredSentences: this.identifyRestructuring(originalText, optimizedText),
+        efficiencyScore: this.calculateEfficiencyScore(percentReduction, originalText, optimizedText)
+      },
+      model: model
+    };
+    
+    console.log('[TokenComparison] Comparison complete:', comparison);
+    
+    return comparison;
+  }
+  
+  /**
+   * Identify words that were removed during optimization
+   */
+  identifyRemovedWords(original, optimized) {
+    const originalWords = new Set(original.toLowerCase().split(/\s+/));
+    const optimizedWords = new Set(optimized.toLowerCase().split(/\s+/));
+    
+    const removed = [];
+    originalWords.forEach(word => {
+      if (!optimizedWords.has(word) && word.length > 2) {
+        removed.push(word);
+      }
+    });
+    
+    return removed.slice(0, 10); // Limit to first 10 for display
+  }
+  
+  /**
+   * Identify sentence restructuring
+   */
+  identifyRestructuring(original, optimized) {
+    const originalSentences = original.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 0);
+    const optimizedSentences = optimized.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 0);
+    
+    const restructured = [];
+    
+    // Simple restructuring detection - sentences that are significantly shorter
+    originalSentences.forEach((origSent, index) => {
+      if (optimizedSentences[index]) {
+        const lengthReduction = origSent.length - optimizedSentences[index].length;
+        if (lengthReduction > origSent.length * 0.3) { // 30% shorter
+          restructured.push({
+            original: origSent.substring(0, 50) + '...',
+            optimized: optimizedSentences[index].substring(0, 50) + '...',
+            reduction: Math.round((lengthReduction / origSent.length) * 100)
+          });
+        }
+      }
+    });
+    
+    return restructured.slice(0, 5); // Limit for display
+  }
+  
+  /**
+   * Calculate optimization efficiency score
+   */
+  calculateEfficiencyScore(percentReduction, original, optimized) {
+    let score = percentReduction; // Base score from token reduction
+    
+    // Bonus for maintaining meaning (simple heuristic)
+    const originalWords = original.split(/\s+/).length;
+    const optimizedWords = optimized.split(/\s+/).length;
+    const wordReductionRatio = originalWords > 0 ? (originalWords - optimizedWords) / originalWords : 0;
+    
+    // If word reduction is reasonable (not too aggressive), add bonus
+    if (wordReductionRatio > 0.1 && wordReductionRatio < 0.5) {
+      score += 10;
+    }
+    
+    // Penalty for over-optimization (too short)
+    if (optimized.length < 20) {
+      score -= 20;
+    }
+    
+    // Bonus for removing filler words
+    const fillerWords = ['basically', 'actually', 'literally', 'obviously', 'clearly'];
+    const fillerRemoved = fillerWords.filter(word =>
+      original.toLowerCase().includes(word) && !optimized.toLowerCase().includes(word)
+    ).length;
+    score += fillerRemoved * 5;
+    
+    return Math.max(0, Math.min(100, Math.round(score)));
+  }
+}
+
+/**
+ * AIModelPowerCalculator class - Advanced power calculations for AI models
+ */
+class AIModelPowerCalculator {
+  constructor() {
+    console.log('[AIModelPowerCalculator] Initializing advanced AI model power calculator');
+    
+    // Comprehensive AI model power profiles with real-world data
+    this.modelPowerProfiles = {
+      // === FRONTIER MODELS (2024-2025) ===
+      'gpt-5-high': {
+        name: 'GPT-5 High',
+        category: 'frontier-large',
+        baseWatts: 45,
+        tokensPerSecond: 120,
+        energyPerQuery: 2.8, // Wh per query
+        scalingFactor: 1.8,
+        contextMultiplier: 1.4,
+        company: 'OpenAI'
+      },
+      
+      'claude-4-sonnet-thinking': {
+        name: 'Claude-4 Sonnet Thinking',
+        category: 'frontier-large',
+        baseWatts: 42,
+        tokensPerSecond: 95,
+        energyPerQuery: 2.5,
+        scalingFactor: 1.7,
+        contextMultiplier: 1.3,
+        company: 'Anthropic'
+      },
+      
+      'grok-4': {
+        name: 'Grok-4',
+        category: 'frontier-large',
+        baseWatts: 48,
+        tokensPerSecond: 110,
+        energyPerQuery: 3.1,
+        scalingFactor: 1.9,
+        contextMultiplier: 1.5,
+        company: 'xAI'
+      },
+      
+      // === REASONING SPECIALIZED MODELS ===
+      'deepseek-r1': {
+        name: 'DeepSeek R1',
+        category: 'reasoning-specialized',
+        baseWatts: 52,
+        tokensPerSecond: 85,
+        energyPerQuery: 3.5,
+        scalingFactor: 2.1,
+        contextMultiplier: 1.6,
+        company: 'DeepSeek'
+      },
+      
+      'o3-mini': {
+        name: 'OpenAI o3-mini',
+        category: 'reasoning-specialized',
+        baseWatts: 38,
+        tokensPerSecond: 95,
+        energyPerQuery: 2.2,
+        scalingFactor: 1.6,
+        contextMultiplier: 1.2,
+        company: 'OpenAI'
+      },
+      
+      // === ULTRA-EFFICIENT MODELS ===
+      'llama-4-maverick': {
+        name: 'Llama-4 Maverick',
+        category: 'ultra-efficient',
+        baseWatts: 18,
+        tokensPerSecond: 140,
+        energyPerQuery: 0.8,
+        scalingFactor: 0.9,
+        contextMultiplier: 0.8,
+        company: 'Meta'
+      },
+      
+      'gemini-2-flash': {
+        name: 'Gemini 2.0 Flash',
+        category: 'ultra-efficient',
+        baseWatts: 22,
+        tokensPerSecond: 160,
+        energyPerQuery: 0.9,
+        scalingFactor: 0.8,
+        contextMultiplier: 0.7,
+        company: 'Google'
+      },
+      
+      // === BALANCED PERFORMANCE MODELS ===
+      'gpt-4-turbo-2024': {
+        name: 'GPT-4 Turbo 2024',
+        category: 'balanced-performance',
+        baseWatts: 32,
+        tokensPerSecond: 110,
+        energyPerQuery: 1.8,
+        scalingFactor: 1.3,
+        contextMultiplier: 1.1,
+        company: 'OpenAI'
+      },
+      
+      'claude-3.5-sonnet': {
+        name: 'Claude 3.5 Sonnet',
+        category: 'balanced-performance',
+        baseWatts: 28,
+        tokensPerSecond: 105,
+        energyPerQuery: 1.5,
+        scalingFactor: 1.2,
+        contextMultiplier: 1.0,
+        company: 'Anthropic'
+      },
+      
+      // === LEGACY MODELS (for comparison) ===
+      'gpt-4': {
+        name: 'GPT-4',
+        category: 'legacy-large',
+        baseWatts: 35,
+        tokensPerSecond: 80,
+        energyPerQuery: 2.0,
+        scalingFactor: 1.4,
+        contextMultiplier: 1.2,
+        company: 'OpenAI'
+      },
+      
+      'gpt-3.5-turbo': {
+        name: 'GPT-3.5 Turbo',
+        category: 'legacy-efficient',
+        baseWatts: 15,
+        tokensPerSecond: 150,
+        energyPerQuery: 0.5,
+        scalingFactor: 0.7,
+        contextMultiplier: 0.6,
+        company: 'OpenAI'
+      }
+    };
+    
+    // Complexity multipliers based on query complexity
+    this.complexityMultipliers = {
+      simple: 0.8,      // Basic Q&A, simple tasks
+      moderate: 1.0,    // Standard requests, moderate complexity
+      complex: 1.4,     // Multi-step reasoning, analysis
+      intensive: 1.8,   // Code generation, long-form content
+      reasoning: 2.2    // Deep reasoning, math, complex analysis
+    };
+    
+    // Context length impact factors
+    this.contextLengthFactors = {
+      short: { threshold: 1000, multiplier: 0.9 },      // < 1k tokens
+      medium: { threshold: 4000, multiplier: 1.0 },     // 1k-4k tokens
+      long: { threshold: 16000, multiplier: 1.3 },      // 4k-16k tokens
+      extended: { threshold: 32000, multiplier: 1.6 },  // 16k-32k tokens
+      massive: { threshold: 128000, multiplier: 2.1 }   // 32k+ tokens
+    };
+    
+    // Regional carbon intensity (gCO2/kWh) for environmental impact
+    this.regionalCarbonIntensity = {
+      'us-west': 350,     // US West Coast (cleaner grid)
+      'us-east': 400,     // US East Coast (average)
+      'us-central': 450,  // US Central (more coal)
+      'europe': 300,      // European average
+      'asia-pacific': 500, // Asia-Pacific average
+      'global': 400      // Global average
+    };
+    
+    // User engagement impact on power consumption
+    this.engagementFactors = {
+      high: 1.2,      // Active conversation, frequent queries
+      medium: 1.0,    // Normal interaction
+      low: 0.8        // Passive browsing, infrequent queries
+    };
+  }
+  
+  /**
+   * Calculate comprehensive backend power consumption for AI models
+   */
+  calculateBackendPower(detectedModel, tabData, context = {}) {
+    try {
+      if (!detectedModel || !detectedModel.model) {
+        console.warn('[AIModelPowerCalculator] Invalid detected model provided');
+        return 0;
+      }
+      
+      const modelKey = detectedModel.modelKey || this.inferModelKey(detectedModel.model);
+      const profile = this.modelPowerProfiles[modelKey];
+      
+      if (!profile) {
+        console.warn('[AIModelPowerCalculator] No power profile found for model:', modelKey);
+        return this.estimatePowerForUnknownModel(detectedModel, context);
+      }
+      
+      console.log(`[AIModelPowerCalculator] Calculating power for ${profile.name}:`, {
+        category: profile.category,
+        baseWatts: profile.baseWatts,
+        context: context
+      });
+      
+      // Base power consumption
+      let powerWatts = profile.baseWatts;
+      
+      // Apply complexity multiplier
+      const complexity = this.analyzeQueryComplexity(tabData, context);
+      const complexityMultiplier = this.complexityMultipliers[complexity] || 1.0;
+      powerWatts *= complexityMultiplier;
+      
+      // Apply context length impact
+      const contextLength = this.estimateContextLength(tabData, detectedModel);
+      const contextMultiplier = this.getContextLengthMultiplier(contextLength, profile);
+      powerWatts *= contextMultiplier;
+      
+      // Apply user engagement factor
+      const engagement = context.userEngagement || 'medium';
+      const engagementMultiplier = this.engagementFactors[engagement] || 1.0;
+      powerWatts *= engagementMultiplier;
+      
+      // Apply performance mode adjustment
+      const performanceAdjustment = this.getPerformanceModeAdjustment(context.performanceMode);
+      powerWatts *= performanceAdjustment;
+      
+      // Apply model scaling factor
+      powerWatts *= profile.scalingFactor;
+      
+      console.log('[AIModelPowerCalculator] Power calculation breakdown:', {
+        model: profile.name,
+        basePower: profile.baseWatts,
+        complexity: complexity,
+        complexityMultiplier: complexityMultiplier,
+        contextLength: contextLength,
+        contextMultiplier: contextMultiplier,
+        engagementMultiplier: engagementMultiplier,
+        performanceAdjustment: performanceAdjustment,
+        scalingFactor: profile.scalingFactor,
+        finalPower: powerWatts.toFixed(2) + 'W'
+      });
+      
+      return Math.max(0, powerWatts);
+      
+    } catch (error) {
+      console.error('[AIModelPowerCalculator] Error calculating backend power:', error);
+      return 0;
+    }
+  }
+  
+  /**
+   * Analyze query complexity based on tab data and context
+   */
+  analyzeQueryComplexity(tabData, context) {
+    if (!tabData) return 'moderate';
+    
+    // Analyze URL patterns for complexity hints
+    const url = tabData.url || '';
+    const urlLower = url.toLowerCase();
+    
+    // Code-related queries are typically complex
+    if (urlLower.includes('github') || urlLower.includes('stackoverflow') ||
+        urlLower.includes('codepen') || urlLower.includes('repl')) {
+      return 'intensive';
+    }
+    
+    // Research and analysis sites suggest complex queries
+    if (urlLower.includes('research') || urlLower.includes('analysis') ||
+        urlLower.includes('academic') || urlLower.includes('arxiv')) {
+      return 'complex';
+    }
+    
+    // Mathematical or scientific sites suggest reasoning tasks
+    if (urlLower.includes('math') || urlLower.includes('science') ||
+        urlLower.includes('calculation') || urlLower.includes('equation')) {
+      return 'reasoning';
+    }
+    
+    // Simple informational queries
+    if (urlLower.includes('wiki') || urlLower.includes('news') ||
+        urlLower.includes('blog') || urlLower.includes('faq')) {
+      return 'simple';
+    }
+    
+    // Check DOM complexity as a proxy for interface complexity
+    const domNodes = tabData.domNodes || 0;
+    if (domNodes > 5000) return 'complex';
+    if (domNodes > 2000) return 'moderate';
+    if (domNodes < 500) return 'simple';
+    
+    return 'moderate'; // Default
+  }
+  
+  /**
+   * Estimate context length based on tab data and model
+   */
+  estimateContextLength(tabData, detectedModel) {
+    if (!tabData) return 1000;
+    
+    // Base estimate from DOM complexity
+    const domNodes = tabData.domNodes || 1000;
+    let estimatedTokens = Math.max(500, Math.min(8000, domNodes * 0.3));
+    
+    // Adjust based on page type
+    const url = tabData.url || '';
+    if (url.includes('docs') || url.includes('documentation')) {
+      estimatedTokens *= 1.5; // Documentation tends to be longer
+    }
+    if (url.includes('chat') || url.includes('conversation')) {
+      estimatedTokens *= 2.0; // Chat interfaces accumulate context
+    }
+    if (url.includes('editor') || url.includes('code')) {
+      estimatedTokens *= 1.8; // Code editors often have large contexts
+    }
+    
+    // Consider model's typical context window
+    const modelName = detectedModel.model?.name || '';
+    if (modelName.toLowerCase().includes('claude')) {
+      estimatedTokens *= 1.2; // Claude models often used with longer contexts
+    }
+    
+    return Math.round(estimatedTokens);
+  }
+  
+  /**
+   * Get context length multiplier based on context size and model profile
+   */
+  getContextLengthMultiplier(contextLength, profile) {
+    // Find appropriate context factor
+    let factor = this.contextLengthFactors.medium; // Default
+    
+    for (const [key, contextFactor] of Object.entries(this.contextLengthFactors)) {
+      if (contextLength <= contextFactor.threshold) {
+        factor = contextFactor;
+        break;
+      }
+    }
+    
+    // Apply model's context multiplier
+    return factor.multiplier * (profile.contextMultiplier || 1.0);
+  }
+  
+  /**
+   * Get performance mode adjustment factor
+   */
+  getPerformanceModeAdjustment(performanceMode) {
+    switch (performanceMode) {
+      case 'efficient':
+        return 0.8;  // Lower power mode
+      case 'balanced':
+        return 1.0;  // Normal power
+      case 'performance':
+        return 1.3;  // Higher power mode
+      default:
+        return 1.0;
+    }
+  }
+  
+  /**
+   * Infer model key from detected model information
+   */
+  inferModelKey(modelInfo) {
+    if (!modelInfo || !modelInfo.name) return 'gpt-4'; // Default fallback
+    
+    const name = modelInfo.name.toLowerCase();
+    
+    // GPT models
+    if (name.includes('gpt-5')) return 'gpt-5-high';
+    if (name.includes('gpt-4-turbo') && name.includes('2024')) return 'gpt-4-turbo-2024';
+    if (name.includes('gpt-4')) return 'gpt-4';
+    if (name.includes('gpt-3.5')) return 'gpt-3.5-turbo';
+    
+    // Claude models
+    if (name.includes('claude-4')) return 'claude-4-sonnet-thinking';
+    if (name.includes('claude-3.5')) return 'claude-3.5-sonnet';
+    
+    // Specialized models
+    if (name.includes('deepseek') && name.includes('r1')) return 'deepseek-r1';
+    if (name.includes('grok-4')) return 'grok-4';
+    if (name.includes('llama-4')) return 'llama-4-maverick';
+    if (name.includes('gemini-2') || name.includes('gemini 2')) return 'gemini-2-flash';
+    if (name.includes('o3-mini')) return 'o3-mini';
+    
+    // Default to GPT-4 for unknown models
+    return 'gpt-4';
+  }
+  
+  /**
+   * Estimate power for unknown models
+   */
+  estimatePowerForUnknownModel(detectedModel, context) {
+    console.log('[AIModelPowerCalculator] Estimating power for unknown model:', detectedModel.model?.name);
+    
+    // Base estimation using model category or size hints
+    let estimatedWatts = 30; // Conservative default
+    
+    const modelName = (detectedModel.model?.name || '').toLowerCase();
+    
+    // Size-based estimation
+    if (modelName.includes('large') || modelName.includes('70b') || modelName.includes('175b')) {
+      estimatedWatts = 40;
+    } else if (modelName.includes('small') || modelName.includes('7b') || modelName.includes('13b')) {
+      estimatedWatts = 20;
+    } else if (modelName.includes('mini') || modelName.includes('nano')) {
+      estimatedWatts = 15;
+    }
+    
+    // Apply basic engagement factor
+    const engagement = context.userEngagement || 'medium';
+    estimatedWatts *= this.engagementFactors[engagement] || 1.0;
+    
+    return estimatedWatts;
+  }
+  
+  /**
+   * Calculate environmental impact from power consumption
+   */
+  calculateEnvironmentalImpact(powerWatts, durationMs = 3600000, region = 'global') {
+    const durationHours = durationMs / 3600000;
+    const energyWh = powerWatts * durationHours;
+    const energyKWh = energyWh / 1000;
+    
+    // Carbon emissions
+    const carbonIntensity = this.regionalCarbonIntensity[region] || this.regionalCarbonIntensity.global;
+    const carbonEmissionsG = energyKWh * carbonIntensity;
+    
+    // Water usage (approximate for data centers)
+    const waterUsageL = energyKWh * 3.0; // ~3L per kWh for cooling
+    
+    // Tree offset equivalent (rough approximation)
+    const treeOffsetDays = carbonEmissionsG / 48.0; // A tree absorbs ~48g CO2 per day
+    
+    return {
+      energyWh: energyWh,
+      energyKWh: energyKWh,
+      carbonEmissionsG: carbonEmissionsG,
+      waterUsageL: waterUsageL,
+      treeOffsetDays: treeOffsetDays,
+      region: region,
+      carbonIntensity: carbonIntensity
+    };
+  }
+  
+  /**
+   * Calculate cost estimate for AI query
+   */
+  calculateQueryCost(modelKey, tokensUsed, region = 'global') {
+    const profile = this.modelPowerProfiles[modelKey];
+    if (!profile) return { energyCost: 0, apiCost: 0, total: 0 };
+    
+    // Energy cost (varies by region)
+    const regionalElectricityRates = {
+      'us-west': 0.15,    // $/kWh
+      'us-east': 0.12,
+      'us-central': 0.10,
+      'europe': 0.20,
+      'asia-pacific': 0.08,
+      'global': 0.12
+    };
+    
+    const electricityRate = regionalElectricityRates[region] || regionalElectricityRates.global;
+    const energyKWh = profile.energyPerQuery / 1000;
+    const energyCost = energyKWh * electricityRate;
+    
+    // Rough API cost estimate (varies significantly)
+    const roughApiCostPer1kTokens = {
+      'frontier-large': 0.03,
+      'reasoning-specialized': 0.05,
+      'balanced-performance': 0.015,
+      'ultra-efficient': 0.001,
+      'legacy-large': 0.02,
+      'legacy-efficient': 0.0015
+    };
+    
+    const apiCostRate = roughApiCostPer1kTokens[profile.category] || 0.02;
+    const apiCost = (tokensUsed / 1000) * apiCostRate;
+    
+    return {
+      energyCost: energyCost,
+      apiCost: apiCost,
+      total: energyCost + apiCost,
+      region: region,
+      electricityRate: electricityRate
+    };
+  }
+  
+  /**
+   * Get model efficiency score (0-100)
+   */
+  getModelEfficiencyScore(modelKey) {
+    const profile = this.modelPowerProfiles[modelKey];
+    if (!profile) return 50; // Default medium efficiency
+    
+    // Calculate efficiency based on tokens per second per watt
+    const tokensPerWatt = profile.tokensPerSecond / profile.baseWatts;
+    
+    // Scoring scale (higher tokens per watt = more efficient)
+    if (tokensPerWatt > 6) return 95;      // Ultra-efficient models
+    if (tokensPerWatt > 4) return 80;      // Efficient models
+    if (tokensPerWatt > 2.5) return 65;    // Balanced models
+    if (tokensPerWatt > 1.5) return 45;    // Less efficient models
+    return 25;                             // Power-intensive models
+  }
+  
+  /**
+   * Get comprehensive model comparison data
+   */
+  compareModels(modelKeys) {
+    const comparison = {
+      models: [],
+      efficiencyRanking: [],
+      powerRanking: [],
+      sustainabilityRanking: []
+    };
+    
+    modelKeys.forEach(key => {
+      const profile = this.modelPowerProfiles[key];
+      if (!profile) return;
+      
+      const efficiencyScore = this.getModelEfficiencyScore(key);
+      const environmentalImpact = this.calculateEnvironmentalImpact(profile.baseWatts, 3600000);
+      
+      const modelData = {
+        key: key,
+        name: profile.name,
+        category: profile.category,
+        company: profile.company,
+        baseWatts: profile.baseWatts,
+        tokensPerSecond: profile.tokensPerSecond,
+        energyPerQuery: profile.energyPerQuery,
+        efficiencyScore: efficiencyScore,
+        carbonEmissions: environmentalImpact.carbonEmissionsG,
+        sustainabilityScore: Math.round(100 - (environmentalImpact.carbonEmissionsG / 20))
+      };
+      
+      comparison.models.push(modelData);
+    });
+    
+    // Sort rankings
+    comparison.efficiencyRanking = [...comparison.models].sort((a, b) => b.efficiencyScore - a.efficiencyScore);
+    comparison.powerRanking = [...comparison.models].sort((a, b) => a.baseWatts - b.baseWatts);
+    comparison.sustainabilityRanking = [...comparison.models].sort((a, b) => b.sustainabilityScore - a.sustainabilityScore);
+    
+    return comparison;
+  }
+}
+
+/**
+ * AdvancedPromptOptimizer class - Sophisticated prompt optimization with ML-inspired algorithms
+ */
+class AdvancedPromptOptimizer {
+  constructor(tokenCounter) {
+    console.log('[AdvancedPromptOptimizer] Initializing advanced prompt optimization system');
+    
+    // Initialize optimization components
+    this.tokenCounter = tokenCounter; // Reference to existing TokenCounter
+    this.optimizationHistory = new Map();
+    this.learningData = new Map();
+    this.optimizationStats = {
+      totalOptimizations: 0,
+      averageTokenSavings: 0,
+      averageQualityScore: 0,
+      successfulOptimizations: 0
+    };
+    
+    // Initialize quality scoring system
+    this.qualityScorer = new OptimizationQualityScorer();
+    
+    // Advanced optimization techniques registry
+    this.optimizationTechniques = {
+      // Semantic compression techniques
+      semanticCompression: {
+        name: 'Semantic Compression',
+        priority: 1,
+        apply: this.applySematicCompression.bind(this),
+        description: 'Removes redundant semantic information while preserving meaning'
+      },
+      
+      // Structural optimization
+      structuralOptimization: {
+        name: 'Structural Optimization',
+        priority: 2,
+        apply: this.applyStructuralOptimization.bind(this),
+        description: 'Reorganizes prompt structure for maximum efficiency'
+      },
+      
+      // Context-aware reduction
+      contextualReduction: {
+        name: 'Contextual Reduction',
+        priority: 3,
+        apply: this.applyContextualReduction.bind(this),
+        description: 'Reduces context based on AI model capabilities'
+      },
+      
+      // Pattern-based optimization
+      patternOptimization: {
+        name: 'Pattern Optimization',
+        priority: 4,
+        apply: this.applyPatternOptimization.bind(this),
+        description: 'Uses learned patterns to optimize common structures'
+      },
+      
+      // Domain-specific optimization
+      domainOptimization: {
+        name: 'Domain Optimization',
+        priority: 5,
+        apply: this.applyDomainOptimization.bind(this),
+        description: 'Applies domain-specific optimization rules'
+      },
+      
+      // Linguistic optimization
+      linguisticOptimization: {
+        name: 'Linguistic Optimization',
+        priority: 6,
+        apply: this.applyLinguisticOptimization.bind(this),
+        description: 'Optimizes language use for AI comprehension'
+      }
+    };
+    
+    // Advanced token-wasting pattern database
+    this.advancedPatterns = {
+      // Meta-linguistic markers (often unnecessary for AI)
+      metaMarkers: {
+        patterns: [
+          /\b(?:please note that|it should be noted that|it is important to note that|bear in mind that|keep in mind that|remember that|don't forget that)\b/gi,
+          /\b(?:as you know|as we know|obviously|clearly|of course|naturally|needless to say|it goes without saying)\b/gi,
+          /\b(?:in other words|that is to say|to put it simply|in simple terms|to clarify|to be clear|let me be clear)\b/gi
+        ],
+        weight: 0.9,
+        category: 'meta'
+      },
+      
+      // Conversational scaffolding (AI doesn't need social cues)
+      conversationalScaffolding: {
+        patterns: [
+          /\b(?:I hope|I think|I believe|I feel|in my opinion|from my perspective|it seems to me)\b/gi,
+          /\b(?:if you don't mind|if possible|if you could|would you mind|could you please|would you be so kind)\b/gi,
+          /\b(?:thank you|thanks|please|kindly|I appreciate|I'm grateful|sorry to bother you)\b/gi
+        ],
+        weight: 0.8,
+        category: 'social'
+      },
+      
+      // Redundant elaboration
+      redundantElaboration: {
+        patterns: [
+          /\b(?:very|extremely|quite|rather|pretty|fairly|somewhat|relatively|particularly|especially)\s+(?:important|good|bad|useful|helpful|effective|efficient)\b/gi,
+          /\b(?:a lot of|lots of|a great deal of|a large number of|a significant amount of|numerous|multiple|various)\b/gi,
+          /\b(?:in order to|so as to|with the purpose of|for the purpose of|with the aim of|in an effort to)\b/gi
+        ],
+        weight: 0.7,
+        category: 'redundancy'
+      },
+      
+      // Temporal and logical connectors (often redundant for AI)
+      temporalConnectors: {
+        patterns: [
+          /\b(?:first of all|to begin with|initially|at the outset|in the beginning|as a starting point)\b/gi,
+          /\b(?:furthermore|moreover|additionally|in addition|what's more|on top of that|not only that)\b/gi,
+          /\b(?:finally|lastly|in conclusion|to conclude|to sum up|in summary|all in all)\b/gi
+        ],
+        weight: 0.6,
+        category: 'connectors'
+      },
+      
+      // Uncertainty and hedging (reduces AI confidence)
+      uncertaintyHedging: {
+        patterns: [
+          /\b(?:maybe|perhaps|possibly|potentially|likely|probably|might|could be|may be)\b/gi,
+          /\b(?:sort of|kind of|more or less|to some extent|in a way|somewhat|rather)\b/gi,
+          /\b(?:I guess|I suppose|I assume|I imagine|it seems|it appears|apparently)\b/gi
+        ],
+        weight: 0.5,
+        category: 'hedging'
+      }
+    };
+    
+    // Domain-specific optimization rules
+    this.domainRules = {
+      coding: {
+        patterns: [
+          /\b(?:write|create|generate|produce|make)\s+(?:a|an|some)?\s*(?:code|script|program|function|method)\b/gi,
+          /\b(?:programming|coding|software development|development)\b/gi
+        ],
+        optimizations: [
+          { from: /please write a function that/gi, to: 'Function:' },
+          { from: /create a script that/gi, to: 'Script:' },
+          { from: /I need you to help me with/gi, to: 'Help with:' },
+          { from: /can you help me debug this code/gi, to: 'Debug:' }
+        ],
+        weight: 0.8
+      },
+      
+      analysis: {
+        patterns: [
+          /\b(?:analyze|examine|study|investigate|review|assess|evaluate)\b/gi,
+          /\b(?:analysis|examination|investigation|assessment|evaluation)\b/gi
+        ],
+        optimizations: [
+          { from: /please analyze the following/gi, to: 'Analyze:' },
+          { from: /I would like you to examine/gi, to: 'Examine:' },
+          { from: /can you provide an analysis of/gi, to: 'Analyze:' }
+        ],
+        weight: 0.7
+      },
+      
+      writing: {
+        patterns: [
+          /\b(?:write|compose|draft|create)\s+(?:a|an)?\s*(?:essay|article|story|letter|email|document)\b/gi,
+          /\b(?:writing|composition|content creation)\b/gi
+        ],
+        optimizations: [
+          { from: /please write an essay about/gi, to: 'Essay on:' },
+          { from: /I need you to compose/gi, to: 'Compose:' },
+          { from: /can you help me write/gi, to: 'Write:' }
+        ],
+        weight: 0.6
+      },
+      
+      explanation: {
+        patterns: [
+          /\b(?:explain|describe|clarify|define|elaborate)\b/gi,
+          /\b(?:explanation|description|definition)\b/gi
+        ],
+        optimizations: [
+          { from: /can you explain what is/gi, to: 'Explain:' },
+          { from: /please describe how/gi, to: 'Describe how:' },
+          { from: /I would like to understand/gi, to: 'Explain:' }
+        ],
+        weight: 0.5
+      }
+    };
+    
+    // Model-specific optimization strategies
+    this.modelStrategies = {
+      'gpt-4': {
+        preferences: ['structured', 'concise', 'specific'],
+        tokenEfficiency: 0.9,
+        contextHandling: 'excellent',
+        specializations: ['reasoning', 'analysis', 'coding']
+      },
+      'gpt-3.5': {
+        preferences: ['simple', 'direct', 'clear'],
+        tokenEfficiency: 0.7,
+        contextHandling: 'good',
+        specializations: ['general', 'conversation', 'basic-tasks']
+      },
+      'claude': {
+        preferences: ['detailed', 'nuanced', 'thoughtful'],
+        tokenEfficiency: 0.8,
+        contextHandling: 'excellent',
+        specializations: ['writing', 'analysis', 'ethics']
+      },
+      'gemini': {
+        preferences: ['multimodal', 'creative', 'factual'],
+        tokenEfficiency: 0.75,
+        contextHandling: 'very-good',
+        specializations: ['search', 'creative', 'factual']
+      }
+    };
+  }
+  
+  /**
+   * Advanced prompt optimization with sophisticated algorithms
+   */
+  async optimizePromptAdvanced(prompt, options = {}) {
+    const startTime = Date.now();
+    console.log('[AdvancedPromptOptimizer] Starting advanced optimization:', {
+      promptLength: prompt.length,
+      options: options
+    });
+    
+    // Set default options
+    const config = {
+      level: options.level || 'balanced',
+      targetModel: options.targetModel || 'gpt-4',
+      preserveStructure: options.preserveStructure !== false,
+      domainHints: options.domainHints || [],
+      maxReduction: options.maxReduction || 0.5,
+      qualityThreshold: options.qualityThreshold || 0.7,
+      ...options
+    };
+    
+    try {
+      // Phase 1: Analysis
+      const analysis = this.analyzePrompt(prompt, config);
+      
+      // Phase 2: Apply techniques
+      let optimized = prompt;
+      const appliedTechniques = [];
+      
+      // Apply semantic compression
+      if (config.level !== 'conservative') {
+        const result = this.applySematicCompression(optimized, analysis, config);
+        if (result.success) {
+          optimized = result.optimized;
+          appliedTechniques.push(result);
+        }
+      }
+      
+      // Apply structural optimization
+      const structuralResult = this.applyStructuralOptimization(optimized, analysis, config);
+      if (structuralResult.success) {
+        optimized = structuralResult.optimized;
+        appliedTechniques.push(structuralResult);
+      }
+      
+      // Apply pattern optimization
+      const patternResult = this.applyPatternOptimization(optimized, analysis, config);
+      if (patternResult.success) {
+        optimized = patternResult.optimized;
+        appliedTechniques.push(patternResult);
+      }
+      
+      // Apply domain optimization
+      const domainResult = this.applyDomainOptimization(optimized, analysis, config);
+      if (domainResult.success) {
+        optimized = domainResult.optimized;
+        appliedTechniques.push(domainResult);
+      }
+      
+      // Calculate results
+      const originalTokens = this.estimateTokens(prompt, config.targetModel);
+      const optimizedTokens = this.estimateTokens(optimized, config.targetModel);
+      const tokenReduction = originalTokens - optimizedTokens;
+      const percentageReduction = Math.round((tokenReduction / Math.max(1, originalTokens)) * 100);
+      
+      // Phase 3: Quality Assessment
+      const qualityAssessment = this.qualityScorer.assessOptimizationQuality(
+        prompt,
+        optimized,
+        { techniques: appliedTechniques, analysis: analysis }
+      );
+      
+      // Update optimization statistics
+      this.updateOptimizationStats(tokenReduction, qualityAssessment.overallScore);
+      
+      const totalDuration = Date.now() - startTime;
+      
+      const optimizationResult = {
+        success: true,
+        original: prompt,
+        optimized: optimized,
+        reduction: {
+          characters: prompt.length - optimized.length,
+          tokens: tokenReduction,
+          percentage: percentageReduction
+        },
+        techniques: appliedTechniques,
+        analysis: analysis,
+        quality: qualityAssessment,
+        metadata: {
+          totalDuration,
+          config,
+          optimizationId: Date.now() + Math.random().toString(36).substr(2, 9)
+        }
+      };
+      
+      // Store in optimization history
+      this.storeOptimizationResult(optimizationResult);
+      
+      return optimizationResult;
+      
+    } catch (error) {
+      console.error('[AdvancedPromptOptimizer] Optimization failed:', error);
+      return {
+        success: false,
+        error: error.message,
+        original: prompt,
+        optimized: prompt
+      };
+    }
+  }
+  
+  /**
+   * Analyze prompt for optimization opportunities
+   */
+  analyzePrompt(prompt, config) {
+    const analysis = {
+      length: prompt.length,
+      wordCount: prompt.split(/\s+/).length,
+      sentenceCount: prompt.split(/[.!?]+/).filter(s => s.trim().length > 0).length,
+      tokenCount: this.estimateTokens(prompt, config.targetModel),
+      
+      // Pattern analysis
+      patterns: {
+        metaMarkers: 0,
+        conversationalScaffolding: 0,
+        redundantElaboration: 0,
+        temporalConnectors: 0,
+        uncertaintyHedging: 0
+      },
+      
+      // Domain detection
+      detectedDomains: [],
+      
+      // Structure analysis
+      structure: {
+        hasIntroduction: false,
+        hasConclusion: false,
+        hasExamples: false,
+        hasBulletPoints: false,
+        hasNumberedLists: false
+      },
+      
+      // Optimization opportunities
+      opportunities: []
+    };
+    
+    // Perform pattern analysis
+    for (const [category, patternData] of Object.entries(this.advancedPatterns)) {
+      let matches = 0;
+      for (const pattern of patternData.patterns) {
+        const found = prompt.match(pattern);
+        matches += found ? found.length : 0;
+      }
+      analysis.patterns[category] = matches;
+      
+      if (matches > 0) {
+        analysis.opportunities.push({
+          category,
+          matches,
+          weight: patternData.weight,
+          potentialReduction: matches * 3
+        });
+      }
+    }
+    
+    // Domain detection
+    for (const [domain, rules] of Object.entries(this.domainRules)) {
+      for (const pattern of rules.patterns) {
+        if (pattern.test(prompt)) {
+          analysis.detectedDomains.push(domain);
+          break;
+        }
+      }
+    }
+    
+    // Structure analysis
+    analysis.structure.hasIntroduction = /^(first|to begin|initially|let me start)/i.test(prompt);
+    analysis.structure.hasConclusion = /(finally|in conclusion|to sum up|lastly)$/i.test(prompt);
+    analysis.structure.hasExamples = /for example|such as|like|including/i.test(prompt);
+    analysis.structure.hasBulletPoints = /^\s*[-*•]/m.test(prompt);
+    analysis.structure.hasNumberedLists = /^\s*\d+[\.)]/m.test(prompt);
+    
+    return analysis;
+  }
+  
+  /**
+   * Apply semantic compression optimization
+   */
+  applySematicCompression(prompt, analysis, config) {
+    let optimized = prompt;
+    let tokensSaved = 0;
+    
+    // Remove semantic redundancy
+    const compressionRules = [
+      // Remove redundant qualifiers
+      { from: /\b(very|extremely|quite|rather) (important|good|useful|helpful)\b/gi, to: '$2' },
+      // Compress common phrases
+      { from: /\bin order to\b/gi, to: 'to' },
+      { from: /\bdue to the fact that\b/gi, to: 'because' },
+      { from: /\bat this point in time\b/gi, to: 'now' },
+      { from: /\bfor the purpose of\b/gi, to: 'for' },
+      { from: /\bin the event that\b/gi, to: 'if' },
+      // Remove filler words
+      { from: /\b(basically|essentially|actually|literally)\s+/gi, to: '' }
+    ];
+    
+    const originalLength = optimized.length;
+    
+    for (const rule of compressionRules) {
+      const before = optimized.length;
+      optimized = optimized.replace(rule.from, rule.to);
+      const after = optimized.length;
+      tokensSaved += Math.ceil((before - after) / 4);
+    }
+    
+    // Clean up extra whitespace
+    optimized = optimized.replace(/\s+/g, ' ').trim();
+    
+    return {
+      success: originalLength !== optimized.length,
+      optimized: optimized,
+      tokensSaved: tokensSaved,
+      technique: 'semanticCompression'
+    };
+  }
+  
+  /**
+   * Apply structural optimization
+   */
+  applyStructuralOptimization(prompt, analysis, config) {
+    let optimized = prompt;
+    let tokensSaved = 0;
+    
+    // Remove unnecessary introductions and conclusions
+    if (config.level === 'aggressive') {
+      // Remove common introductory phrases
+      const introPatterns = [
+        /^(First of all,|To begin with,|Initially,|Let me start by saying|At the outset,)\s*/gi,
+        /^(I would like to|I want to|I need to|Please)\s+/gi
+      ];
+      
+      for (const pattern of introPatterns) {
+        const before = optimized.length;
+        optimized = optimized.replace(pattern, '');
+        tokensSaved += Math.ceil((before - optimized.length) / 4);
+      }
+      
+      // Remove concluding phrases
+      const conclusionPatterns = [
+        /\s*(In conclusion,|To conclude,|Finally,|Lastly,|To sum up,).*$/gi,
+        /\s*(Thank you|Thanks in advance|I appreciate|I would appreciate).*$/gi
+      ];
+      
+      for (const pattern of conclusionPatterns) {
+        const before = optimized.length;
+        optimized = optimized.replace(pattern, '');
+        tokensSaved += Math.ceil((before - optimized.length) / 4);
+      }
+    }
+    
+    return {
+      success: tokensSaved > 0,
+      optimized: optimized.trim(),
+      tokensSaved: tokensSaved,
+      technique: 'structuralOptimization'
+    };
+  }
+  
+  /**
+   * Apply pattern-based optimization
+   */
+  applyPatternOptimization(prompt, analysis, config) {
+    let optimized = prompt;
+    let tokensSaved = 0;
+    
+    // Apply advanced pattern replacements
+    for (const [category, patternData] of Object.entries(this.advancedPatterns)) {
+      if (analysis.patterns[category] > 0) {
+        for (const pattern of patternData.patterns) {
+          const matches = optimized.match(pattern);
+          if (matches) {
+            const before = optimized.length;
+            optimized = optimized.replace(pattern, '');
+            const saved = Math.ceil((before - optimized.length) / 4);
+            tokensSaved += saved;
+          }
+        }
+      }
+    }
+    
+    return {
+      success: tokensSaved > 0,
+      optimized: optimized.replace(/\s+/g, ' ').trim(),
+      tokensSaved: tokensSaved,
+      technique: 'patternOptimization'
+    };
+  }
+  
+  /**
+   * Apply domain-specific optimization
+   */
+  applyDomainOptimization(prompt, analysis, config) {
+    let optimized = prompt;
+    let tokensSaved = 0;
+    
+    for (const domain of analysis.detectedDomains) {
+      const domainRules = this.domainRules[domain];
+      if (domainRules) {
+        for (const optimization of domainRules.optimizations) {
+          const before = optimized.length;
+          optimized = optimized.replace(optimization.from, optimization.to);
+          tokensSaved += Math.ceil((before - optimized.length) / 4);
+        }
+      }
+    }
+    
+    return {
+      success: tokensSaved > 0,
+      optimized: optimized,
+      tokensSaved: tokensSaved,
+      technique: 'domainOptimization'
+    };
+  }
+  
+  /**
+   * Update optimization statistics
+   */
+  updateOptimizationStats(tokenReduction, qualityScore) {
+    this.optimizationStats.totalOptimizations += 1;
+    
+    // Update average token savings
+    const totalSavings = this.optimizationStats.averageTokenSavings * (this.optimizationStats.totalOptimizations - 1);
+    this.optimizationStats.averageTokenSavings = (totalSavings + tokenReduction) / this.optimizationStats.totalOptimizations;
+    
+    // Update average quality score
+    const totalQuality = this.optimizationStats.averageQualityScore * (this.optimizationStats.totalOptimizations - 1);
+    this.optimizationStats.averageQualityScore = (totalQuality + qualityScore) / this.optimizationStats.totalOptimizations;
+    
+    // Update successful optimizations (quality > 0.7)
+    if (qualityScore > 0.7) {
+      this.optimizationStats.successfulOptimizations += 1;
+    }
+    
+    console.log('[AdvancedPromptOptimizer] Stats updated:', this.optimizationStats);
+  }
+  
+  /**
+   * Store optimization result in history
+   */
+  storeOptimizationResult(result) {
+    const optimizationId = result.metadata.optimizationId;
+    this.optimizationHistory.set(optimizationId, {
+      timestamp: Date.now(),
+      result: result,
+      config: result.metadata.config
+    });
+    
+    // Keep only recent history (last 100 optimizations)
+    if (this.optimizationHistory.size > 100) {
+      const oldestKey = Math.min(...this.optimizationHistory.keys());
+      this.optimizationHistory.delete(oldestKey);
+    }
+  }
+  
+  /**
+   * Get optimization insights based on history
+   */
+  getOptimizationInsights() {
+    const insights = {
+      totalOptimizations: this.optimizationStats.totalOptimizations,
+      averageTokenSavings: Math.round(this.optimizationStats.averageTokenSavings),
+      averageQualityScore: Math.round(this.optimizationStats.averageQualityScore * 100) / 100,
+      successRate: this.optimizationStats.totalOptimizations > 0 ?
+        Math.round((this.optimizationStats.successfulOptimizations / this.optimizationStats.totalOptimizations) * 100) : 0,
+      bestTechniques: this.getBestPerformingTechniques(),
+      qualityTrends: this.getQualityTrends()
+    };
+    
+    return insights;
+  }
+  
+  /**
+   * Get best performing optimization techniques
+   */
+  getBestPerformingTechniques() {
+    const techniqueStats = new Map();
+    
+    for (const [id, historyEntry] of this.optimizationHistory.entries()) {
+      const result = historyEntry.result;
+      if (result.techniques) {
+        result.techniques.forEach(technique => {
+          const stats = techniqueStats.get(technique.technique) || {
+            name: technique.technique,
+            totalUses: 0,
+            totalTokensSaved: 0,
+            totalQualityScore: 0,
+            avgTokensSaved: 0,
+            avgQualityScore: 0
+          };
+          
+          stats.totalUses += 1;
+          stats.totalTokensSaved += technique.tokensSaved || 0;
+          stats.totalQualityScore += result.quality?.overallScore || 0;
+          stats.avgTokensSaved = stats.totalTokensSaved / stats.totalUses;
+          stats.avgQualityScore = stats.totalQualityScore / stats.totalUses;
+          
+          techniqueStats.set(technique.technique, stats);
+        });
+      }
+    }
+    
+    return Array.from(techniqueStats.values())
+      .filter(stats => stats.totalUses >= 3) // Minimum usage threshold
+      .sort((a, b) => (b.avgTokensSaved * b.avgQualityScore) - (a.avgTokensSaved * a.avgQualityScore))
+      .slice(0, 5);
+  }
+  
+  /**
+   * Get quality trends over time
+   */
+  getQualityTrends() {
+    const trends = [];
+    const sortedHistory = Array.from(this.optimizationHistory.values())
+      .sort((a, b) => a.timestamp - b.timestamp);
+    
+    // Group by time periods (last 10 optimizations)
+    const recentHistory = sortedHistory.slice(-10);
+    let totalQuality = 0;
+    let totalTokenSavings = 0;
+    
+    recentHistory.forEach(entry => {
+      totalQuality += entry.result.quality?.overallScore || 0;
+      totalTokenSavings += entry.result.reduction?.tokens || 0;
+    });
+    
+    if (recentHistory.length > 0) {
+      trends.push({
+        period: 'Recent',
+        avgQuality: Math.round((totalQuality / recentHistory.length) * 100) / 100,
+        avgTokenSavings: Math.round(totalTokenSavings / recentHistory.length),
+        count: recentHistory.length
+      });
+    }
+    
+    return trends;
+  }
+  
+  /**
+   * Estimate tokens for a given text and model
+   */
+  estimateTokens(text, model = 'gpt-4') {
+    // Use existing token counter if available
+    if (this.tokenCounter) {
+      return this.tokenCounter.countTokensGPT(text, model);
+    } else if (window.popupManager && window.popupManager.tokenCounter) {
+      return window.popupManager.tokenCounter.countTokensGPT(text, model);
+    }
+    
+    // Fallback estimation
+    const ratios = { 'gpt-4': 3.8, 'gpt-3.5': 4.0, 'claude': 3.5, 'gemini': 3.6 };
+    const ratio = ratios[model] || ratios['gpt-4'];
+    return Math.ceil(text.length / ratio);
+  }
+}
+
+/**
+ * OptimizationQualityScorer class - Advanced quality assessment for prompt optimizations
+ */
+class OptimizationQualityScorer {
+  constructor() {
+    console.log('[OptimizationQualityScorer] Initializing optimization quality scoring system');
+    
+    // Quality assessment weights
+    this.qualityWeights = {
+      semanticPreservation: 0.30,    // How well meaning is preserved
+      structuralCoherence: 0.20,     // How well structure is maintained
+      linguisticClarity: 0.20,       // How clear and readable the text is
+      contextualRelevance: 0.15,     // How relevant the content remains
+      tokenEfficiency: 0.15          // How efficiently tokens are used
+    };
+    
+    // Quality thresholds
+    this.qualityThresholds = {
+      excellent: 0.90,    // 90%+ overall quality
+      good: 0.75,         // 75%+ overall quality
+      acceptable: 0.60,   // 60%+ overall quality
+      poor: 0.40,         // 40%+ overall quality
+      unacceptable: 0.0   // Below 40%
+    };
+    
+    // Semantic analysis patterns
+    this.semanticPatterns = {
+      keyTerms: /\b(important|key|main|primary|essential|crucial|critical|vital|significant)\b/gi,
+      actionWords: /\b(create|generate|write|analyze|explain|describe|implement|develop|design)\b/gi,
+      contextualCues: /\b(because|therefore|however|although|since|while|whereas|moreover)\b/gi,
+      specificTerms: /\b(specific|particular|detailed|exact|precise|explicit)\b/gi,
+      quantifiers: /\b(all|some|most|many|few|several|multiple|various)\b/gi
+    };
+    
+    // Structural integrity markers
+    this.structuralMarkers = {
+      introductionMarkers: /\b(first|initially|to begin|starting|introduction)\b/gi,
+      transitionMarkers: /\b(next|then|furthermore|additionally|moreover|however)\b/gi,
+      conclusionMarkers: /\b(finally|in conclusion|to summarize|lastly|overall)\b/gi,
+      listMarkers: /\b(first|second|third|1\.|2\.|3\.|\*|-|•)\b/gi,
+      hierarchyMarkers: /\b(main|sub|primary|secondary|detail|example)\b/gi
+    };
+    
+    // Linguistic quality indicators
+    this.linguisticIndicators = {
+      complexSentences: /[^.!?]{100,}/g,  // Very long sentences
+      passiveVoice: /\b(is|are|was|were|being|been)\s+\w+ed\b/gi,
+      redundantWords: /\b(very|really|quite|rather|somewhat|fairly)\s+/gi,
+      vagueTerms: /\b(thing|stuff|something|anything|everything|nothing)\b/gi,
+      fillerWords: /\b(um|uh|like|you know|sort of|kind of)\b/gi
+    };
+    
+    // Context preservation patterns
+    this.contextPatterns = {
+      requirements: /\b(must|should|need|require|necessary|mandatory)\b/gi,
+      constraints: /\b(cannot|must not|should not|avoid|exclude|limit)\b/gi,
+      goals: /\b(goal|objective|purpose|aim|target|intent)\b/gi,
+      examples: /\b(example|instance|case|such as|for instance|like)\b/gi,
+      specifications: /\b(format|style|length|size|type|version)\b/gi
+    };
+    
+    // Historical quality data for machine learning
+    this.qualityHistory = new Map();
+    this.patternSuccess = new Map();
+    this.modelPerformance = new Map();
+  }
+  
+  /**
+   * Comprehensive quality assessment of prompt optimization
+   */
+  assessOptimizationQuality(originalPrompt, optimizedPrompt, optimizationResult = {}) {
+    console.log('[OptimizationQualityScorer] Starting comprehensive quality assessment');
+    
+    const startTime = Date.now();
+    
+    // Calculate individual quality metrics
+    const metrics = {
+      semanticPreservation: this.assessSemanticPreservation(originalPrompt, optimizedPrompt),
+      structuralCoherence: this.assessStructuralCoherence(originalPrompt, optimizedPrompt),
+      linguisticClarity: this.assessLinguisticClarity(optimizedPrompt, originalPrompt),
+      contextualRelevance: this.assessContextualRelevance(originalPrompt, optimizedPrompt),
+      tokenEfficiency: this.assessTokenEfficiency(originalPrompt, optimizedPrompt)
+    };
+    
+    // Calculate weighted overall score
+    const overallScore = this.calculateWeightedScore(metrics);
+    
+    // Determine quality grade
+    const qualityGrade = this.determineQualityGrade(overallScore);
+    
+    // Generate detailed recommendations
+    const recommendations = this.generateQualityRecommendations(metrics, originalPrompt, optimizedPrompt);
+    
+    // Calculate confidence intervals
+    const confidence = this.calculateConfidenceInterval(metrics, originalPrompt.length, optimizedPrompt.length);
+    
+    // Update learning system
+    this.updateQualityLearningSystem(metrics, overallScore, optimizationResult);
+    
+    const assessmentDuration = Date.now() - startTime;
+    
+    const qualityAssessment = {
+      overallScore: Math.round(overallScore * 100) / 100,
+      qualityGrade: qualityGrade,
+      metrics: {
+        semanticPreservation: Math.round(metrics.semanticPreservation * 100) / 100,
+        structuralCoherence: Math.round(metrics.structuralCoherence * 100) / 100,
+        linguisticClarity: Math.round(metrics.linguisticClarity * 100) / 100,
+        contextualRelevance: Math.round(metrics.contextualRelevance * 100) / 100,
+        tokenEfficiency: Math.round(metrics.tokenEfficiency * 100) / 100
+      },
+      recommendations: recommendations,
+      confidence: confidence,
+      metadata: {
+        assessmentDuration: assessmentDuration,
+        originalLength: originalPrompt.length,
+        optimizedLength: optimizedPrompt.length,
+        reductionRatio: (originalPrompt.length - optimizedPrompt.length) / originalPrompt.length
+      }
+    };
+    
+    console.log('[OptimizationQualityScorer] Quality assessment complete:', {
+      overallScore: qualityAssessment.overallScore,
+      qualityGrade: qualityAssessment.qualityGrade,
+      duration: assessmentDuration + 'ms'
+    });
+    
+    return qualityAssessment;
+  }
+  
+  /**
+   * Assess semantic preservation - how well meaning is retained
+   */
+  assessSemanticPreservation(original, optimized) {
+    let preservationScore = 1.0;
+    
+    // Extract key terms and check preservation
+    const keyTermsScore = this.calculateKeyTermsPreservation(original, optimized);
+    
+    // Check action word preservation
+    const actionWordsScore = this.calculateActionWordsPreservation(original, optimized);
+    
+    // Assess contextual cue preservation
+    const contextualCuesScore = this.calculateContextualCuesPreservation(original, optimized);
+    
+    // Check specific terms preservation
+    const specificTermsScore = this.calculateSpecificTermsPreservation(original, optimized);
+    
+    // Calculate word overlap (Jaccard similarity)
+    const wordOverlapScore = this.calculateWordOverlap(original, optimized);
+    
+    // Weighted semantic preservation score
+    preservationScore = (
+      keyTermsScore * 0.25 +
+      actionWordsScore * 0.25 +
+      contextualCuesScore * 0.20 +
+      specificTermsScore * 0.15 +
+      wordOverlapScore * 0.15
+    );
+    
+    console.log('[OptimizationQualityScorer] Semantic preservation:', {
+      keyTerms: keyTermsScore.toFixed(3),
+      actionWords: actionWordsScore.toFixed(3),
+      contextualCues: contextualCuesScore.toFixed(3),
+      specificTerms: specificTermsScore.toFixed(3),
+      wordOverlap: wordOverlapScore.toFixed(3),
+      overall: preservationScore.toFixed(3)
+    });
+    
+    return Math.max(0, Math.min(1, preservationScore));
+  }
+  
+  /**
+   * Assess structural coherence - how well structure is maintained
+   */
+  assessStructuralCoherence(original, optimized) {
+    let coherenceScore = 1.0;
+    
+    // Check sentence count preservation
+    const originalSentences = original.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+    const optimizedSentences = optimized.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+    const sentenceRatio = originalSentences > 0 ? optimizedSentences / originalSentences : 1;
+    const sentenceScore = 1 - Math.abs(sentenceRatio - 0.8); // Target 80% sentence retention
+    
+    // Check paragraph structure preservation
+    const paragraphScore = this.calculateParagraphStructureScore(original, optimized);
+    
+    // Assess list structure preservation
+    const listScore = this.calculateListStructureScore(original, optimized);
+    
+    // Check transition marker preservation
+    const transitionScore = this.calculateTransitionPreservation(original, optimized);
+    
+    // Calculate logical flow preservation
+    const logicalFlowScore = this.calculateLogicalFlowScore(original, optimized);
+    
+    coherenceScore = (
+      sentenceScore * 0.20 +
+      paragraphScore * 0.25 +
+      listScore * 0.20 +
+      transitionScore * 0.15 +
+      logicalFlowScore * 0.20
+    );
+    
+    return Math.max(0, Math.min(1, coherenceScore));
+  }
+  
+  /**
+   * Assess linguistic clarity - how clear and readable the text is
+   */
+  assessLinguisticClarity(optimized, original) {
+    let clarityScore = 1.0;
+    
+    // Calculate average sentence length (optimal: 15-20 words)
+    const sentences = optimized.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const words = optimized.split(/\s+/).filter(w => w.length > 0);
+    const avgSentenceLength = words.length / Math.max(1, sentences.length);
+    const sentenceLengthScore = this.calculateSentenceLengthScore(avgSentenceLength);
+    
+    // Calculate average word length (optimal: 4-6 characters)
+    const avgWordLength = optimized.replace(/\s/g, '').length / Math.max(1, words.length);
+    const wordLengthScore = this.calculateWordLengthScore(avgWordLength);
+    
+    // Check for passive voice reduction
+    const passiveVoiceScore = this.calculatePassiveVoiceScore(optimized, original);
+    
+    // Assess redundancy removal
+    const redundancyScore = this.calculateRedundancyScore(optimized, original);
+    
+    // Check vocabulary simplicity
+    const vocabularyScore = this.calculateVocabularyComplexityScore(optimized);
+    
+    clarityScore = (
+      sentenceLengthScore * 0.25 +
+      wordLengthScore * 0.15 +
+      passiveVoiceScore * 0.20 +
+      redundancyScore * 0.25 +
+      vocabularyScore * 0.15
+    );
+    
+    return Math.max(0, Math.min(1, clarityScore));
+  }
+  
+  /**
+   * Assess contextual relevance - how relevant the content remains
+   */
+  assessContextualRelevance(original, optimized) {
+    let relevanceScore = 1.0;
+    
+    // Check requirement preservation
+    const requirementScore = this.calculatePatternPreservation(
+      original, optimized, this.contextPatterns.requirements
+    );
+    
+    // Check constraint preservation
+    const constraintScore = this.calculatePatternPreservation(
+      original, optimized, this.contextPatterns.constraints
+    );
+    
+    // Check goal preservation
+    const goalScore = this.calculatePatternPreservation(
+      original, optimized, this.contextPatterns.goals
+    );
+    
+    // Check example preservation
+    const exampleScore = this.calculatePatternPreservation(
+      original, optimized, this.contextPatterns.examples
+    );
+    
+    // Check specification preservation
+    const specificationScore = this.calculatePatternPreservation(
+      original, optimized, this.contextPatterns.specifications
+    );
+    
+    relevanceScore = (
+      requirementScore * 0.25 +
+      constraintScore * 0.20 +
+      goalScore * 0.25 +
+      exampleScore * 0.15 +
+      specificationScore * 0.15
+    );
+    
+    return Math.max(0, Math.min(1, relevanceScore));
+  }
+  
+  /**
+   * Assess token efficiency - how efficiently tokens are used
+   */
+  assessTokenEfficiency(original, optimized) {
+    const originalLength = original.length;
+    const optimizedLength = optimized.length;
+    
+    if (originalLength === 0) return 1.0;
+    
+    const reductionRatio = (originalLength - optimizedLength) / originalLength;
+    
+    // Optimal reduction is 20-40%
+    let efficiencyScore;
+    if (reductionRatio < 0.1) {
+      efficiencyScore = reductionRatio * 5; // Poor efficiency for minimal reduction
+    } else if (reductionRatio <= 0.4) {
+      efficiencyScore = 0.5 + (reductionRatio - 0.1) * 1.67; // Linear improvement
+    } else if (reductionRatio <= 0.6) {
+      efficiencyScore = 1.0 - (reductionRatio - 0.4) * 1.5; // Diminishing returns
+    } else {
+      efficiencyScore = Math.max(0.1, 0.7 - (reductionRatio - 0.6) * 2); // Over-optimization penalty
+    }
+    
+    return Math.max(0, Math.min(1, efficiencyScore));
+  }
+  
+  /**
+   * Calculate weighted overall quality score
+   */
+  calculateWeightedScore(metrics) {
+    return (
+      metrics.semanticPreservation * this.qualityWeights.semanticPreservation +
+      metrics.structuralCoherence * this.qualityWeights.structuralCoherence +
+      metrics.linguisticClarity * this.qualityWeights.linguisticClarity +
+      metrics.contextualRelevance * this.qualityWeights.contextualRelevance +
+      metrics.tokenEfficiency * this.qualityWeights.tokenEfficiency
+    );
+  }
+  
+  /**
+   * Determine quality grade based on overall score
+   */
+  determineQualityGrade(overallScore) {
+    if (overallScore >= this.qualityThresholds.excellent) return 'excellent';
+    if (overallScore >= this.qualityThresholds.good) return 'good';
+    if (overallScore >= this.qualityThresholds.acceptable) return 'acceptable';
+    if (overallScore >= this.qualityThresholds.poor) return 'poor';
+    return 'unacceptable';
+  }
+  
+  /**
+   * Generate quality improvement recommendations
+   */
+  generateQualityRecommendations(metrics, original, optimized) {
+    const recommendations = [];
+    const threshold = 0.75; // Recommendation threshold
+    
+    if (metrics.semanticPreservation < threshold) {
+      recommendations.push({
+        category: 'semantic',
+        priority: 'high',
+        message: 'Consider preserving more key terms and action words to maintain semantic meaning',
+        specificIssue: 'Low semantic preservation score',
+        suggestedAction: 'Review removed words for essential meaning'
+      });
+    }
+    
+    if (metrics.structuralCoherence < threshold) {
+      recommendations.push({
+        category: 'structure',
+        priority: 'medium',
+        message: 'Try to maintain logical flow and sentence structure',
+        specificIssue: 'Structural coherence below threshold',
+        suggestedAction: 'Preserve transition words and paragraph structure'
+      });
+    }
+    
+    if (metrics.linguisticClarity < threshold) {
+      recommendations.push({
+        category: 'clarity',
+        priority: 'medium',
+        message: 'Focus on simplifying complex sentences while maintaining meaning',
+        specificIssue: 'Linguistic clarity could be improved',
+        suggestedAction: 'Break down long sentences and simplify vocabulary'
+      });
+    }
+    
+    if (metrics.contextualRelevance < threshold) {
+      recommendations.push({
+        category: 'context',
+        priority: 'high',
+        message: 'Ensure important contextual information is preserved',
+        specificIssue: 'Critical context may have been lost',
+        suggestedAction: 'Review requirements, constraints, and specifications'
+      });
+    }
+    
+    if (metrics.tokenEfficiency < threshold) {
+      recommendations.push({
+        category: 'efficiency',
+        priority: 'low',
+        message: 'Consider more aggressive optimization for better token savings',
+        specificIssue: 'Token reduction below optimal range',
+        suggestedAction: 'Identify additional redundant phrases to remove'
+      });
+    }
+    
+    return recommendations;
+  }
+  
+  /**
+   * Calculate confidence interval for quality assessment
+   */
+  calculateConfidenceInterval(metrics, originalLength, optimizedLength) {
+    // Simple heuristic for confidence based on text length and metric variance
+    const metricValues = Object.values(metrics);
+    const avgMetric = metricValues.reduce((sum, val) => sum + val, 0) / metricValues.length;
+    const variance = metricValues.reduce((sum, val) => sum + Math.pow(val - avgMetric, 2), 0) / metricValues.length;
+    
+    // Length factor - more confidence with longer texts
+    const lengthFactor = Math.min(1.0, Math.log10(originalLength + 1) / 3);
+    
+    // Variance factor - less confidence with high variance
+    const varianceFactor = Math.max(0.5, 1 - variance);
+    
+    const confidence = lengthFactor * varianceFactor;
+    
+    return {
+      score: Math.round(confidence * 100) / 100,
+      level: confidence > 0.8 ? 'high' : confidence > 0.6 ? 'medium' : 'low',
+      factors: {
+        lengthFactor: Math.round(lengthFactor * 100) / 100,
+        varianceFactor: Math.round(varianceFactor * 100) / 100,
+        metricVariance: Math.round(variance * 100) / 100
+      }
+    };
+  }
+  
+  /**
+   * Helper method: Calculate key terms preservation
+   */
+  calculateKeyTermsPreservation(original, optimized) {
+    return this.calculatePatternPreservation(original, optimized, this.semanticPatterns.keyTerms);
+  }
+  
+  /**
+   * Helper method: Calculate action words preservation
+   */
+  calculateActionWordsPreservation(original, optimized) {
+    return this.calculatePatternPreservation(original, optimized, this.semanticPatterns.actionWords);
+  }
+  
+  /**
+   * Helper method: Calculate contextual cues preservation
+   */
+  calculateContextualCuesPreservation(original, optimized) {
+    return this.calculatePatternPreservation(original, optimized, this.semanticPatterns.contextualCues);
+  }
+  
+  /**
+   * Helper method: Calculate specific terms preservation
+   */
+  calculateSpecificTermsPreservation(original, optimized) {
+    return this.calculatePatternPreservation(original, optimized, this.semanticPatterns.specificTerms);
+  }
+  
+  /**
+   * Helper method: Calculate pattern preservation score
+   */
+  calculatePatternPreservation(original, optimized, pattern) {
+    const originalMatches = (original.match(pattern) || []).length;
+    const optimizedMatches = (optimized.match(pattern) || []).length;
+    
+    if (originalMatches === 0) return 1.0; // No patterns to preserve
+    
+    const preservationRatio = optimizedMatches / originalMatches;
+    return Math.min(1.0, preservationRatio); // Cap at 1.0
+  }
+  
+  /**
+   * Helper method: Calculate word overlap (Jaccard similarity)
+   */
+  calculateWordOverlap(original, optimized) {
+    const originalWords = new Set(original.toLowerCase().split(/\s+/).filter(w => w.length > 2));
+    const optimizedWords = new Set(optimized.toLowerCase().split(/\s+/).filter(w => w.length > 2));
+    
+    const intersection = new Set([...originalWords].filter(x => optimizedWords.has(x)));
+    const union = new Set([...originalWords, ...optimizedWords]);
+    
+    return union.size > 0 ? intersection.size / union.size : 1.0;
+  }
+  
+  /**
+   * Helper method: Calculate sentence length score
+   */
+  calculateSentenceLengthScore(avgLength) {
+    const optimal = 17.5; // Optimal average sentence length
+    const tolerance = 5; // Acceptable deviation
+    
+    const deviation = Math.abs(avgLength - optimal);
+    if (deviation <= tolerance) return 1.0;
+    
+    return Math.max(0.3, 1 - (deviation - tolerance) / 20);
+  }
+  
+  /**
+   * Helper method: Calculate word length score
+   */
+  calculateWordLengthScore(avgLength) {
+    const optimal = 5; // Optimal average word length
+    const tolerance = 1; // Acceptable deviation
+    
+    const deviation = Math.abs(avgLength - optimal);
+    if (deviation <= tolerance) return 1.0;
+    
+    return Math.max(0.4, 1 - (deviation - tolerance) / 8);
+  }
+  
+  /**
+   * Helper method: Calculate passive voice score
+   */
+  calculatePassiveVoiceScore(optimized, original) {
+    const originalPassive = (original.match(this.linguisticIndicators.passiveVoice) || []).length;
+    const optimizedPassive = (optimized.match(this.linguisticIndicators.passiveVoice) || []).length;
+    
+    if (originalPassive === 0) return 1.0;
+    
+    const reductionRatio = (originalPassive - optimizedPassive) / originalPassive;
+    return Math.max(0.5, reductionRatio * 0.5 + 0.5); // Reward passive voice reduction
+  }
+  
+  /**
+   * Helper method: Calculate redundancy score
+   */
+  calculateRedundancyScore(optimized, original) {
+    const originalRedundant = (original.match(this.linguisticIndicators.redundantWords) || []).length;
+    const optimizedRedundant = (optimized.match(this.linguisticIndicators.redundantWords) || []).length;
+    
+    if (originalRedundant === 0) return 1.0;
+    
+    const reductionRatio = (originalRedundant - optimizedRedundant) / originalRedundant;
+    return Math.min(1.0, reductionRatio + 0.3); // Reward redundancy removal
+  }
+  
+  /**
+   * Helper method: Calculate vocabulary complexity score
+   */
+  calculateVocabularyComplexityScore(text) {
+    const words = text.split(/\s+/).filter(w => w.length > 0);
+    const complexWords = words.filter(w => w.length > 8).length;
+    const complexityRatio = complexWords / Math.max(1, words.length);
+    
+    // Ideal complexity ratio is around 10-15%
+    if (complexityRatio <= 0.15) return 1.0;
+    return Math.max(0.4, 1 - (complexityRatio - 0.15) * 3);
+  }
+  
+  /**
+   * Helper method: Calculate paragraph structure score
+   */
+  calculateParagraphStructureScore(original, optimized) {
+    const originalParagraphs = original.split(/\n\s*\n/).length;
+    const optimizedParagraphs = optimized.split(/\n\s*\n/).length;
+    
+    if (originalParagraphs === 1) return 1.0; // Single paragraph, no structure to preserve
+    
+    const ratio = optimizedParagraphs / originalParagraphs;
+    return Math.max(0.5, 1 - Math.abs(ratio - 0.8)); // Target 80% paragraph retention
+  }
+  
+  /**
+   * Helper method: Calculate list structure score
+   */
+  calculateListStructureScore(original, optimized) {
+    const originalLists = (original.match(this.structuralMarkers.listMarkers) || []).length;
+    const optimizedLists = (optimized.match(this.structuralMarkers.listMarkers) || []).length;
+    
+    if (originalLists === 0) return 1.0;
+    
+    const preservationRatio = optimizedLists / originalLists;
+    return Math.min(1.0, preservationRatio + 0.2); // Slight bonus for list preservation
+  }
+  
+  /**
+   * Helper method: Calculate transition preservation
+   */
+  calculateTransitionPreservation(original, optimized) {
+    return this.calculatePatternPreservation(original, optimized, this.structuralMarkers.transitionMarkers);
+  }
+  
+  /**
+   * Helper method: Calculate logical flow score
+   */
+  calculateLogicalFlowScore(original, optimized) {
+    // Simple heuristic: presence of logical connectors
+    const logicalConnectors = /\b(therefore|because|since|thus|hence|consequently|as a result|due to)\b/gi;
+    return this.calculatePatternPreservation(original, optimized, logicalConnectors);
+  }
+  
+  /**
+   * Update learning system with quality assessment results
+   */
+  updateQualityLearningSystem(metrics, overallScore, optimizationResult) {
+    const timestamp = Date.now();
+    
+    // Store quality assessment in history
+    if (!this.qualityHistory.has(timestamp)) {
+      this.qualityHistory.set(timestamp, {
+        metrics: metrics,
+        overallScore: overallScore,
+        result: optimizationResult,
+        timestamp: timestamp
+      });
+      
+      // Keep only recent history (last 1000 assessments)
+      if (this.qualityHistory.size > 1000) {
+        const oldestKey = Math.min(...this.qualityHistory.keys());
+        this.qualityHistory.delete(oldestKey);
+      }
+    }
+    
+    // Update pattern success tracking
+    if (optimizationResult.techniques) {
+      optimizationResult.techniques.forEach(technique => {
+        const key = technique.name;
+        const current = this.patternSuccess.get(key) || { successes: 0, total: 0, avgQuality: 0 };
+        
+        current.total += 1;
+        if (overallScore > 0.75) {
+          current.successes += 1;
+        }
+        current.avgQuality = (current.avgQuality * (current.total - 1) + overallScore) / current.total;
+        
+        this.patternSuccess.set(key, current);
+      });
+    }
+    
+    console.log('[OptimizationQualityScorer] Learning system updated:', {
+      historySize: this.qualityHistory.size,
+      patternSuccess: this.patternSuccess.size
+    });
+  }
+  
+  /**
+   * Get quality insights based on historical data
+   */
+  getQualityInsights() {
+    const insights = {
+      averageQuality: 0,
+      qualityTrends: [],
+      bestTechniques: [],
+      commonIssues: [],
+      recommendations: []
+    };
+    
+    if (this.qualityHistory.size === 0) return insights;
+    
+    // Calculate average quality
+    const qualityScores = Array.from(this.qualityHistory.values()).map(entry => entry.overallScore);
+    insights.averageQuality = qualityScores.reduce((sum, score) => sum + score, 0) / qualityScores.length;
+    
+    // Identify best techniques
+    const techniqueSuccessRates = Array.from(this.patternSuccess.entries())
+      .map(([technique, data]) => ({
+        technique,
+        successRate: data.successes / data.total,
+        avgQuality: data.avgQuality,
+        total: data.total
+      }))
+      .filter(item => item.total >= 5) // Minimum sample size
+      .sort((a, b) => b.successRate - a.successRate);
+    
+    insights.bestTechniques = techniqueSuccessRates.slice(0, 5);
+    
+    return insights;
+  }
+}
+
+class PopupManager {
+  
   optimizePrompt(prompt, level, model) {
-    // Enhanced prompt optimization algorithm with comprehensive token-wasting word list
+    // Initialize token counting systems
+    this.initializeTokenCounters();
+    
+    // Check if advanced optimizer is available and level is not 'legacy'
+    if (this.advancedOptimizer && level !== 'legacy') {
+      console.log('[PopupManager] Using advanced prompt optimization');
+      
+      try {
+        const result = this.advancedOptimizer.optimizePromptAdvanced(prompt, {
+          level: level,
+          targetModel: model,
+          preserveStructure: level !== 'aggressive',
+          maxReduction: level === 'aggressive' ? 0.6 : level === 'conservative' ? 0.3 : 0.45,
+          qualityThreshold: level === 'aggressive' ? 0.6 : 0.7
+        });
+        
+        if (result.success) {
+          // Convert to legacy format for compatibility
+          return {
+            original: result.original,
+            optimized: result.optimized,
+            tokenReduction: result.reduction.tokens,
+            energySavings: Math.min(60, result.reduction.percentage * 1.5),
+            model: model,
+            level: level,
+            quality: result.quality,
+            techniques: result.techniques,
+            advanced: true
+          };
+        }
+        
+        // Fall back to legacy optimization if advanced fails
+        console.log('[PopupManager] Advanced optimization failed, falling back to legacy method');
+      } catch (error) {
+        console.error('[PopupManager] Advanced optimization error:', error);
+        // Continue with legacy optimization
+      }
+    }
+    
+    // Legacy optimization algorithm with comprehensive token-wasting word list
+    console.log('[PopupManager] Using legacy prompt optimization');
     let optimized = prompt;
     let tokenReduction = 0;
     let energySavings = 0;
