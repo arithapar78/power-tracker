@@ -142,11 +142,13 @@ body {
 }
 
 .popup-container {
-  width: 300px;
-  min-height: 500px;
+  width: 420px;
+  min-height: 650px;
+  max-height: 1200px;
   background: var(--background);
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--border);
@@ -1449,7 +1451,7 @@ body {
 }
 
 .actions {
-  animation: fadeIn 0.5s ease 0.4s both;
+  animation: fadeIn 0.5s ease 0s both;
 }
 
 /* ===== ACCESSIBILITY ===== */

@@ -1009,6 +1009,12 @@ class PopupManager {
     // Advanced features integration
     this.safeAddEventListener('advancedFeaturesBtn', 'click', this.handleAdvancedFeatures.bind(this));
     
+    // Access code modal handlers
+    this.safeAddEventListener('submitCodeBtn', 'click', this.handleSubmitAccessCode.bind(this));
+    this.safeAddEventListener('cancelCodeBtn', 'click', this.hideAccessCodeModal.bind(this));
+    this.safeAddEventListener('modalCloseBtn', 'click', this.hideAccessCodeModal.bind(this));
+    this.safeAddEventListener('accessCodeInput', 'keypress', this.handleAccessCodeKeypress.bind(this));
+    
     // Prompt generator buttons
     this.safeAddEventListener('generateOptimizedBtn', 'click', this.handleGenerateOptimized.bind(this));
     this.safeAddEventListener('generatorCloseBtn', 'click', this.hidePromptGenerator.bind(this));
@@ -1605,7 +1611,27 @@ class PopupManager {
 
   handleAdvancedFeatures() {
     console.log('[PopupManager] Advanced features button clicked');
-    this.showPromptGenerator();
+    this.showAccessCodeModal();
+  }
+  
+  showAccessCodeModal() {
+    try {
+      const codeModal = this.safeGetElement('codeEntryModal');
+      if (codeModal) {
+        codeModal.style.display = 'flex';
+        console.log('[PopupManager] Access code modal opened');
+        
+        // Focus on the input field
+        const codeInput = this.safeGetElement('accessCodeInput');
+        if (codeInput) {
+          setTimeout(() => codeInput.focus(), 100);
+        }
+      } else {
+        console.warn('[PopupManager] Access code modal not found');
+      }
+    } catch (error) {
+      console.error('[PopupManager] Error showing access code modal:', error);
+    }
   }
   
   showPromptGenerator() {
@@ -1631,6 +1657,86 @@ class PopupManager {
       }
     } catch (error) {
       console.error('[PopupManager] Error hiding prompt generator:', error);
+    }
+  }
+
+  handleSubmitAccessCode() {
+    console.log('[PopupManager] Submit access code button clicked');
+    
+    try {
+      const codeInput = this.safeGetElement('accessCodeInput');
+      const enteredCode = codeInput ? codeInput.value.trim() : '';
+      
+      // Validate access code (expected: 0410)
+      if (enteredCode === '0410') {
+        console.log('[PopupManager] Access code validated successfully');
+        
+        // Clear the input and hide modal
+        if (codeInput) codeInput.value = '';
+        this.hideAccessCodeModal();
+        this.hideAccessCodeError();
+        
+        // Show prompt generator
+        this.showPromptGenerator();
+        
+      } else {
+        console.log('[PopupManager] Invalid access code entered:', enteredCode);
+        this.showAccessCodeError('Invalid access code. Please try again.');
+      }
+      
+    } catch (error) {
+      console.error('[PopupManager] Error handling access code submission:', error);
+      this.showAccessCodeError('An error occurred. Please try again.');
+    }
+  }
+
+  hideAccessCodeModal() {
+    try {
+      const codeModal = this.safeGetElement('codeEntryModal');
+      if (codeModal) {
+        codeModal.style.display = 'none';
+        console.log('[PopupManager] Access code modal closed');
+        
+        // Clear the input field
+        const codeInput = this.safeGetElement('accessCodeInput');
+        if (codeInput) codeInput.value = '';
+        
+        // Hide any error messages
+        this.hideAccessCodeError();
+      }
+    } catch (error) {
+      console.error('[PopupManager] Error hiding access code modal:', error);
+    }
+  }
+
+  handleAccessCodeKeypress(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.handleSubmitAccessCode();
+    }
+  }
+
+  showAccessCodeError(message) {
+    try {
+      const errorElement = this.safeGetElement('codeError');
+      if (errorElement) {
+        this.safeSetTextContent(errorElement, message);
+        errorElement.style.display = 'block';
+        console.log('[PopupManager] Access code error shown:', message);
+      }
+    } catch (error) {
+      console.error('[PopupManager] Error showing access code error:', error);
+    }
+  }
+
+  hideAccessCodeError() {
+    try {
+      const errorElement = this.safeGetElement('codeError');
+      if (errorElement) {
+        errorElement.style.display = 'none';
+      }
+    } catch (error) {
+      console.error('[PopupManager] Error hiding access code error:', error);
     }
   }
   
