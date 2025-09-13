@@ -1009,6 +1009,10 @@ class PopupManager {
     // Advanced features integration
     this.safeAddEventListener('advancedFeaturesBtn', 'click', this.handleAdvancedFeatures.bind(this));
     
+    // Prompt generator buttons
+    this.safeAddEventListener('generateOptimizedBtn', 'click', this.handleGenerateOptimized.bind(this));
+    this.safeAddEventListener('generatorCloseBtn', 'click', this.hidePromptGenerator.bind(this));
+    
     // Handle popup close
     window.addEventListener('beforeunload', this.handlePopupClose.bind(this));
   }
@@ -1601,7 +1605,179 @@ class PopupManager {
 
   handleAdvancedFeatures() {
     console.log('[PopupManager] Advanced features button clicked');
-    // This could open a modal or navigate to advanced features
+    this.showPromptGenerator();
+  }
+  
+  showPromptGenerator() {
+    try {
+      const promptSection = this.safeGetElement('promptGeneratorSection');
+      if (promptSection) {
+        promptSection.style.display = 'block';
+        console.log('[PopupManager] Prompt generator interface opened');
+      } else {
+        console.warn('[PopupManager] Prompt generator section not found');
+      }
+    } catch (error) {
+      console.error('[PopupManager] Error showing prompt generator:', error);
+    }
+  }
+  
+  hidePromptGenerator() {
+    try {
+      const promptSection = this.safeGetElement('promptGeneratorSection');
+      if (promptSection) {
+        promptSection.style.display = 'none';
+        console.log('[PopupManager] Prompt generator interface closed');
+      }
+    } catch (error) {
+      console.error('[PopupManager] Error hiding prompt generator:', error);
+    }
+  }
+  
+  handleGenerateOptimized() {
+    console.log('[PopupManager] Generate Optimized Prompt button clicked');
+    
+    try {
+      // Get the input prompt
+      const promptInput = this.safeGetElement('promptInput');
+      const targetModel = this.safeGetElement('targetModel');
+      const optimizationLevel = this.safeGetElement('optimizationLevel');
+      
+      if (!promptInput || !promptInput.value.trim()) {
+        console.warn('[PopupManager] No prompt text provided');
+        this.showPromptError('Please enter a prompt to optimize');
+        return;
+      }
+      
+      const originalPrompt = promptInput.value.trim();
+      const model = targetModel ? targetModel.value : 'gpt-4';
+      const level = optimizationLevel ? optimizationLevel.value : 'balanced';
+      
+      console.log('[PopupManager] Starting prompt optimization:', {
+        originalLength: originalPrompt.length,
+        model: model,
+        level: level
+      });
+      
+      // Analyze the original prompt
+      const originalAnalysis = this.tokenCounter.analyzeTokens(originalPrompt, model);
+      
+      // Generate optimized version (simplified optimization)
+      const optimizedPrompt = this.optimizePromptBasic(originalPrompt, level);
+      
+      // Analyze optimized prompt
+      const optimizedAnalysis = this.tokenCounter.analyzeTokens(optimizedPrompt, model);
+      
+      // Show results
+      this.displayOptimizationResults(originalPrompt, optimizedPrompt, originalAnalysis, optimizedAnalysis, model);
+      
+    } catch (error) {
+      console.error('[PopupManager] Error generating optimized prompt:', error);
+      this.showPromptError('Failed to generate optimized prompt. Please try again.');
+    }
+  }
+  
+  optimizePromptBasic(prompt, level) {
+    // Basic optimization - remove redundant words, filler words, etc.
+    let optimized = prompt;
+    
+    // Remove filler words based on optimization level
+    const fillerWords = ['basically', 'actually', 'literally', 'obviously', 'clearly', 'really', 'very', 'quite', 'rather', 'somewhat'];
+    
+    if (level === 'aggressive' || level === 'balanced') {
+      fillerWords.forEach(word => {
+        const regex = new RegExp(`\\b${word}\\b`, 'gi');
+        optimized = optimized.replace(regex, '');
+      });
+    }
+    
+    // Remove redundant phrases
+    optimized = optimized.replace(/please note that/gi, '');
+    optimized = optimized.replace(/it should be noted that/gi, '');
+    optimized = optimized.replace(/it is important to/gi, '');
+    
+    // Clean up extra spaces
+    optimized = optimized.replace(/\s+/g, ' ').trim();
+    
+    // If aggressive, also make sentences more concise
+    if (level === 'aggressive') {
+      optimized = optimized.replace(/in order to/gi, 'to');
+      optimized = optimized.replace(/due to the fact that/gi, 'because');
+      optimized = optimized.replace(/at this point in time/gi, 'now');
+    }
+    
+    console.log('[PopupManager] Basic optimization complete:', {
+      originalLength: prompt.length,
+      optimizedLength: optimized.length,
+      reduction: prompt.length - optimized.length
+    });
+    
+    return optimized;
+  }
+  
+  displayOptimizationResults(original, optimized, originalAnalysis, optimizedAnalysis, model) {
+    try {
+      // Show the optimized prompt
+      const optimizedTextarea = this.safeGetElement('optimizedPrompt');
+      if (optimizedTextarea) {
+        optimizedTextarea.value = optimized;
+      }
+      
+      // Show the results area
+      const resultsArea = this.safeGetElement('resultsArea');
+      if (resultsArea) {
+        resultsArea.style.display = 'block';
+      }
+      
+      // Calculate savings
+      const tokensSaved = Math.max(0, originalAnalysis.gpt - optimizedAnalysis.gpt);
+      const percentReduction = originalAnalysis.gpt > 0 ?
+        Math.round((tokensSaved / originalAnalysis.gpt) * 100) : 0;
+      
+      // Update stats displays
+      this.updateOptimizationStats(originalAnalysis, optimizedAnalysis, tokensSaved, percentReduction);
+      
+      console.log('[PopupManager] Optimization results displayed:', {
+        tokensSaved: tokensSaved,
+        percentReduction: percentReduction + '%'
+      });
+      
+    } catch (error) {
+      console.error('[PopupManager] Error displaying results:', error);
+    }
+  }
+  
+  updateOptimizationStats(original, optimized, tokensSaved, percentReduction) {
+    // Update various stat elements if they exist
+    const statElements = {
+      'summaryTokenReduction': tokensSaved,
+      'percentReduction': percentReduction + '%',
+      'originalPromptStats': `${original.gpt} tokens, ${original.chars} chars`,
+      'optimizedPromptStats': `${optimized.gpt} tokens, ${optimized.chars} chars`
+    };
+    
+    Object.entries(statElements).forEach(([id, value]) => {
+      const element = this.safeGetElement(id);
+      if (element) {
+        this.safeSetTextContent(element, value);
+      }
+    });
+  }
+  
+  showPromptError(message) {
+    // Show error in the prompt interface
+    const errorElement = this.safeGetElement('codeError');
+    if (errorElement) {
+      this.safeSetTextContent(errorElement, message);
+      errorElement.style.display = 'block';
+      
+      // Hide error after 3 seconds
+      setTimeout(() => {
+        if (errorElement) {
+          errorElement.style.display = 'none';
+        }
+      }, 3000);
+    }
   }
   
   handlePopupClose() {
