@@ -142,9 +142,11 @@ body {
 }
 
 .popup-container {
-  width: 420px;
-  min-height: 650px;
-  max-height: 1200px;
+  width: 420px !important;
+  min-width: 420px !important;
+  height: 700px !important;
+  min-height: 700px !important;
+  max-height: 1200px !important;
   background: var(--background);
   position: relative;
   overflow-y: auto;
@@ -153,6 +155,8 @@ body {
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--border);
   animation: popupEntrance 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes popupEntrance {
@@ -1465,7 +1469,8 @@ body {
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 320px) {
   .popup-container {
-    width: 280px;
+    width: 420px !important;
+    min-width: 420px !important;
   }
   
   .power-display {
@@ -1503,7 +1508,8 @@ body {
 
 @media (max-width: 280px) {
   .popup-container {
-    width: 260px;
+    width: 420px !important;
+    min-width: 420px !important;
   }
   
   .power-display {
@@ -1545,7 +1551,8 @@ body {
 /* Enhanced medium screen adjustments */
 @media (min-width: 321px) and (max-width: 380px) {
   .popup-container {
-    width: 320px;
+    width: 420px !important;
+    min-width: 420px !important;
   }
   
   .power-display {
