@@ -15,14 +15,12 @@ Power Tracker is a sophisticated Chrome extension that provides real-time monito
 - **Multi-Factor Tracking**: Monitors DOM activity, network requests, media consumption, CPU usage, and GPU rendering
 - **Environmental Impact**: Displays CO2 emissions and LED bulb equivalents for meaningful context
 - **Historical Analysis**: Track energy usage trends over time with detailed charts and insights
-- **Enhanced Popup Interface**: Expanded 420x650px dimensions with professional LearnTAV design system
 
 ### 🤖 AI Energy Optimization
-- **Advanced Prompt Energy Optimizer**: Professional-grade prompt optimization with local algorithms (Access Code: 0410)
-- **Real-Time Token Analysis**: Live token counting for GPT-4, Claude, Gemini with efficiency scoring
-- **Multi-Model Support**: Comprehensive power profiles for frontier, reasoning, and ultra-efficient AI models
+- **Backend AI Tracking**: Monitor energy consumption of GPT, Claude, Gemini, Perplexity, and other AI platforms
+- **Prompt Optimization**: Reduce AI query energy usage by 15-45% with intelligent suggestions
+- **Model-Specific Profiles**: Accurate energy estimates based on research data for major AI models
 - **Privacy-First**: All AI analysis happens locally - no data sent to external services
-- **Quality Assessment**: Advanced optimization quality scoring with semantic preservation analysis
 
 ### 🧠 Intelligent Agent System
 - **OODA Loop Processing**: Observe-Analyze-Decide-Act cycle for continuous optimization
@@ -65,10 +63,10 @@ cd chrome-extension
 5. **View history** by clicking the chart icon to see your energy usage trends
 
 ### Accessing Advanced Features
-1. Click the ⚡ icon to open the popup (now expanded to 420x650px minimum dimensions)
-2. Look for the lightning bolt ⚡ button in the action section
-3. Enter the access code when prompted: `0410`
-4. Unlock the **Prompt Energy Optimizer** with comprehensive token analysis, real-time optimization, and advanced analytics
+1. Click the ⚡ icon to open the popup
+2. Look for the lightning bolt ⚡ symbols next to advanced features
+3. Enter the access code when prompted: `ENERGY_OPTIMIZER_2024`
+4. Unlock AI optimization tools, advanced analytics, and intelligent agent features
 
 ### AI Energy Optimization
 1. **Automatic Detection**: The extension automatically detects when you're using AI tools

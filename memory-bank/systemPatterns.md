@@ -196,18 +196,16 @@ class IntelligentActions {
 - **Pre/Post Analysis**: Impact assessment before and after execution
 - **User Consent**: All actions require explicit or learned user approval
 
-### 8. Facade Pattern for UI Complexity (Enhanced 2024)
+### 8. Facade Pattern for UI Complexity
 
-**Pattern**: Simple interface hiding complex backend operations with professional design
-**Implementation**: `PopupManager` coordinates multiple subsystems with enhanced dimensions
+**Pattern**: Simple interface hiding complex backend operations
+**Implementation**: `PopupManager` coordinates multiple subsystems
 
 ```javascript
 class PopupManager {
   constructor() {
     this.aiEnergyManager = new EnhancedAIEnergyManager();
     this.backendPowerCalculator = new BackendPowerCalculator();
-    this.tokenCounter = new TokenCounter(); // Advanced token analysis
-    this.tokenComparison = new TokenComparison(); // Prompt optimization
     this.energyDisplayMode = 'frontend'; // or 'total'
   }
   
@@ -216,19 +214,15 @@ class PopupManager {
     this.updatePowerDisplay();
     this.updateDeviceComparisons();
     this.updateAIModelInfoSection();
-    // Enhanced with professional LearnTAV design at 420x650px minimum
   }
 }
 ```
 
 **Key Features**:
-- **Enhanced Dimensions**: Professional 420x650px minimum popup with LearnTAV design system
-- **Advanced Token Systems**: Real-time token counting and prompt optimization tools
-- **Access Control Integration**: Seamless access code modal and advanced feature management
-- **Unified Interface**: Single class manages all UI interactions including advanced features
+- **Unified Interface**: Single class manages all UI interactions
 - **Mode Switching**: Frontend-only vs. total energy display modes
 - **Real-time Updates**: Periodic refresh with minimal performance impact
-- **Progressive Loading**: Advanced features load on demand with proper access control
+- **Progressive Loading**: Advanced features load on demand
 
 ## Data Flow Patterns
 
@@ -277,41 +271,27 @@ class DataMigrationUtility {
 
 ## Security and Safety Patterns
 
-### 11. Access Control Pattern (Recently Enhanced 2024)
+### 11. Access Control Pattern
 
-**Pattern**: Layered security with progressive access levels and professional modal interface
-**Implementation**: Access code protection for advanced features with proper UX flow
+**Pattern**: Layered security with progressive access levels
+**Implementation**: Access code protection for advanced features
 
 ```javascript
-// Access code validation
 validateAccessCode(code) {
-  return code === '0410'; // Advanced features access code
+  return code === '0410'; // Advanced features access
 }
 
-// Enhanced access flow with modal interface
 handleAdvancedFeatures() {
-  console.log('[PopupManager] Advanced features button clicked');
-  this.showAccessCodeModal(); // Show modal first
-}
-
-handleSubmitAccessCode() {
-  const enteredCode = this.safeGetElement('accessCodeInput').value.trim();
-  if (enteredCode === '0410') {
-    this.hideAccessCodeModal();
-    this.showPromptGenerator(); // Show advanced features
-  } else {
-    this.showAccessCodeError('Invalid access code. Please try again.');
+  if (this.validateAccessCode(userCode)) {
+    this.showPromptGenerator();
   }
 }
 ```
 
 **Key Features**:
-- **Professional Modal Interface**: Clean access code entry with validation feedback
-- **Enhanced UX Flow**: Proper sequence from button → modal → validation → features
+- **Progressive Disclosure**: Basic features open, advanced features protected
 - **Session-Based Access**: No persistent storage of access credentials
 - **Feature Isolation**: Advanced features cleanly separated from core functionality
-- **Error Handling**: Clear feedback for invalid access attempts
-- **Browser Tested**: Fully validated in real browser environment (2024)
 
 ### 12. Namespace Protection Pattern
 
