@@ -1002,6 +1002,10 @@ class PopupManager {
     this.safeAddEventListener('tipAction', 'click', this.handleTipAction.bind(this));
     this.safeAddEventListener('themeToggle', 'click', this.handleThemeToggle.bind(this));
     
+    // Energy mode toggle buttons
+    this.safeAddEventListener('frontendModeBtn', 'click', this.handleFrontendMode.bind(this));
+    this.safeAddEventListener('totalModeBtn', 'click', this.handleTotalMode.bind(this));
+    
     // Advanced features integration
     this.safeAddEventListener('advancedFeaturesBtn', 'click', this.handleAdvancedFeatures.bind(this));
     
@@ -1516,6 +1520,83 @@ class PopupManager {
   handleTipAction() {
     // This is handled by the specific tip's onclick event
     console.log('[PopupManager] Tip action clicked');
+  }
+
+  handleFrontendMode() {
+    console.log('[PopupManager] Frontend mode button clicked');
+    this.switchEnergyMode('frontend');
+  }
+  
+  handleTotalMode() {
+    console.log('[PopupManager] Total mode button clicked');
+    this.switchEnergyMode('total');
+  }
+  
+  switchEnergyMode(mode) {
+    try {
+      // Get both toggle buttons
+      const frontendBtn = this.safeGetElement('frontendModeBtn');
+      const totalBtn = this.safeGetElement('totalModeBtn');
+      
+      if (!frontendBtn || !totalBtn) {
+        console.warn('[PopupManager] Energy mode toggle buttons not found');
+        return;
+      }
+      
+      // Update button states
+      if (mode === 'frontend') {
+        frontendBtn.classList.add('active');
+        frontendBtn.setAttribute('aria-selected', 'true');
+        frontendBtn.setAttribute('tabindex', '0');
+        
+        totalBtn.classList.remove('active');
+        totalBtn.setAttribute('aria-selected', 'false');
+        totalBtn.setAttribute('tabindex', '-1');
+        
+        console.log('[PopupManager] Switched to frontend-only energy tracking');
+        
+        // Update power display for frontend-only mode
+        this.updatePowerDisplayForMode('frontend');
+        
+      } else if (mode === 'total') {
+        totalBtn.classList.add('active');
+        totalBtn.setAttribute('aria-selected', 'true');
+        totalBtn.setAttribute('tabindex', '0');
+        
+        frontendBtn.classList.remove('active');
+        frontendBtn.setAttribute('aria-selected', 'false');
+        frontendBtn.setAttribute('tabindex', '-1');
+        
+        console.log('[PopupManager] Switched to total energy tracking (frontend + backend)');
+        
+        // Update power display for total mode
+        this.updatePowerDisplayForMode('total');
+      }
+      
+      // Store current mode for future reference
+      this.currentEnergyMode = mode;
+      
+    } catch (error) {
+      console.error('[PopupManager] Error switching energy mode:', error);
+    }
+  }
+  
+  updatePowerDisplayForMode(mode) {
+    try {
+      const powerDescription = this.safeGetElement('powerDescription');
+      
+      if (mode === 'frontend' && powerDescription) {
+        this.safeSetInnerHTML(powerDescription,
+          'Browser power consumption only<br><small>Excludes backend/AI processing</small>');
+      } else if (mode === 'total' && powerDescription) {
+        this.safeSetInnerHTML(powerDescription,
+          'Total power consumption<br><small>Includes browser + backend/AI processing</small>');
+      }
+      
+      console.log(`[PopupManager] Power display updated for ${mode} mode`);
+    } catch (error) {
+      console.error('[PopupManager] Error updating power display for mode:', error);
+    }
   }
 
   handleAdvancedFeatures() {
