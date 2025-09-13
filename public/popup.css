@@ -142,8 +142,8 @@ body {
 }
 
 .popup-container {
-  width: 420px !important;
-  min-width: 420px !important;
+  width: 400px !important;
+  min-width: 400px !important;
   height: 700px !important;
   min-height: 700px !important;
   max-height: 1200px !important;
@@ -1469,8 +1469,8 @@ body {
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 320px) {
   .popup-container {
-    width: 420px !important;
-    min-width: 420px !important;
+    width: 400px !important;
+    min-width: 400px !important;
   }
   
   .power-display {
@@ -1508,8 +1508,8 @@ body {
 
 @media (max-width: 280px) {
   .popup-container {
-    width: 420px !important;
-    min-width: 420px !important;
+    width: 400px !important;
+    min-width: 400px !important;
   }
   
   .power-display {
@@ -1551,8 +1551,8 @@ body {
 /* Enhanced medium screen adjustments */
 @media (min-width: 321px) and (max-width: 380px) {
   .popup-container {
-    width: 420px !important;
-    min-width: 420px !important;
+    width: 400px !important;
+    min-width: 400px !important;
   }
   
   .power-display {
