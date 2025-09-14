@@ -114,6 +114,13 @@
   box-sizing: border-box;
 }
 
+html {
+  width: 380px;
+  min-width: 380px;
+  max-width: 380px;
+  overflow-x: hidden;
+}
+
 body {
   font-family: var(--font-sans);
   font-size: var(--text-sm);
@@ -123,10 +130,17 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  width: 380px;
+  min-width: 380px;
+  max-width: 380px;
 }
 
 .popup-container {
   width: 380px;
+  min-width: 380px;
+  max-width: 380px;
   min-height: 600px;
   max-height: 800px;
   background: var(--background);
@@ -135,6 +149,8 @@ body {
   flex-direction: column;
   gap: var(--space-4);
   overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 /* ===== HEADER CARD ===== */
@@ -852,26 +868,39 @@ body {
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
+/* Chrome extension popup should maintain fixed width */
 @media (max-width: 400px) {
+  html, body {
+    width: 380px;
+    min-width: 380px;
+    max-width: 380px;
+  }
+  
   .popup-container {
-    width: 100vw;
+    width: 380px;
+    min-width: 380px;
+    max-width: 380px;
     padding: var(--space-3);
   }
   
   .impact-cards-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-2);
   }
   
   .stats-cards-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
   }
   
   .action-buttons {
-    flex-direction: column;
+    flex-direction: row;
+    gap: var(--space-2);
   }
   
   .card-actions {
-    flex-direction: column;
+    flex-direction: row;
+    gap: var(--space-2);
   }
 }
 
