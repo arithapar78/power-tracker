@@ -267,6 +267,109 @@
     </div>
   </div>
 
+  <!-- Code Entry Modal -->
+  <div class="modal-overlay" id="codeEntryModal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Enter Access Code</h3>
+        <button class="modal-close" id="modalCloseBtn" aria-label="Close modal">×</button>
+      </div>
+      <div class="modal-body">
+        <p>Enter the access code to unlock advanced features:</p>
+        <div class="code-input-group">
+          <input type="text" id="accessCodeInput" placeholder="Enter code..." maxlength="10" autocomplete="off">
+          <div class="code-error" id="codeError" style="display: none;">Invalid access code. Please try again.</div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="cancelCodeBtn">Cancel</button>
+        <button class="btn btn-primary" id="submitCodeBtn">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prompt Generator Section -->
+  <div class="advanced-section" id="promptGeneratorSection" style="display: none;">
+    <div class="section-header">
+      <h2>🚀 AI Prompt Optimizer</h2>
+      <button class="close-generator" id="generatorCloseBtn" aria-label="Close generator">×</button>
+    </div>
+    
+    <!-- Generator Statistics -->
+    <div class="generator-stats">
+      <div class="stat-item">
+        <span class="stat-value" id="totalPromptsGenerated">0</span>
+        <span class="stat-label">Prompts Optimized</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="energySavingsPercent">0%</span>
+        <span class="stat-label">Avg Energy Saved</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="avgTokenReduction">0</span>
+        <span class="stat-label">Avg Tokens Saved</span>
+      </div>
+    </div>
+
+    <!-- Prompt Input -->
+    <div class="prompt-input-section">
+      <label for="promptInput">Enter your AI prompt:</label>
+      <textarea id="promptInput" placeholder="Enter the prompt you want to optimize for energy efficiency..."></textarea>
+    </div>
+
+    <!-- Optimization Options -->
+    <div class="optimization-options">
+      <div class="option-group">
+        <label for="optimizationLevel">Optimization Level:</label>
+        <select id="optimizationLevel">
+          <option value="conservative">Conservative (maintains tone)</option>
+          <option value="balanced" selected>Balanced (recommended)</option>
+          <option value="aggressive">Aggressive (maximum efficiency)</option>
+        </select>
+      </div>
+      <div class="option-group">
+        <label for="targetModel">Target AI Model:</label>
+        <select id="targetModel">
+          <option value="gpt-4">GPT-4</option>
+          <option value="claude-4">Claude Sonnet 4</option>
+          <option value="grok-4">Grok-4</option>
+          <option value="deepseek-r1">DeepSeek R1</option>
+          <option value="llama-4">Llama-4</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Generate Button -->
+    <div class="generate-section">
+      <button class="btn btn-primary generate-btn" id="generateOptimizedBtn">
+        <span class="btn-icon">⚡</span>
+        Generate Optimized Prompt
+      </button>
+    </div>
+
+    <!-- Results Area -->
+    <div class="results-area" id="resultsArea" style="display: none;">
+      <div class="results-header">
+        <h4>Optimized Result</h4>
+        <div class="energy-savings" id="energySavingsResult">25% Energy Saved</div>
+      </div>
+      <div class="results-content">
+        <label for="optimizedPrompt">Optimized Prompt:</label>
+        <textarea id="optimizedPrompt" readonly></textarea>
+      </div>
+      <div class="results-actions">
+        <button class="btn btn-primary" id="copyResultBtn">
+          <span class="btn-icon">📋</span>
+          Copy Result
+        </button>
+        <button class="btn btn-secondary" id="newOptimizationBtn">
+          <span class="btn-icon">🔄</span>
+          New Optimization
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="enhanced-ai-energy-database.js"></script>
   <script src="enhanced-query-estimation.js"></script>
   <script src="ai-model-comparison.js"></script>
