@@ -75,15 +75,16 @@
   --leading-normal: 1.5;
   --leading-relaxed: 1.625;
   
-  /* Transitions */
-  --transition-colors: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
-  --transition-shadow: box-shadow 150ms ease;
-  --transition-transform: transform 150ms ease;
-  --transition-all: all 150ms ease;
+  /* Smooth Fluid Transitions */
+  --transition-colors: color 350ms ease-in-out, background-color 350ms ease-in-out, border-color 350ms ease-in-out;
+  --transition-shadow: box-shadow 300ms ease-in-out;
+  --transition-transform: transform 350ms ease-in-out;
+  --transition-all: all 350ms ease-in-out;
+  --transition-smooth: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
   
   /* Animation Durations */
-  --duration-fast: 150ms;
-  --duration-normal: 300ms;
+  --duration-fast: 200ms;
+  --duration-normal: 350ms;
   --duration-slow: 500ms;
 }
 
@@ -115,9 +116,9 @@
 }
 
 html {
-  width: 380px;
-  min-width: 380px;
-  max-width: 380px;
+  width: 320px;
+  min-width: 320px;
+  max-width: 320px;
   overflow-x: hidden;
 }
 
@@ -132,22 +133,22 @@ body {
   overflow-x: hidden;
   margin: 0;
   padding: 0;
-  width: 380px;
-  min-width: 380px;
-  max-width: 380px;
+  width: 320px;
+  min-width: 320px;
+  max-width: 320px;
 }
 
 .popup-container {
-  width: 380px;
-  min-width: 380px;
-  max-width: 380px;
+  width: 320px;
+  min-width: 320px;
+  max-width: 320px;
   min-height: 600px;
   max-height: 800px;
   background: var(--background);
-  padding: var(--space-4);
+  padding: var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-5);
   overflow-y: auto;
   overflow-x: hidden;
   box-sizing: border-box;
@@ -157,9 +158,15 @@ body {
 .header-card {
   background: var(--surface-elevated);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-smooth);
+}
+
+.header-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
 }
 
 .header-content {
@@ -222,21 +229,26 @@ body {
 .theme-toggle {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   padding: var(--space-2);
   cursor: pointer;
-  transition: var(--transition-colors), var(--transition-shadow);
+  transition: var(--transition-smooth);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
 }
 
 .theme-toggle:hover {
   background: var(--surface-hover);
   border-color: var(--border-hover);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-md);
+  transform: scale(1.05) rotate(5deg);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
 }
 
 .theme-toggle:focus {
@@ -248,10 +260,17 @@ body {
 .power-display-card {
   background: var(--surface-elevated);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   padding: var(--space-6);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-md);
   text-align: center;
+  transition: var(--transition-smooth);
+}
+
+.power-display-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  border-color: var(--primary-light);
 }
 
 .card-header {
@@ -280,26 +299,33 @@ body {
   background: transparent;
   border: none;
   padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   font-size: var(--text-xs);
   color: var(--text-muted);
   cursor: pointer;
-  transition: var(--transition-colors);
+  transition: var(--transition-smooth);
   display: flex;
   align-items: center;
   gap: var(--space-1);
   font-weight: 500;
+  position: relative;
 }
 
 .toggle-button.active {
   background: var(--primary);
   color: var(--text-inverse);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
+  transform: scale(1.02);
 }
 
 .toggle-button:not(.active):hover {
   background: var(--surface-hover);
   color: var(--text-secondary);
+  transform: scale(1.05);
+}
+
+.toggle-button:active {
+  transform: scale(0.98);
 }
 
 .toggle-icon {
@@ -401,18 +427,39 @@ body {
 .impact-card {
   background: var(--surface-elevated);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
   text-align: center;
   cursor: pointer;
-  transition: var(--transition-all);
-  box-shadow: var(--shadow-sm);
+  transition: var(--transition-smooth);
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.impact-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 600ms ease-in-out;
 }
 
 .impact-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--border-hover);
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--primary-light);
+}
+
+.impact-card:hover::before {
+  left: 100%;
+}
+
+.impact-card:active {
+  transform: translateY(-2px) scale(1.01);
 }
 
 .impact-card:focus {
@@ -667,17 +714,22 @@ body {
 .stat-card {
   background: var(--surface-elevated);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
   text-align: center;
-  box-shadow: var(--shadow-sm);
-  transition: var(--transition-all);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-smooth);
+  cursor: pointer;
 }
 
 .stat-card:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow);
-  border-color: var(--border-hover);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-light);
+}
+
+.stat-card:active {
+  transform: translateY(-1px) scale(1.01);
 }
 
 /* ===== TIPS CARD ===== */
@@ -714,8 +766,19 @@ body {
 }
 
 .action-buttons {
-  display: flex;
-  gap: var(--space-3);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.action-buttons .btn {
+  font-size: var(--text-xs);
+  padding: var(--space-2) var(--space-3);
+}
+
+/* Third button spans full width */
+.action-buttons .btn:nth-child(3) {
+  grid-column: 1 / -1;
 }
 
 /* ===== LEARNTAV CARD ===== */
@@ -756,59 +819,85 @@ body {
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
   border: 1px solid transparent;
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   font-size: var(--text-sm);
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
-  transition: var(--transition-colors), var(--transition-shadow), var(--transition-transform);
-  min-height: 40px;
+  transition: var(--transition-smooth);
+  min-height: 44px;
   font-family: inherit;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 600ms ease-in-out;
+}
+
+.btn:hover::before {
+  left: 100%;
 }
 
 .btn:focus {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.btn:active {
+  transform: scale(0.98);
 }
 
 .btn-primary {
   background: var(--primary);
   color: var(--text-inverse);
   border-color: var(--primary);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-primary:hover {
   background: var(--primary-dark);
   border-color: var(--primary-dark);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: var(--shadow-lg);
 }
 
 .btn-secondary {
   background: var(--surface-elevated);
   color: var(--text-primary);
   border-color: var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-secondary:hover {
   background: var(--surface-hover);
-  border-color: var(--border-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow);
+  border-color: var(--primary-light);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: var(--shadow-md);
+  color: var(--primary);
 }
 
 .btn-learntav {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   color: var(--text-inverse);
   border-color: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-lg);
 }
 
 .btn-learntav:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: translateY(-1px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.3);
 }
 
 .btn-icon {
@@ -869,18 +958,19 @@ body {
 
 /* ===== RESPONSIVE DESIGN ===== */
 /* Chrome extension popup should maintain fixed width */
-@media (max-width: 400px) {
+@media (max-width: 350px) {
   html, body {
-    width: 380px;
-    min-width: 380px;
-    max-width: 380px;
+    width: 320px;
+    min-width: 320px;
+    max-width: 320px;
   }
   
   .popup-container {
-    width: 380px;
-    min-width: 380px;
-    max-width: 380px;
-    padding: var(--space-3);
+    width: 320px;
+    min-width: 320px;
+    max-width: 320px;
+    padding: var(--space-4);
+    gap: var(--space-4);
   }
   
   .impact-cards-grid {
@@ -890,11 +980,11 @@ body {
   
   .stats-cards-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-2);
+    gap: var(--space-3);
   }
   
   .action-buttons {
-    flex-direction: row;
+    grid-template-columns: 1fr 1fr;
     gap: var(--space-2);
   }
   
