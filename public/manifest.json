@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Power Tracker",
   "version": "2.0.8",
-  "description": "Monitor and track your browser's power consumption in watts, save usage history, and export your data into a JSON file for backup or analysis.",
+  "description": "Monitor and track browser power consumption in watts, save usage history, and export data to JSON for backup/analysis.",
   "permissions": ["activeTab", "storage", "alarms", "downloads", "scripting"],
   "background": { "service_worker": "service-worker.js" },
   "action": {
