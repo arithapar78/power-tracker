@@ -3,462 +3,256 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Energy Tracking App</title>
+  <title>Power Tracker</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
   <div class="popup-container" data-theme="light">
-    <!-- Theme Toggle -->
-    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Switch theme">
-      <span class="theme-icon">🌙</span>
-    </button>
-
-    <!-- Header -->
-    <header class="popup-header">
-      <div class="logo-container">
-        <img src="icon-48.png" alt="Power AI Power Tracker Logo" class="logo" id="popupLogo">
-        <h1>Power AI</h1>
-      </div>
-      <div class="status-indicator" id="statusIndicator">
-        <span class="status-dot" id="statusDot" role="status" aria-live="polite"></span>
-        <span class="status-text" id="statusText">Loading...</span>
-      </div>
-    </header>
-
-    <!-- Current Power Display -->
-    <section class="current-power">
-      <div class="power-display-container">
-        <div class="power-display" id="powerDisplay">
-          <div class="power-value" id="powerValue">--</div>
-          <div class="power-label">Current Power</div>
+    <!-- Header Card -->
+    <div class="header-card">
+      <div class="header-content">
+        <div class="logo-section">
+          <img src="icon-48.png" alt="Power Tracker Logo" class="logo" id="popupLogo">
+          <div class="brand-info">
+            <h1>Power Tracker</h1>
+            <div class="status-indicator" id="statusIndicator">
+              <span class="status-dot" id="statusDot" role="status" aria-live="polite"></span>
+              <span class="status-text" id="statusText">Loading...</span>
+            </div>
+          </div>
         </div>
-        <!-- Enhanced Energy Mode Toggle -->
-        <div class="energy-mode-toggle" role="tablist" aria-label="Energy tracking mode selection">
-          <button
-            class="toggle-btn"
-            id="frontendModeBtn"
-            data-mode="frontend"
-            role="tab"
-            aria-selected="false"
-            aria-controls="energy-display"
-            tabindex="-1"
-            title="Track only browser/frontend energy consumption">
-            <span class="btn-text">Browser Power</span>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Switch theme">
+          <span class="theme-icon">🌙</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Power Display Card -->
+    <div class="power-display-card">
+      <div class="card-header">
+        <h2>Current Power Usage</h2>
+        <div class="power-mode-toggle">
+          <button class="toggle-button" id="frontendModeBtn" data-mode="frontend" title="Browser power only">
+            Browser Only
           </button>
-          <button
-            class="toggle-btn active"
-            id="totalModeBtn"
-            data-mode="total"
-            role="tab"
-            aria-selected="true"
-            aria-controls="energy-display"
-            tabindex="0"
-            title="Track total energy including backend/AI processing">
-            <span class="btn-icon">⚡</span>
-            <span class="btn-text">Browser + Backend</span>
+          <button class="toggle-button active" id="totalModeBtn" data-mode="total" title="Total power including AI">
+            <span class="toggle-icon">⚡</span>
+            Total Power
           </button>
         </div>
-        <div class="power-description" id="powerDescription">
-          Calculating power consumption...
-        </div>
-        <div class="efficiency-rating" id="efficiencyRating">
-          <span class="efficiency-badge" id="efficiencyBadge">--</span>
-          <span class="efficiency-text">Efficiency</span>
-        </div>
       </div>
-    </section>
+      <div class="power-display" id="powerDisplay">
+        <div class="power-value" id="powerValue">--</div>
+        <div class="power-unit">Watts</div>
+      </div>
+      <div class="power-description" id="powerDescription">
+        Calculating power consumption...
+      </div>
+      <div class="efficiency-indicator">
+        <span class="efficiency-badge" id="efficiencyBadge">--</span>
+        <span class="efficiency-label">Efficiency Rating</span>
+      </div>
+    </div>
 
-    <!-- Enhanced Environmental Impact -->
-    <section class="device-comparisons">
+    <!-- Environmental Impact Cards -->
+    <div class="section-header">
       <h2>Environmental Impact</h2>
-      <div class="comparison-grid">
-        <div class="comparison-card bulbs-comparison main-comparison">
-          <div class="comparison-icon">💡</div>
-          <div class="comparison-content">
-            <div class="comparison-percentage" id="bulbsCount">--</div>
-            <div class="comparison-label">LED bulbs powered</div>
-          </div>
-        </div>
-        <div class="comparison-card water-comparison">
-          <div class="comparison-icon">💧</div>
-          <div class="comparison-content">
-            <div class="comparison-percentage" id="waterUsage">--</div>
-            <div class="comparison-label">gallons of water per hour</div>
-          </div>
-        </div>
-        <div class="comparison-card carbon-comparison">
-          <div class="comparison-icon">🌍</div>
-          <div class="comparison-content">
-            <div class="comparison-percentage" id="carbonEmissions">--</div>
-            <div class="comparison-label">CO₂ per hour</div>
-          </div>
+    </div>
+    <div class="impact-cards-grid">
+      <div class="impact-card bulbs-card" role="button" tabindex="0">
+        <div class="impact-icon">💡</div>
+        <div class="impact-content">
+          <div class="impact-value" id="bulbsCount">--</div>
+          <div class="impact-label">LED Bulbs</div>
+          <div class="impact-description">powered equivalent</div>
         </div>
       </div>
       
-      <!-- Sustainability Score -->
-      <div class="sustainability-score" id="sustainabilitySection" style="display: none;">
-        <div class="score-container">
-          <div class="score-value" id="sustainabilityScore">--</div>
-          <div class="score-label">Sustainability Score</div>
-          <div class="score-description" id="sustainabilityDescription">Calculating...</div>
+      <div class="impact-card water-card" role="button" tabindex="0">
+        <div class="impact-icon">💧</div>
+        <div class="impact-content">
+          <div class="impact-value" id="waterUsage">--</div>
+          <div class="impact-label">Water Usage</div>
+          <div class="impact-description">gallons per hour</div>
         </div>
       </div>
-    </section>
+      
+      <div class="impact-card carbon-card" role="button" tabindex="0">
+        <div class="impact-icon">🌱</div>
+        <div class="impact-content">
+          <div class="impact-value" id="carbonEmissions">--</div>
+          <div class="impact-label">Carbon Footprint</div>
+          <div class="impact-description">CO₂ per hour</div>
+        </div>
+      </div>
+    </div>
 
-
-    <!-- AI Model Information Section -->
-    <section class="ai-model-info-section" id="aiModelInfoSection">
-      <h2>🤖 AI Model Information</h2>
-      <div class="ai-model-card">
+    <!-- AI Model Information Card -->
+    <div class="ai-model-card" id="aiModelInfoSection">
+      <div class="card-header">
+        <div class="header-icon">🤖</div>
+        <h2>AI Model Detected</h2>
+      </div>
+      <div class="ai-model-info">
         <div class="model-details">
-          <div class="model-name-display">
-            <div class="model-name-value" id="currentModelName">Claude Sonnet 4</div>
-            <div class="model-version" id="currentModelVersion">20250514</div>
+          <div class="model-name" id="currentModelName">Claude Sonnet 4</div>
+          <div class="model-version" id="currentModelVersion">Latest</div>
+        </div>
+        <div class="energy-metrics">
+          <div class="energy-metric">
+            <span class="metric-label">Session Energy</span>
+            <span class="metric-value" id="sessionEnergyUsage">~2.5 Wh</span>
           </div>
-          <div class="energy-usage-info">
-            <div class="energy-metric">
-              <span class="energy-label">Current Session Energy:</span>
-              <span class="energy-value" id="sessionEnergyUsage">~2.5 Wh</span>
-            </div>
-            <div class="energy-metric">
-              <span class="energy-label">Estimated Carbon:</span>
-              <span class="energy-value" id="sessionCarbonUsage">~1.2 gCO₂e</span>
-            </div>
-            <div class="energy-metric">
-              <span class="energy-label">Model Efficiency:</span>
-              <span class="energy-value efficiency-good" id="modelEfficiency">High</span>
-            </div>
+          <div class="energy-metric">
+            <span class="metric-label">Carbon Impact</span>
+            <span class="metric-value" id="sessionCarbonUsage">~1.2g CO₂</span>
+          </div>
+          <div class="energy-metric">
+            <span class="metric-label">Efficiency</span>
+            <span class="metric-value efficiency-good" id="modelEfficiency">High</span>
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Active Tab Info -->
-    <section class="current-tab">
-      <h2>Current Tab</h2>
-      <div class="tab-info" id="currentTabInfo">
+    <!-- Current Tab Information Card -->
+    <div class="tab-info-card">
+      <div class="card-header">
+        <h2>Current Tab</h2>
+      </div>
+      <div class="tab-details" id="currentTabInfo">
         <div class="tab-title" id="tabTitle">Loading...</div>
         <div class="tab-url" id="tabUrl">...</div>
-        <div class="tab-metrics">
-          <div class="metric">
-            <span class="metric-label">DOM Nodes:</span>
+        <div class="tab-metrics-grid">
+          <div class="tab-metric">
+            <span class="metric-label">DOM Nodes</span>
             <span class="metric-value" id="domNodes">--</span>
           </div>
-          <div class="metric">
-            <span class="metric-label">Active Time:</span>
+          <div class="tab-metric">
+            <span class="metric-label">Active Time</span>
             <span class="metric-value" id="activeTime">--</span>
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Tab Energy Recommendations -->
-    <section class="tab-energy-recommendations" id="tabEnergyRecommendations" style="display: none;">
-      <h2>💡 Energy Saving Suggestions</h2>
+    <!-- Energy Recommendations Cards -->
+    <div class="recommendations-section" id="tabEnergyRecommendations" style="display: none;">
+      <div class="section-header">
+        <h2>💡 Energy Saving Suggestions</h2>
+      </div>
       
       <!-- High Energy Tabs -->
-      <div class="high-energy-tabs" id="highEnergyTabsSection" style="display: none;">
-        <div class="recommendation-header">
-          <span class="recommendation-icon">⚡</span>
-          <span class="recommendation-title">These tabs are using the most energy:</span>
+      <div class="recommendation-card high-energy-card" id="highEnergyTabsSection" style="display: none;">
+        <div class="card-header">
+          <div class="header-icon">⚡</div>
+          <h3>High Energy Tabs</h3>
         </div>
-        <div class="high-energy-list" id="highEnergyTabsList">
+        <div class="recommendation-list" id="highEnergyTabsList">
           <!-- High energy tabs will be populated here -->
         </div>
       </div>
 
       <!-- Tab Closing Suggestions -->
-      <div class="tab-closing-suggestions" id="tabClosingSuggestions" style="display: none;">
-        <div class="recommendation-header">
-          <span class="recommendation-icon">🗂️</span>
-          <span class="recommendation-title">Consider closing tabs:</span>
+      <div class="recommendation-card closing-suggestions-card" id="tabClosingSuggestions" style="display: none;">
+        <div class="card-header">
+          <div class="header-icon">🗂️</div>
+          <h3>Suggested Tab Closures</h3>
         </div>
-        <div class="closing-suggestions-list" id="closingSuggestionsList">
+        <div class="suggestion-list" id="closingSuggestionsList">
           <!-- Tab closing suggestions will be populated here -->
         </div>
-        <div class="suggestion-actions">
-          <button class="btn btn-small btn-primary" id="closeRecommendedBtn">Close Suggested Tabs</button>
-          <button class="btn btn-small btn-secondary" id="dismissSuggestionsBtn">Dismiss</button>
+        <div class="card-actions">
+          <button class="btn btn-primary" id="closeRecommendedBtn">Close Selected</button>
+          <button class="btn btn-secondary" id="dismissSuggestionsBtn">Dismiss</button>
         </div>
       </div>
 
-      <!-- Energy Summary -->
-      <div class="energy-summary" id="energySummarySection" style="display: none;">
-        <div class="summary-card">
-          <div class="summary-icon">📊</div>
-          <div class="summary-content">
-            <div class="summary-stat">
-              <span class="summary-value" id="totalTabsCount">--</span>
-              <span class="summary-label">Total Tabs</span>
-            </div>
-            <div class="summary-stat">
-              <span class="summary-value" id="highEnergyCount">--</span>
-              <span class="summary-label">High Energy</span>
-            </div>
-            <div class="summary-stat">
-              <span class="summary-value" id="potentialSavings">--</span>
-              <span class="summary-label">Potential Savings</span>
-            </div>
+      <!-- Energy Summary Card -->
+      <div class="summary-card" id="energySummarySection" style="display: none;">
+        <div class="card-header">
+          <div class="header-icon">📊</div>
+          <h3>Energy Summary</h3>
+        </div>
+        <div class="summary-stats">
+          <div class="summary-stat">
+            <span class="stat-value" id="totalTabsCount">--</span>
+            <span class="stat-label">Total Tabs</span>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Quick Stats -->
-    <section class="quick-stats">
-      <h2>Today's Summary</h2>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-value" id="totalTabs">--</div>
-          <div class="stat-label">Tabs Tracked</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="avgPower">--</div>
-          <div class="stat-label">Avg Power</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="highPowerAlerts">--</div>
-          <div class="stat-label">High Power</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="totalTime">--</div>
-          <div class="stat-label">Active Time</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Power Saving Tips -->
-    <section class="tips-section" id="tipsSection" style="display: none;">
-      <h2>💡 Power Saving Tips</h2>
-      <div class="tip-card" id="powerTip">
-        <div class="tip-text"></div>
-        <button class="tip-action" id="tipAction">Apply</button>
-      </div>
-    </section>
-
-    <!-- Action Buttons -->
-    <section class="actions">
-      <button class="btn btn-primary" id="viewHistoryBtn">View History</button>
-      <button class="btn btn-secondary" id="settingsBtn">Settings</button>
-      <button class="btn btn-advanced" id="advancedFeaturesBtn" title="Access advanced features">⚡</button>
-    </section>
-
-    <!-- Code Entry Modal -->
-    <div class="modal-overlay" id="codeEntryModal" style="display: none;">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Access Advanced Features</h3>
-          <button class="modal-close" id="modalCloseBtn">&times;</button>
-        </div>
-        <div class="modal-body">
-          <p>Enter access code to unlock prompt optimization features:</p>
-          <input type="password" id="accessCodeInput" class="code-input" placeholder="Enter code" maxlength="4">
-          <div class="code-error" id="codeError" style="display: none;">Invalid access code</div>
-        </div>
-        <div class="modal-actions">
-          <button class="btn btn-primary" id="submitCodeBtn">Submit</button>
-          <button class="btn btn-secondary" id="cancelCodeBtn">Cancel</button>
+          <div class="summary-stat">
+            <span class="stat-value" id="highEnergyCount">--</span>
+            <span class="stat-label">High Energy</span>
+          </div>
+          <div class="summary-stat">
+            <span class="stat-value" id="potentialSavings">--</span>
+            <span class="stat-label">Potential Savings</span>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Prompt Generator Section (Hidden by default) -->
-    <section class="prompt-generator" id="promptGeneratorSection" style="display: none;">
-      <div class="generator-header">
-        <h2>⚡ Prompt Energy Optimizer</h2>
-        <button class="generator-close" id="generatorCloseBtn">&times;</button>
+    <!-- Today's Stats Cards -->
+    <div class="section-header">
+      <h2>Today's Summary</h2>
+    </div>
+    <div class="stats-cards-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="totalTabs">--</div>
+        <div class="stat-label">Tabs Tracked</div>
       </div>
-      
-      <!-- Generator Stats -->
-      <div class="generator-stats">
-        <div class="stat-item">
-          <span class="stat-value" id="totalPromptsGenerated">0</span>
-          <span class="stat-label">Prompts Generated</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-value" id="energySavingsPercent">0%</span>
-          <span class="stat-label">Energy Saved</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-value" id="avgTokenReduction">0</span>
-          <span class="stat-label">Avg Token Reduction</span>
-        </div>
+      <div class="stat-card">
+        <div class="stat-value" id="avgPower">--</div>
+        <div class="stat-label">Avg Power</div>
       </div>
+      <div class="stat-card">
+        <div class="stat-value" id="highPowerAlerts">--</div>
+        <div class="stat-label">High Power Alerts</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="totalTime">--</div>
+        <div class="stat-label">Active Time</div>
+      </div>
+    </div>
 
-      <!-- Generator Controls -->
-      <div class="generator-controls">
-        <div class="control-group">
-          <label for="optimizationLevel">Optimization Level:</label>
-          <select id="optimizationLevel" class="form-select">
-            <option value="balanced">Balanced</option>
-            <option value="aggressive">Aggressive</option>
-            <option value="conservative">Conservative</option>
-          </select>
-        </div>
-        
-        <div class="control-group">
-          <label for="targetModel">Target Model:</label>
-          <select id="targetModel" class="form-select">
-            <option value="gpt-4">GPT-4</option>
-            <option value="gpt-3.5">GPT-3.5</option>
-            <option value="claude">Claude</option>
-            <option value="gemini">Gemini</option>
-          </select>
-        </div>
+    <!-- Power Saving Tips Card -->
+    <div class="tips-card" id="tipsSection" style="display: none;">
+      <div class="card-header">
+        <div class="header-icon">💡</div>
+        <h2>Power Saving Tip</h2>
+      </div>
+      <div class="tip-content">
+        <div class="tip-text" id="powerTip"></div>
+        <button class="btn btn-primary" id="tipAction">Apply Tip</button>
+      </div>
+    </div>
 
-        <div class="control-group full-width">
-          <label for="promptInput">Enter your prompt:</label>
-          <textarea id="promptInput" class="prompt-textarea" placeholder="Enter your prompt here..." rows="4"></textarea>
-        </div>
-
-        <button class="btn btn-primary btn-generate" id="generateOptimizedBtn">
-          <span class="btn-icon">⚡</span>
-          Generate Optimized Prompt
+    <!-- Action Buttons Card -->
+    <div class="actions-card">
+      <div class="action-buttons">
+        <button class="btn btn-primary" id="viewHistoryBtn">
+          <span class="btn-icon">📊</span>
+          View History
+        </button>
+        <button class="btn btn-secondary" id="settingsBtn">
+          <span class="btn-icon">⚙️</span>
+          Settings
         </button>
       </div>
-
-      <!-- Results Area -->
-      <div class="results-area" id="resultsArea" style="display: none;">
-        <div class="result-header">
-          <h3>Optimized Result</h3>
-          <div class="energy-savings" id="energySavingsResult"></div>
-        </div>
-        <div class="result-content">
-          <textarea id="optimizedPrompt" class="result-textarea" readonly></textarea>
-        </div>
-        <div class="result-actions">
-          <button class="btn btn-secondary" id="copyResultBtn">Copy Result</button>
-          <button class="btn btn-primary" id="newOptimizationBtn">New Optimization</button>
-        </div>
-      </div>
-
-      <!-- Energy Tips -->
-      <div class="energy-tips">
-        <h4>💡 Energy Optimization Tips</h4>
-        <div class="tips-grid">
-          <div class="tip-item">
-            <span class="tip-icon">🎯</span>
-            <span class="tip-text">Be specific with your requirements</span>
-          </div>
-          <div class="tip-item">
-            <span class="tip-icon">✂️</span>
-            <span class="tip-text">Remove redundant instructions</span>
-          </div>
-          <div class="tip-item">
-            <span class="tip-icon">📊</span>
-            <span class="tip-text">Use structured formats when possible</span>
-          </div>
-          <div class="tip-item">
-            <span class="tip-icon">⚡</span>
-            <span class="tip-text">Optimize for your target model</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Model Comparison Modal -->
-    <div class="modal-overlay" id="comparisonModal" style="display: none;">
-      <div class="modal-content comparison-modal">
-        <div class="modal-header">
-          <h3>AI Model Comparison</h3>
-          <button class="modal-close" id="comparisonCloseBtn">&times;</button>
-        </div>
-        <div class="modal-body">
-          <!-- Comparison Controls -->
-          <div class="comparison-controls">
-            <div class="control-group">
-              <label>Compare by:</label>
-              <select id="comparisonCriteria" class="form-select">
-                <option value="all">Overall</option>
-                <option value="efficiency">Efficiency</option>
-                <option value="sustainability">Sustainability</option>
-                <option value="performance">Performance</option>
-                <option value="cost">Cost</option>
-              </select>
-            </div>
-            <div class="control-group">
-              <label>Show trending:</label>
-              <select id="trendingTimeframe" class="form-select">
-                <option value="1d">Last 24 hours</option>
-                <option value="3d">Last 3 days</option>
-                <option value="7d">Last week</option>
-                <option value="30d">Last month</option>
-              </select>
-            </div>
-            <button class="btn btn-small" id="exportComparisonBtn">Export Data</button>
-          </div>
-
-          <!-- Comparison Results -->
-          <div class="comparison-results" id="comparisonResults">
-            <div class="loading-comparison">Loading comparison data...</div>
-          </div>
-
-          <!-- Benchmarks -->
-          <div class="benchmarks-section" id="benchmarksSection" style="display: none;">
-            <h4>Performance Benchmarks</h4>
-            <div class="benchmark-tabs">
-              <button class="tab-btn active" data-metric="intelligence">Intelligence</button>
-              <button class="tab-btn" data-metric="energy">Energy</button>
-              <button class="tab-btn" data-metric="carbon">Carbon</button>
-              <button class="tab-btn" data-metric="performance">Speed</button>
-            </div>
-            <div class="benchmark-content" id="benchmarkContent">
-              <div class="loading-benchmarks">Loading benchmark data...</div>
-            </div>
-          </div>
-
-          <!-- Trending Models -->
-          <div class="trending-section" id="trendingSection" style="display: none;">
-            <h4>Trending Models</h4>
-            <div class="trending-list" id="trendingList">
-              <div class="loading-trending">Loading trending data...</div>
-            </div>
-          </div>
-
-          <!-- Recommendations -->
-          <div class="recommendations-section" id="recommendationsSection">
-            <h4>💡 Recommendations</h4>
-            <div class="recommendations-list" id="recommendationsList">
-              <div class="loading-recommendations">Loading recommendations...</div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button class="btn btn-secondary" id="refreshComparisonBtn">Refresh Data</button>
-          <button class="btn btn-primary" id="applyRecommendationBtn" style="display: none;">Apply Recommendation</button>
-        </div>
-      </div>
     </div>
 
-    <!-- Benchmarks Modal -->
-    <div class="modal-overlay" id="benchmarksModal" style="display: none;">
-      <div class="modal-content benchmarks-modal">
-        <div class="modal-header">
-          <h3>AI Model Benchmarks</h3>
-          <button class="modal-close" id="benchmarksCloseBtn">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="benchmark-controls">
-            <div class="metric-selector">
-              <button class="metric-btn active" data-metric="intelligence">Intelligence Index</button>
-              <button class="metric-btn" data-metric="energy">Energy Efficiency</button>
-              <button class="metric-btn" data-metric="carbon">Carbon Footprint</button>
-              <button class="metric-btn" data-metric="water">Water Usage</button>
-            </div>
-          </div>
-          
-          <div class="benchmark-visualization" id="benchmarkVisualization">
-            <!-- Benchmark charts and data will be inserted here -->
-            <div class="loading-benchmarks">Loading benchmark visualization...</div>
-          </div>
-          
-          <div class="benchmark-insights" id="benchmarkInsights">
-            <h4>Key Insights</h4>
-            <div class="insights-list" id="insightsList">
-              <div class="loading-insights">Analyzing benchmark data...</div>
-            </div>
-          </div>
-        </div>
+    <!-- LearnTAV Signup Card (replacing advanced features) -->
+    <div class="learntav-card">
+      <div class="card-header">
+        <div class="header-icon">🎓</div>
+        <h2>Upgrade Your Learning</h2>
+      </div>
+      <div class="learntav-content">
+        <p>Ready to take your development skills to the next level?</p>
+        <p class="learntav-description">Join LearnTAV for personalized AI-powered learning experiences and advanced energy optimization insights.</p>
+        <button class="btn btn-learntav" id="learnTavSignupBtn">
+          <span class="btn-icon">✨</span>
+          Sign up for LearnTAV
+        </button>
       </div>
     </div>
 
