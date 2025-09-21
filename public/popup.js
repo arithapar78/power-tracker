@@ -2523,7 +2523,15 @@ class PopupManager {
   // ===== ADVANCED FEATURES INTEGRATION =====
   
   handleAdvancedFeatures() {
-    this.showCodeEntryModal();
+    try {
+      console.log('[PopupManager] Advanced Features clicked - showing prompt generator directly');
+      this.showPromptGenerator();
+      this.loadPromptGeneratorData();
+      this.showToast('Prompt generator opened!', 'success');
+    } catch (error) {
+      console.error('[PopupManager] Error showing prompt generator:', error);
+      this.showToast('Error opening prompt generator', 'error');
+    }
   }
   
   showCodeEntryModal() {
