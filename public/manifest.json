@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Power Tracker – Monitor Your Browser’s Energy Impact",
-  "version": "2.0.10",
-  "description": "Monitor and track your browser's power consumption in watts, save usage history, export data to JSON, and get environmental and AI-powered tips to reduce energy use.",
-  "permissions": ["activeTab", "storage", "alarms", "downloads", "scripting"],
+  "version": "2.1.0",
+  "description": "Monitor your browser's power consumption, save usage history, export data to JSON, and get AI-powered tips to reduce energy use.",
+  "permissions": ["activeTab", "storage", "alarms", "scripting"],
   "background": { "service_worker": "service-worker.js" },
   "action": {
     "default_popup": "popup.html",

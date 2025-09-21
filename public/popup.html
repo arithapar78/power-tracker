@@ -315,6 +315,31 @@
     <div class="prompt-input-section">
       <label for="promptInput">Enter your AI prompt:</label>
       <textarea id="promptInput" placeholder="Enter the prompt you want to optimize for energy efficiency..."></textarea>
+      
+      <!-- Real-Time Token Counter -->
+      <div class="token-analysis" id="tokenAnalysis">
+        <div class="token-count">
+          <span class="token-metric">
+            <span class="token-label">Original:</span>
+            <span class="token-value" id="originalTokens">0</span>
+            <span class="token-unit">tokens</span>
+          </span>
+          <span class="token-metric optimized" style="display: none;">
+            <span class="token-label">Optimized:</span>
+            <span class="token-value" id="optimizedTokens">0</span>
+            <span class="token-unit">tokens</span>
+          </span>
+          <span class="token-metric savings" style="display: none;">
+            <span class="token-label">Saved:</span>
+            <span class="token-value" id="tokensSaved">0</span>
+            <span class="token-percentage">(<span id="percentSaved">0%</span>)</span>
+          </span>
+        </div>
+        <div class="processing-time" id="processingTime" style="display: none;">
+          <span class="processing-label">Processing time:</span>
+          <span class="processing-value" id="processingTimeValue">0ms</span>
+        </div>
+      </div>
     </div>
 
     <!-- Optimization Options -->
@@ -353,6 +378,42 @@
         <h4>Optimized Result</h4>
         <div class="energy-savings" id="energySavingsResult">25% Energy Saved</div>
       </div>
+      
+      <!-- Optimization Breakdown -->
+      <div class="optimization-breakdown" id="optimizationBreakdown">
+        <h5>Optimization Applied:</h5>
+        <div class="breakdown-metrics">
+          <div class="metric-row">
+            <span class="metric-label">Tokens Saved:</span>
+            <span class="metric-value" id="detailedTokensSaved">0</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Energy Saved:</span>
+            <span class="metric-value" id="detailedEnergySaved">0 mWh</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Processing Time:</span>
+            <span class="metric-value" id="detailedProcessingTime">0ms</span>
+          </div>
+        </div>
+        <div class="category-breakdown">
+          <h6>Categories Optimized:</h6>
+          <ul class="optimization-categories" id="optimizationCategories">
+            <!-- Dynamically populated with removed word categories -->
+          </ul>
+        </div>
+        <div class="removed-words-section" id="removedWordsSection" style="display: none;">
+          <h6>Words/Phrases Removed:</h6>
+          <div class="removed-words-list" id="removedWordsList">
+            <!-- Dynamically populated with specific removed words -->
+          </div>
+        </div>
+        <button class="btn btn-text toggle-details" id="toggleDetailsBtn">
+          <span class="btn-icon">👁️</span>
+          Show Removed Words
+        </button>
+      </div>
+      
       <div class="results-content">
         <label for="optimizedPrompt">Optimized Prompt:</label>
         <textarea id="optimizedPrompt" readonly></textarea>

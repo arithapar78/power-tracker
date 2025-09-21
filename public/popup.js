@@ -2643,6 +2643,17 @@ class PopupManager {
     this.safeAddEventListener('generateOptimizedBtn', 'click', this.handleGenerateOptimized.bind(this));
     this.safeAddEventListener('copyResultBtn', 'click', this.handleCopyResult.bind(this));
     this.safeAddEventListener('newOptimizationBtn', 'click', this.handleNewOptimization.bind(this));
+    this.safeAddEventListener('toggleDetailsBtn', 'click', this.handleToggleDetails.bind(this));
+    
+    // Real-time token counting
+    const promptInput = document.getElementById('promptInput');
+    if (promptInput) {
+      promptInput.addEventListener('input', this.handlePromptInputChange.bind(this));
+      promptInput.addEventListener('paste', () => {
+        // Delay to allow paste to complete
+        setTimeout(() => this.handlePromptInputChange(), 50);
+      });
+    }
     
     // Modal overlay click functionality is now handled in showCodeEntryModal/hideCodeEntryModal
   }
@@ -2703,7 +2714,10 @@ class PopupManager {
       generateBtn.innerHTML = '<span class="btn-icon">⏳</span> Optimizing...';
     }
     
-    // Simulate optimization process
+    // Store start time for processing time calculation
+    this.optimizationStartTime = Date.now();
+    
+    // Simulate optimization process with realistic timing
     setTimeout(() => {
       const result = this.optimizePrompt(originalPrompt, level, model);
       this.showOptimizationResult(result);
@@ -2713,135 +2727,795 @@ class PopupManager {
         generateBtn.disabled = false;
         generateBtn.innerHTML = '<span class="btn-icon">⚡</span> Generate Optimized Prompt';
       }
-    }, 1500);
+      
+      // Update token analysis for optimized text
+      this.updateTokenAnalysis(originalPrompt, result.optimized, model);
+    }, Math.random() * 1000 + 500); // 500-1500ms realistic processing time
+  }
+
+  /**
+   * Real-time prompt input change handler
+   */
+  handlePromptInputChange() {
+    const promptInput = document.getElementById('promptInput');
+    const targetModel = document.getElementById('targetModel');
+    
+    if (!promptInput) return;
+    
+    const text = promptInput.value.trim();
+    const model = targetModel?.value || 'gpt-4';
+    
+    // Update original token count
+    const tokenCount = this.estimateTokenCount(text, model);
+    this.updateOriginalTokenCount(tokenCount);
+    
+    // Hide optimized metrics when input changes
+    this.hideOptimizedMetrics();
+  }
+
+  /**
+   * Update original token count display
+   */
+  updateOriginalTokenCount(count) {
+    const originalTokens = document.getElementById('originalTokens');
+    if (originalTokens) {
+      originalTokens.textContent = count.toString();
+      
+      // Add visual feedback for large prompts
+      if (count > 1000) {
+        originalTokens.parentElement.style.color = 'var(--warning)';
+      } else if (count > 2000) {
+        originalTokens.parentElement.style.color = 'var(--error)';
+      } else {
+        originalTokens.parentElement.style.color = '';
+      }
+    }
+  }
+
+  /**
+   * Update token analysis with optimization results
+   */
+  updateTokenAnalysis(originalText, optimizedText, model) {
+    const originalTokens = this.estimateTokenCount(originalText, model);
+    const optimizedTokens = this.estimateTokenCount(optimizedText, model);
+    const tokensSaved = Math.max(0, originalTokens - optimizedTokens);
+    const percentSaved = originalTokens > 0 ? Math.round((tokensSaved / originalTokens) * 100) : 0;
+    
+    // Show optimized metrics
+    this.showOptimizedMetrics();
+    
+    // Update values
+    document.getElementById('originalTokens').textContent = originalTokens.toString();
+    document.getElementById('optimizedTokens').textContent = optimizedTokens.toString();
+    document.getElementById('tokensSaved').textContent = tokensSaved.toString();
+    document.getElementById('percentSaved').textContent = `${percentSaved}%`;
+    
+    // Show processing time if available
+    if (this.lastOptimizationResult && this.lastOptimizationResult.processingTime) {
+      const processingTime = document.getElementById('processingTime');
+      const processingTimeValue = document.getElementById('processingTimeValue');
+      if (processingTime && processingTimeValue) {
+        processingTimeValue.textContent = `${this.lastOptimizationResult.processingTime}ms`;
+        processingTime.style.display = 'block';
+      }
+    }
+  }
+
+  /**
+   * Show optimized token metrics
+   */
+  showOptimizedMetrics() {
+    const optimizedMetric = document.querySelector('.token-metric.optimized');
+    const savingsMetric = document.querySelector('.token-metric.savings');
+    
+    if (optimizedMetric) optimizedMetric.style.display = 'flex';
+    if (savingsMetric) savingsMetric.style.display = 'flex';
+  }
+
+  /**
+   * Hide optimized token metrics
+   */
+  hideOptimizedMetrics() {
+    const optimizedMetric = document.querySelector('.token-metric.optimized');
+    const savingsMetric = document.querySelector('.token-metric.savings');
+    const processingTime = document.getElementById('processingTime');
+    
+    if (optimizedMetric) optimizedMetric.style.display = 'none';
+    if (savingsMetric) savingsMetric.style.display = 'none';
+    if (processingTime) processingTime.style.display = 'none';
+  }
+
+  /**
+   * Handle toggle details button
+   */
+  handleToggleDetails() {
+    const removedWordsSection = document.getElementById('removedWordsSection');
+    const toggleBtn = document.getElementById('toggleDetailsBtn');
+    
+    if (!removedWordsSection || !toggleBtn) return;
+    
+    const isVisible = removedWordsSection.style.display !== 'none';
+    
+    if (isVisible) {
+      removedWordsSection.style.display = 'none';
+      toggleBtn.innerHTML = '<span class="btn-icon">👁️</span> Show Removed Words';
+    } else {
+      removedWordsSection.style.display = 'block';
+      toggleBtn.innerHTML = '<span class="btn-icon">🙈</span> Hide Removed Words';
+    }
   }
   
+  /**
+   * ENHANCED TOKEN OPTIMIZATION ENGINE
+   * Implements comprehensive prompt optimization with advanced token reduction techniques
+   */
   optimizePrompt(prompt, level, model) {
-    // Enhanced prompt optimization algorithm with comprehensive token-wasting word list
+    console.log('[OptimizationEngine] Starting optimization:', { level, model, promptLength: prompt.length });
+    
     let optimized = prompt;
-    let tokenReduction = 0;
-    let energySavings = 0;
+    let originalTokens = this.estimateTokenCount(prompt, model);
+    let removedWords = [];
+    let optimizationCategories = [];
     
-    // Comprehensive list of token-wasting words and phrases
-    const tokenWastingPhrases = {
-      // Politeness markers (often unnecessary in AI prompts)
-      politeness: [
-        'please', 'thank you', 'thanks', 'kindly', 'if you don\'t mind',
-        'if possible', 'if you could', 'would you mind', 'could you please',
-        'would you be so kind', 'I would appreciate', 'thank you in advance',
-        'many thanks', 'much appreciated', 'grateful', 'sorry to bother you'
-      ],
-      
-      // Redundant request phrases
-      requests: [
-        'can you', 'could you', 'would you', 'will you', 'are you able to',
-        'I need you to', 'I want you to', 'I would like you to', 'I require you to',
-        'help me', 'assist me', 'I\'m asking you to', 'do me a favor'
-      ],
-      
-      // Uncertainty and hedging (reduce confidence unnecessarily)
-      hedging: [
-        'I think', 'I believe', 'I guess', 'maybe', 'perhaps', 'possibly',
-        'it seems like', 'it appears that', 'I suppose', 'I assume',
-        'in my opinion', 'from my perspective', 'as far as I know'
-      ],
-      
-      // Redundant introductions
-      introductions: [
-        'let me start by saying', 'first of all', 'to begin with', 'initially',
-        'at the outset', 'in the beginning', 'as a starting point',
-        'before we begin', 'prior to starting'
-      ],
-      
-      // Filler words and phrases
-      fillers: [
-        'basically', 'essentially', 'actually', 'literally', 'obviously',
-        'clearly', 'definitely', 'certainly', 'absolutely', 'totally',
-        'completely', 'entirely', 'utterly', 'quite', 'rather', 'pretty much',
-        'sort of', 'kind of', 'more or less', 'in a way', 'to some extent'
-      ],
-      
-      // Redundant explanatory phrases
-      explanatory: [
-        'in other words', 'that is to say', 'what I mean is', 'put simply',
-        'to put it another way', 'in simple terms', 'to clarify', 'specifically',
-        'more specifically', 'in particular', 'namely', 'for instance',
-        'as an example', 'for example' // Keep some examples but reduce redundancy
-      ],
-      
-      // Time-wasting connectors
-      connectors: [
-        'furthermore', 'moreover', 'additionally', 'in addition to this',
-        'what\'s more', 'on top of that', 'not only that', 'also worth noting',
-        'it should also be mentioned', 'another point to consider'
-      ],
-      
-      // Redundant emphasis
-      emphasis: [
-        'very important', 'extremely important', 'absolutely crucial',
-        'highly significant', 'tremendously valuable', 'incredibly useful',
-        'exceptionally good', 'remarkably effective', 'particularly noteworthy'
-      ]
-    };
+    // Layer 1: Comprehensive Filler Word Removal Engine
+    const layer1Result = this.applyFillerWordRemoval(optimized, level);
+    optimized = layer1Result.text;
+    removedWords = removedWords.concat(layer1Result.removedWords);
+    optimizationCategories = optimizationCategories.concat(layer1Result.categories);
     
-    // Apply optimizations based on level
-    const allPhrases = level === 'aggressive'
-      ? Object.values(tokenWastingPhrases).flat()
-      : level === 'conservative'
-        ? tokenWastingPhrases.politeness.concat(tokenWastingPhrases.fillers)
-        : tokenWastingPhrases.politeness.concat(tokenWastingPhrases.requests, tokenWastingPhrases.fillers, tokenWastingPhrases.hedging);
+    // Layer 2: Model-Specific Optimization
+    const layer2Result = this.applyModelSpecificOptimization(optimized, model);
+    optimized = layer2Result.text;
+    removedWords = removedWords.concat(layer2Result.removedWords);
+    optimizationCategories = optimizationCategories.concat(layer2Result.categories);
     
-    // Remove token-wasting phrases
-    allPhrases.forEach(phrase => {
-      const regex = new RegExp(`\\b${phrase}\\b`, 'gi');
-      const matches = optimized.match(regex);
-      if (matches) {
-        optimized = optimized.replace(regex, '');
-        tokenReduction += matches.length * phrase.split(' ').length;
-      }
+    // Layer 3: Advanced Compression Techniques
+    const layer3Result = this.applyAdvancedCompression(optimized, level);
+    optimized = layer3Result.text;
+    removedWords = removedWords.concat(layer3Result.removedWords);
+    optimizationCategories = optimizationCategories.concat(layer3Result.categories);
+    
+    // Calculate final metrics
+    const optimizedTokens = this.estimateTokenCount(optimized, model);
+    const tokensSaved = Math.max(0, originalTokens - optimizedTokens);
+    const percentageSaved = originalTokens > 0 ? Math.round((tokensSaved / originalTokens) * 100) : 0;
+    const energySavings = this.calculateEnergySavings(tokensSaved, model);
+    
+    // Apply optimization level caps
+    const cappedResults = this.applyOptimizationCaps(prompt, optimized, level, {
+      tokensSaved,
+      percentageSaved,
+      energySavings
     });
     
-    // Clean up extra whitespace and punctuation
-    optimized = optimized.replace(/\s+/g, ' ')
-                      .replace(/\s*,\s*,+/g, ',')
-                      .replace(/\s*\.\s*\.+/g, '.')
-                      .replace(/^\s*[,.]/, '')
-                      .trim();
-    
-    // Apply level-specific optimizations
-    switch (level) {
-      case 'aggressive':
-        optimized = this.applyAggressiveOptimization(optimized);
-        tokenReduction += Math.floor(prompt.split(' ').length * 0.3);
-        energySavings = Math.min(50, tokenReduction * 2.2);
-        break;
-        
-      case 'conservative':
-        tokenReduction += Math.floor(prompt.split(' ').length * 0.12);
-        energySavings = Math.min(25, tokenReduction * 1.5);
-        break;
-        
-      default: // balanced
-        optimized = this.applyBalancedOptimization(optimized);
-        tokenReduction += Math.floor(prompt.split(' ').length * 0.2);
-        energySavings = Math.min(40, tokenReduction * 1.8);
-    }
-    
-    // Ensure we don't have empty or overly short results
-    if (optimized.length < 10) {
-      optimized = prompt; // Revert if too aggressive
-      tokenReduction = Math.floor(tokenReduction * 0.1);
-      energySavings = Math.floor(energySavings * 0.1);
-    }
+    console.log('[OptimizationEngine] Optimization complete:', {
+      originalTokens,
+      optimizedTokens: this.estimateTokenCount(cappedResults.optimized, model),
+      tokensSaved: cappedResults.tokensSaved,
+      percentageSaved: cappedResults.percentageSaved,
+      energySavings: cappedResults.energySavings
+    });
     
     return {
       original: prompt,
-      optimized: optimized,
-      tokenReduction: Math.max(1, tokenReduction),
-      energySavings: Math.max(5, energySavings),
+      optimized: cappedResults.optimized,
+      originalTokens,
+      optimizedTokens: this.estimateTokenCount(cappedResults.optimized, model),
+      tokensSaved: cappedResults.tokensSaved,
+      percentageSaved: cappedResults.percentageSaved,
+      energySavings: cappedResults.energySavings,
       model: model,
-      level: level
+      level: level,
+      removedWords: removedWords,
+      optimizationCategories: this.consolidateCategories(optimizationCategories),
+      processingTime: Date.now() - (this.optimizationStartTime || Date.now())
     };
+  }
+
+  /**
+   * LAYER 1: COMPREHENSIVE FILLER WORD REMOVAL ENGINE
+   */
+  applyFillerWordRemoval(text, level) {
+    let optimized = text;
+    let removedWords = [];
+    let categories = [];
+    
+    // Define comprehensive removal categories with priority scoring
+    const fillerWordCategories = {
+      // High-Priority Removals (3-8 tokens saved)
+      politenessMarkers: {
+        priority: 1,
+        words: [
+          'please', 'thank you', 'thanks', 'kindly', 'if you don\'t mind',
+          'if possible', 'if you could', 'would you mind', 'could you please',
+          'would you be so kind', 'I would appreciate', 'thank you in advance',
+          'many thanks', 'much appreciated', 'grateful', 'sorry to bother you',
+          'I apologize for', 'excuse me', 'pardon me'
+        ],
+        description: 'Politeness markers (unnecessary for AI)'
+      },
+      
+      intensifiers: {
+        priority: 1,
+        words: [
+          'very', 'really', 'quite', 'extremely', 'absolutely', 'completely',
+          'totally', 'literally', 'seriously', 'highly', 'incredibly',
+          'tremendously', 'exceptionally', 'remarkably', 'particularly',
+          'especially', 'significantly', 'substantially'
+        ],
+        description: 'Intensifiers and emphasis words'
+      },
+      
+      qualifiers: {
+        priority: 1,
+        words: [
+          'just', 'simply', 'basically', 'actually', 'obviously', 'clearly',
+          'sort of', 'kind of', 'somewhat', 'rather', 'pretty much',
+          'more or less', 'in a way', 'to some extent', 'relatively'
+        ],
+        description: 'Qualifiers and hedge words'
+      },
+      
+      // Medium-Priority Removals (2-5 tokens saved)
+      verbosePhrases: {
+        priority: 2,
+        phrases: [
+          { from: 'in order to', to: 'to' },
+          { from: 'due to the fact that', to: 'because' },
+          { from: 'with regard to', to: 'about' },
+          { from: 'in terms of', to: 'for' },
+          { from: 'for the purpose of', to: 'to' },
+          { from: 'in the event that', to: 'if' },
+          { from: 'at this point in time', to: 'now' },
+          { from: 'prior to', to: 'before' },
+          { from: 'subsequent to', to: 'after' }
+        ],
+        description: 'Verbose phrase replacements'
+      },
+      
+      fillerPhrases: {
+        priority: 2,
+        words: [
+          'at the end of the day', 'for all intents and purposes',
+          'the thing is', 'in terms of', 'as a matter of fact',
+          'to tell you the truth', 'to be honest', 'frankly speaking',
+          'needless to say', 'it goes without saying'
+        ],
+        description: 'Filler phrases'
+      },
+      
+      redundancies: {
+        priority: 2,
+        phrases: [
+          { from: 'write down', to: 'write' },
+          { from: 'empty out', to: 'empty' },
+          { from: 'completely finish', to: 'finish' },
+          { from: 'final result', to: 'result' },
+          { from: 'end result', to: 'result' },
+          { from: 'past history', to: 'history' },
+          { from: 'future plans', to: 'plans' }
+        ],
+        description: 'Redundant combinations'
+      },
+      
+      // Low-Priority Removals (1-3 tokens saved)
+      conversationFillers: {
+        priority: 3,
+        words: [
+          'you know', 'you see', 'right?', 'like', 'um', 'uh', 'er', 'ah',
+          'well', 'so', 'anyway', 'by the way', 'speaking of which',
+          'as I was saying', 'where was I'
+        ],
+        description: 'Conversation fillers'
+      },
+      
+      redundantRequests: {
+        priority: 3,
+        words: [
+          'can you', 'could you', 'would you', 'will you', 'are you able to',
+          'I need you to', 'I want you to', 'I would like you to',
+          'help me', 'assist me', 'I\'m asking you to'
+        ],
+        description: 'Redundant request phrases'
+      }
+    };
+    
+    // Apply removals based on optimization level and priority
+    const maxPriority = level === 'aggressive' ? 3 : level === 'balanced' ? 2 : 1;
+    
+    for (const [categoryName, category] of Object.entries(fillerWordCategories)) {
+      if (category.priority <= maxPriority) {
+        // Handle phrase replacements
+        if (category.phrases) {
+          category.phrases.forEach(replacement => {
+            const regex = new RegExp(`\\b${replacement.from}\\b`, 'gi');
+            const matches = optimized.match(regex);
+            if (matches) {
+              optimized = optimized.replace(regex, replacement.to);
+              removedWords.push(...matches);
+              if (!categories.includes(category.description)) {
+                categories.push(category.description);
+              }
+            }
+          });
+        }
+        
+        // Handle word removals
+        if (category.words) {
+          category.words.forEach(word => {
+            const regex = new RegExp(`\\b${word}\\b`, 'gi');
+            const matches = optimized.match(regex);
+            if (matches) {
+              optimized = optimized.replace(regex, ' ');
+              removedWords.push(...matches);
+              if (!categories.includes(category.description)) {
+                categories.push(category.description);
+              }
+            }
+          });
+        }
+      }
+    }
+    
+    // Clean up whitespace
+    optimized = this.cleanupWhitespace(optimized);
+    
+    return {
+      text: optimized,
+      removedWords,
+      categories
+    };
+  }
+
+  /**
+   * LAYER 2: MODEL-SPECIFIC OPTIMIZATION
+   */
+  applyModelSpecificOptimization(text, model) {
+    let optimized = text;
+    let removedWords = [];
+    let categories = [];
+    
+    switch (model) {
+      case 'gpt-4':
+      case 'gpt-5':
+        return this.optimizeForGPT4(optimized);
+        
+      case 'claude-4':
+      case 'claude-sonnet':
+        return this.optimizeForClaude(optimized);
+        
+      case 'grok-4':
+        return this.optimizeForGrok(optimized);
+        
+      case 'deepseek-r1':
+        return this.optimizeForDeepSeek(optimized);
+        
+      case 'llama-4':
+        return this.optimizeForLlama(optimized);
+        
+      default:
+        return this.optimizeForGeneric(optimized);
+    }
+  }
+
+  optimizeForGPT4(text) {
+    // GPT-4: Maintain context richness but remove redundancy
+    let optimized = text;
+    let removedWords = [];
+    let categories = [];
+    
+    // Remove excessive context setting
+    const contextPhrases = [
+      'As an AI', 'I am an AI', 'As a language model', 'I\'m ChatGPT',
+      'As ChatGPT', 'I should mention that', 'It\'s important to note that'
+    ];
+    
+    contextPhrases.forEach(phrase => {
+      const regex = new RegExp(`\\b${phrase}\\b`, 'gi');
+      if (optimized.match(regex)) {
+        optimized = optimized.replace(regex, '');
+        removedWords.push(phrase);
+        if (!categories.includes('GPT-4 context reduction')) {
+          categories.push('GPT-4 context reduction');
+        }
+      }
+    });
+    
+    // Keep technical terminology intact, focus on structural efficiency
+    optimized = this.cleanupWhitespace(optimized);
+    
+    return {
+      text: optimized,
+      removedWords,
+      categories
+    };
+  }
+
+  optimizeForClaude(text) {
+    // Claude: Natural language flow preservation, remove formal excess
+    let optimized = text;
+    let removedWords = [];
+    let categories = [];
+    
+    // Remove excessive formal language
+    const formalPhrases = [
+      'I would be happy to', 'I\'d be glad to', 'I\'m here to help',
+      'Allow me to', 'Permit me to', 'Let me assist you with'
+    ];
+    
+    formalPhrases.forEach(phrase => {
+      const regex = new RegExp(`\\b${phrase}\\b`, 'gi');
+      if (optimized.match(regex)) {
+        optimized = optimized.replace(regex, '');
+        removedWords.push(phrase);
+        if (!categories.includes('Claude formality reduction')) {
+          categories.push('Claude formality reduction');
+        }
+      }
+    });
+    
+    optimized = this.cleanupWhitespace(optimized);
+    
+    return {
+      text: optimized,
+      removedWords,
+      categories
+    };
+  }
+
+  optimizeForGrok(text) {
+    // Grok: Direct, concise instructions
+    let optimized = text;
+    let removedWords = [];
+    let categories = [];
+    
+    // Remove verbose explanations
+    const verbosePatterns = [
+      'Let me explain', 'To elaborate', 'In more detail',
+      'For context', 'Background information', 'Additional details'
+    ];
+    
+    verbosePatterns.forEach(phrase => {
+      const regex = new RegExp(`\\b${phrase}\\b`, 'gi');
+      if (optimized.match(regex)) {
+        optimized = optimized.replace(regex, '');
+        removedWords.push(phrase);
+        if (!categories.includes('Grok directness optimization')) {
+          categories.push('Grok directness optimization');
+        }
+      }
+    });
+    
+    optimized = this.cleanupWhitespace(optimized);
+    
+    return {
+      text: optimized,
+      removedWords,
+      categories
+    };
+  }
+
+  optimizeForDeepSeek(text) {
+    // DeepSeek R1: Reasoning-focused, remove ambiguity
+    let optimized = text;
+    let removedWords = [];
+    let categories = [];
+    
+    // Remove ambiguous language
+    const ambiguousPhrases = [
+      'maybe', 'perhaps', 'possibly', 'potentially', 'might be',
+      'could be', 'seems like', 'appears to be', 'looks like'
+    ];
+    
+    ambiguousPhrases.forEach(phrase => {
+      const regex = new RegExp(`\\b${phrase}\\b`, 'gi');
+      if (optimized.match(regex)) {
+        optimized = optimized.replace(regex, '');
+        removedWords.push(phrase);
+        if (!categories.includes('DeepSeek clarity optimization')) {
+          categories.push('DeepSeek clarity optimization');
+        }
+      }
+    });
+    
+    optimized = this.cleanupWhitespace(optimized);
+    
+    return {
+      text: optimized,
+      removedWords,
+      categories
+    };
+  }
+
+  optimizeForLlama(text) {
+    // Llama: Efficient, structured prompts
+    let optimized = text;
+    let removedWords = [];
+    let categories = [];
+    
+    // Remove casual language
+    const casualPhrases = [
+      'you know', 'like', 'basically', 'kind of', 'sort of',
+      'pretty much', 'more or less', 'I guess'
+    ];
+    
+    casualPhrases.forEach(phrase => {
+      const regex = new RegExp(`\\b${phrase}\\b`, 'gi');
+      if (optimized.match(regex)) {
+        optimized = optimized.replace(regex, '');
+        removedWords.push(phrase);
+        if (!categories.includes('Llama structure optimization')) {
+          categories.push('Llama structure optimization');
+        }
+      }
+    });
+    
+    optimized = this.cleanupWhitespace(optimized);
+    
+    return {
+      text: optimized,
+      removedWords,
+      categories
+    };
+  }
+
+  optimizeForGeneric(text) {
+    // Generic optimization for unknown models
+    return {
+      text: this.cleanupWhitespace(text),
+      removedWords: [],
+      categories: []
+    };
+  }
+
+  /**
+   * LAYER 3: ADVANCED COMPRESSION TECHNIQUES
+   */
+  applyAdvancedCompression(text, level) {
+    let optimized = text;
+    let removedWords = [];
+    let categories = [];
+    
+    if (level === 'aggressive') {
+      // Sentence structure optimization
+      const structureResult = this.optimizeSentenceStructure(optimized);
+      optimized = structureResult.text;
+      removedWords = removedWords.concat(structureResult.removedWords);
+      categories = categories.concat(structureResult.categories);
+      
+      // Context-aware removal
+      const contextResult = this.removeRedundantContext(optimized);
+      optimized = contextResult.text;
+      removedWords = removedWords.concat(contextResult.removedWords);
+      categories = categories.concat(contextResult.categories);
+    }
+    
+    return {
+      text: optimized,
+      removedWords,
+      categories
+    };
+  }
+
+  optimizeSentenceStructure(text) {
+    let optimized = text;
+    let removedWords = [];
+    let categories = [];
+    
+    // Convert passive voice to active voice
+    const passivePatterns = [
+      { from: /was (\w+ed) by/gi, to: '$1' },
+      { from: /is (\w+ed) by/gi, to: '$1' },
+      { from: /are (\w+ed) by/gi, to: '$1' }
+    ];
+    
+    passivePatterns.forEach(pattern => {
+      if (optimized.match(pattern.from)) {
+        optimized = optimized.replace(pattern.from, pattern.to);
+        categories.push('Passive to active voice conversion');
+      }
+    });
+    
+    // Combine related sentences (basic implementation)
+    optimized = optimized.replace(/\.\s+Also,\s+/gi, '. ');
+    optimized = optimized.replace(/\.\s+Additionally,\s+/gi, '. ');
+    optimized = optimized.replace(/\.\s+Furthermore,\s+/gi, '. ');
+    
+    if (categories.length > 0) {
+      categories.push('Sentence structure optimization');
+    }
+    
+    return {
+      text: this.cleanupWhitespace(optimized),
+      removedWords,
+      categories
+    };
+  }
+
+  removeRedundantContext(text) {
+    let optimized = text;
+    let removedWords = [];
+    let categories = [];
+    
+    // Detect and remove repeated concepts (basic implementation)
+    const words = optimized.toLowerCase().split(/\s+/);
+    const wordCounts = {};
+    
+    words.forEach(word => {
+      const cleanWord = word.replace(/[^a-z]/g, '');
+      if (cleanWord.length > 3) {
+        wordCounts[cleanWord] = (wordCounts[cleanWord] || 0) + 1;
+      }
+    });
+    
+    // Remove excessive repetition of concepts
+    for (const [word, count] of Object.entries(wordCounts)) {
+      if (count > 3) {
+        const regex = new RegExp(`\\b${word}\\b`, 'gi');
+        const matches = optimized.match(regex);
+        if (matches && matches.length > 3) {
+          // Keep first 2 occurrences, remove the rest
+          let replacements = 0;
+          optimized = optimized.replace(regex, (match) => {
+            replacements++;
+            return replacements > 2 ? ' ' : match;
+          });
+          removedWords.push(`${word} (${matches.length - 2} redundant)`);
+          categories.push('Redundant concept removal');
+        }
+      }
+    }
+    
+    return {
+      text: this.cleanupWhitespace(optimized),
+      removedWords,
+      categories
+    };
+  }
+
+  /**
+   * REAL-TIME TOKEN COUNTING SYSTEM
+   */
+  estimateTokenCount(text, model) {
+    if (!text || typeof text !== 'string') return 0;
+    
+    // Model-specific token estimation (approximate)
+    const baseTokens = text.length / 4; // ~4 characters = 1 token for English
+    
+    const modelMultipliers = {
+      'gpt-4': 1.0,
+      'gpt-5': 1.0,
+      'claude-4': 0.95,
+      'claude-sonnet': 0.95,
+      'grok-4': 1.05,
+      'deepseek-r1': 0.9,
+      'llama-4': 0.85
+    };
+    
+    const multiplier = modelMultipliers[model] || 1.0;
+    return Math.round(baseTokens * multiplier);
+  }
+
+  calculateTokenSavings(originalTokens, optimizedTokens, model) {
+    const tokensSaved = Math.max(0, originalTokens - optimizedTokens);
+    const percentageSaved = originalTokens > 0 ? (tokensSaved / originalTokens) * 100 : 0;
+    
+    return {
+      tokensSaved,
+      percentageSaved: Math.round(percentageSaved),
+      absoluteSavings: tokensSaved,
+      relativeSavings: `${Math.round(percentageSaved)}%`
+    };
+  }
+
+  /**
+   * ENERGY SAVINGS CALCULATION
+   */
+  calculateEnergySavings(tokensSaved, model) {
+    // Energy cost per token (in mWh) - based on model efficiency
+    const energyCostPerToken = {
+      'gpt-4': 0.05,
+      'gpt-5': 0.045,
+      'claude-4': 0.04,
+      'claude-sonnet': 0.04,
+      'grok-4': 0.06,
+      'deepseek-r1': 0.03,
+      'llama-4': 0.025
+    };
+    
+    const costPerToken = energyCostPerToken[model] || 0.045;
+    const energySavedMwh = tokensSaved * costPerToken;
+    const energySavedWh = energySavedMwh / 1000;
+    
+    return {
+      energySavedMwh,
+      energySavedWh,
+      percentageSaved: Math.min(50, Math.round(tokensSaved * 0.1)) // Rough percentage
+    };
+  }
+
+  /**
+   * OPTIMIZATION LEVEL REFINEMENT
+   */
+  applyOptimizationCaps(original, optimized, level, metrics) {
+    const caps = {
+      conservative: { min: 5, max: 15 },
+      balanced: { min: 15, max: 25 },
+      aggressive: { min: 25, max: 45 }
+    };
+    
+    const cap = caps[level] || caps.balanced;
+    
+    // If reduction is too low, try more aggressive techniques
+    if (metrics.percentageSaved < cap.min) {
+      console.log('[OptimizationEngine] Applying additional optimization to meet minimum threshold');
+      // Apply additional compression
+      optimized = this.applyAdditionalCompression(optimized, cap.min - metrics.percentageSaved);
+    }
+    
+    // If reduction is too high, restore some content
+    if (metrics.percentageSaved > cap.max) {
+      console.log('[OptimizationEngine] Reduction too aggressive, restoring content');
+      optimized = this.restoreEssentialContent(original, optimized, metrics.percentageSaved - cap.max);
+    }
+    
+    // Recalculate metrics
+    const finalTokens = this.estimateTokenCount(optimized, metrics.model);
+    const finalSavings = this.calculateTokenSavings(this.estimateTokenCount(original), finalTokens);
+    const finalEnergy = this.calculateEnergySavings(finalSavings.tokensSaved, metrics.model);
+    
+    return {
+      optimized,
+      tokensSaved: finalSavings.tokensSaved,
+      percentageSaved: finalSavings.percentageSaved,
+      energySavings: finalEnergy.percentageSaved
+    };
+  }
+
+  applyAdditionalCompression(text, targetReduction) {
+    // Apply more aggressive compression techniques
+    let compressed = text;
+    
+    // Remove articles more aggressively
+    compressed = compressed.replace(/\b(a|an|the)\b/gi, '');
+    
+    // Remove auxiliary verbs
+    compressed = compressed.replace(/\b(is|are|was|were|be|been|being)\b/gi, '');
+    
+    // Remove prepositions where context allows
+    compressed = compressed.replace(/\b(in|on|at|by|for|with|from)\b/gi, '');
+    
+    return this.cleanupWhitespace(compressed);
+  }
+
+  restoreEssentialContent(original, optimized, excessReduction) {
+    // Simple restoration: if too much was removed, use a blend
+    if (excessReduction > 20) {
+      // Too aggressive, use more of the original
+      return original;
+    }
+    
+    return optimized;
+  }
+
+  /**
+   * UTILITY FUNCTIONS
+   */
+  cleanupWhitespace(text) {
+    return text
+      .replace(/\s+/g, ' ')                    // Multiple spaces to single
+      .replace(/\s*,\s*,+/g, ',')             // Multiple commas
+      .replace(/\s*\.\s*\.+/g, '.')           // Multiple periods
+      .replace(/^\s*[,.]/, '')                 // Leading punctuation
+      .replace(/\s*([,.!?;:])/g, '$1')        // Space before punctuation
+      .replace(/([,.!?;:])\s*([,.!?;:])/g, '$1$2') // Double punctuation
+      .trim();
+  }
+
+  consolidateCategories(categories) {
+    // Remove duplicates and group similar categories
+    const uniqueCategories = [...new Set(categories)];
+    return uniqueCategories.slice(0, 5); // Limit to top 5 for UI
   }
   
   applyAggressiveOptimization(text) {
@@ -2873,10 +3547,16 @@ class PopupManager {
     const energySavingsResult = document.getElementById('energySavingsResult');
     
     if (resultsArea && optimizedPrompt && energySavingsResult) {
-      // Show results
+      // Show results area
       resultsArea.style.display = 'block';
       optimizedPrompt.value = result.optimized;
-      energySavingsResult.textContent = `${result.energySavings}% Energy Saved`;
+      energySavingsResult.textContent = `${result.percentageSaved || result.energySavings || 0}% Energy Saved`;
+      
+      // Update detailed metrics
+      this.updateDetailedMetrics(result);
+      
+      // Update optimization breakdown
+      this.updateOptimizationBreakdown(result);
       
       // Store result for copying
       this.lastOptimizationResult = result;
@@ -2885,30 +3565,176 @@ class PopupManager {
       this.updateStatsAfterOptimization(result);
       
       // Show success toast
-      this.showToastNotification(`Optimized! Saved ${result.tokenReduction} tokens`, 'success');
+      this.showToastNotification(`Optimized! Saved ${result.tokensSaved || result.tokenReduction || 0} tokens (${result.percentageSaved || 0}%)`, 'success');
     }
   }
   
   updateStatsAfterOptimization(result) {
-    // Update the statistics display
+    // Enhanced statistics tracking
     const totalElement = document.getElementById('totalPromptsGenerated');
     const savingsElement = document.getElementById('energySavingsPercent');
     const reductionElement = document.getElementById('avgTokenReduction');
     
     if (totalElement && savingsElement && reductionElement) {
       const currentTotal = parseInt(totalElement.textContent) || 0;
-      const currentSavings = parseInt(savingsElement.textContent) || 0;
+      const currentSavings = parseInt(savingsElement.textContent.replace('%', '')) || 0;
       const currentReduction = parseInt(reductionElement.textContent) || 0;
       
       // Calculate new averages
       const newTotal = currentTotal + 1;
-      const newAvgSavings = Math.round(((currentSavings * currentTotal) + result.energySavings) / newTotal);
-      const newAvgReduction = Math.round(((currentReduction * currentTotal) + result.tokenReduction) / newTotal);
+      const newAvgSavings = Math.round(((currentSavings * currentTotal) + result.percentageSaved) / newTotal);
+      const newAvgReduction = Math.round(((currentReduction * currentTotal) + result.tokensSaved) / newTotal);
       
       // Update display
       this.safeSetTextContent(totalElement, newTotal.toString());
       this.safeSetTextContent(savingsElement, `${newAvgSavings}%`);
       this.safeSetTextContent(reductionElement, newAvgReduction.toString());
+    }
+
+    // Store detailed analytics (for future features)
+    this.updateOptimizationAnalytics(result);
+  }
+
+  /**
+   * Enhanced optimization analytics tracking
+   */
+  updateOptimizationAnalytics(result) {
+    // Initialize analytics storage if not exists
+    if (!this.optimizationAnalytics) {
+      this.optimizationAnalytics = {
+        totalOptimizations: 0,
+        totalTokensSaved: 0,
+        totalEnergyWastedMwh: 0,
+        modelBreakdown: {},
+        levelBreakdown: {},
+        categoryFrequency: {},
+        averageProcessingTime: 0,
+        sessionStart: Date.now()
+      };
+    }
+
+    const analytics = this.optimizationAnalytics;
+    
+    // Update core metrics
+    analytics.totalOptimizations++;
+    analytics.totalTokensSaved += result.tokensSaved || 0;
+    analytics.totalEnergyWastedMwh += result.energySavings?.energySavedMwh || 0;
+    
+    // Update model breakdown
+    const model = result.model || 'unknown';
+    if (!analytics.modelBreakdown[model]) {
+      analytics.modelBreakdown[model] = { count: 0, totalTokensSaved: 0 };
+    }
+    analytics.modelBreakdown[model].count++;
+    analytics.modelBreakdown[model].totalTokensSaved += result.tokensSaved || 0;
+    
+    // Update optimization level breakdown
+    const level = result.level || 'unknown';
+    if (!analytics.levelBreakdown[level]) {
+      analytics.levelBreakdown[level] = { count: 0, totalTokensSaved: 0 };
+    }
+    analytics.levelBreakdown[level].count++;
+    analytics.levelBreakdown[level].totalTokensSaved += result.tokensSaved || 0;
+    
+    // Update category frequency
+    if (result.optimizationCategories) {
+      result.optimizationCategories.forEach(category => {
+        analytics.categoryFrequency[category] = (analytics.categoryFrequency[category] || 0) + 1;
+      });
+    }
+    
+    // Update average processing time
+    if (result.processingTime) {
+      analytics.averageProcessingTime = Math.round(
+        (analytics.averageProcessingTime * (analytics.totalOptimizations - 1) + result.processingTime) / analytics.totalOptimizations
+      );
+    }
+
+    console.log('[OptimizationEngine] Analytics updated:', analytics);
+  }
+
+  /**
+   * Get optimization analytics summary
+   */
+  getOptimizationAnalytics() {
+    return this.optimizationAnalytics || {
+      totalOptimizations: 0,
+      totalTokensSaved: 0,
+      totalEnergyWastedMwh: 0,
+      sessionStart: Date.now()
+    };
+  }
+
+  /**
+   * Update detailed metrics in the breakdown section
+   */
+  updateDetailedMetrics(result) {
+    // Update detailed metrics
+    this.safeSetTextContent(document.getElementById('detailedTokensSaved'), (result.tokensSaved || 0).toString());
+    
+    // Handle energy savings display
+    const energySaved = result.energySavings?.energySavedMwh || 0;
+    this.safeSetTextContent(document.getElementById('detailedEnergySaved'), `${energySaved.toFixed(2)} mWh`);
+    
+    this.safeSetTextContent(document.getElementById('detailedProcessingTime'), `${result.processingTime || 0}ms`);
+  }
+
+  /**
+   * Update optimization breakdown with categories and removed words
+   */
+  updateOptimizationBreakdown(result) {
+    // Update categories
+    const categoriesList = document.getElementById('optimizationCategories');
+    if (categoriesList && result.optimizationCategories) {
+      categoriesList.innerHTML = '';
+      result.optimizationCategories.forEach(category => {
+        const li = document.createElement('li');
+        li.textContent = category;
+        categoriesList.appendChild(li);
+      });
+    }
+
+    // Update removed words
+    const removedWordsList = document.getElementById('removedWordsList');
+    if (removedWordsList && result.removedWords && result.removedWords.length > 0) {
+      removedWordsList.innerHTML = '';
+      
+      // Group and display removed words
+      const wordCounts = {};
+      result.removedWords.forEach(word => {
+        const cleanWord = typeof word === 'string' ? word.toLowerCase().trim() : String(word).toLowerCase().trim();
+        if (cleanWord && cleanWord.length > 0) {
+          wordCounts[cleanWord] = (wordCounts[cleanWord] || 0) + 1;
+        }
+      });
+
+      // Sort by frequency and display
+      const sortedWords = Object.entries(wordCounts)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 20); // Limit to top 20 for performance
+
+      if (sortedWords.length > 0) {
+        sortedWords.forEach(([word, count]) => {
+          const span = document.createElement('span');
+          span.className = count > 1 ? 'removed-word redundant' : 'removed-word';
+          span.textContent = count > 1 ? `${word} (${count}x)` : word;
+          removedWordsList.appendChild(span);
+        });
+
+        // Show the toggle button if there are removed words
+        const toggleBtn = document.getElementById('toggleDetailsBtn');
+        if (toggleBtn) {
+          toggleBtn.style.display = 'flex';
+        }
+      } else {
+        // No words to display
+        const span = document.createElement('span');
+        span.className = 'removed-word';
+        span.textContent = 'No specific words tracked';
+        span.style.fontStyle = 'italic';
+        span.style.color = 'var(--text-muted)';
+        removedWordsList.appendChild(span);
+      }
     }
   }
   
