@@ -28,6 +28,16 @@ try {
   console.warn('[EnergyTracker] PowerCalculator not available:', error.message);
 }
 
+// Import Energy-Saving Tips Database
+let ENERGY_TIPS_AVAILABLE = false;
+try {
+  importScripts('energy-saving-tips.js');
+  ENERGY_TIPS_AVAILABLE = true;
+  console.log('[EnergyTracker] Energy-saving tips database loaded successfully');
+} catch (error) {
+  console.warn('[EnergyTracker] Energy-saving tips database not available:', error.message);
+}
+
 try {
   importScripts('data-migration.js');
   DATA_MIGRATION_AVAILABLE = true;
@@ -64,7 +74,7 @@ try {
   console.warn('[EnergyTracker] Enhanced integration not available:', error.message);
 }
 
-console.log('[EnergyTracker] Dependency status - PowerCalculator:', POWER_CALCULATOR_AVAILABLE, 'DataMigration:', DATA_MIGRATION_AVAILABLE, 'AgentSystem:', AGENT_SYSTEM_AVAILABLE, 'EnhancedIntegration:', ENHANCED_INTEGRATION_AVAILABLE);
+console.log('[EnergyTracker] Dependency status - PowerCalculator:', POWER_CALCULATOR_AVAILABLE, 'DataMigration:', DATA_MIGRATION_AVAILABLE, 'AgentSystem:', AGENT_SYSTEM_AVAILABLE, 'EnhancedIntegration:', ENHANCED_INTEGRATION_AVAILABLE, 'EnergyTips:', ENERGY_TIPS_AVAILABLE);
 
 class EnergyTracker {
   constructor() {
@@ -89,6 +99,26 @@ class EnergyTracker {
     
     if (!this.powerCalculator) {
       console.log('[EnergyTracker] Using fallback power calculations');
+    }
+
+    // Initialize energy-saving tips database
+    this.energyTipsDatabase = null;
+    if (ENERGY_TIPS_AVAILABLE) {
+      try {
+        if (typeof EnergySavingTipsDatabase !== 'undefined') {
+          this.energyTipsDatabase = new EnergySavingTipsDatabase();
+          console.log('[EnergyTracker] Energy-saving tips database initialized successfully');
+        } else {
+          console.warn('[EnergyTracker] EnergySavingTipsDatabase class not found despite successful import');
+        }
+      } catch (error) {
+        console.error('[EnergyTracker] Energy-saving tips database initialization failed:', error.message);
+        this.energyTipsDatabase = null;
+      }
+    }
+    
+    if (!this.energyTipsDatabase) {
+      console.log('[EnergyTracker] Using fallback tip generation');
     }
     
     // Initialize data migration utility with enhanced safety
@@ -1517,7 +1547,7 @@ class EnergyTracker {
   }
 
   /**
-   * Enhanced contextual tip generation with more sophisticated logic
+   * Enhanced contextual tip generation using comprehensive tips database
    */
   generateAdvancedContextualTip(powerWatts, tabData, settings) {
     // Skip if in quiet hours
@@ -1533,7 +1563,29 @@ class EnergyTracker {
     if (Math.random() > frequencyChances[settings.frequency || 'normal']) {
       return null;
     }
-    
+
+    // Use comprehensive tips database if available
+    if (this.energyTipsDatabase) {
+      try {
+        const tip = this.energyTipsDatabase.getContextualTip(powerWatts, tabData, settings);
+        if (tip) {
+          console.log('[EnergyTracker] Generated contextual tip:', tip.type, 'for', powerWatts + 'W');
+          return tip;
+        }
+      } catch (error) {
+        console.error('[EnergyTracker] Tips database error:', error);
+        // Fall through to legacy system
+      }
+    }
+
+    // Fallback to legacy tip generation if database unavailable
+    return this.generateLegacyContextualTip(powerWatts, tabData, settings);
+  }
+
+  /**
+   * Legacy contextual tip generation (fallback)
+   */
+  generateLegacyContextualTip(powerWatts, tabData, settings) {
     const url = tabData.url || '';
     const title = tabData.title || '';
     const domain = this.getDomain(url);
@@ -1557,7 +1609,8 @@ class EnergyTracker {
           actionText: 'Pause Media',
           duration: 8000,
           cooldown: 10 * 60 * 1000,
-          efficiency: 'poor'
+          efficiency: 'poor',
+          icon: '📹'
         };
       }
       
@@ -1575,7 +1628,8 @@ class EnergyTracker {
           actionText: 'Close Tab',
           duration: 8000,
           cooldown: 15 * 60 * 1000,
-          efficiency: 'poor'
+          efficiency: 'poor',
+          icon: '🎮'
         };
       }
       
@@ -1591,7 +1645,8 @@ class EnergyTracker {
         actionText: 'Refresh Page',
         duration: 8000,
         cooldown: 10 * 60 * 1000,
-        efficiency: 'poor'
+        efficiency: 'poor',
+        icon: '🔄'
       };
     }
     
@@ -1613,7 +1668,8 @@ class EnergyTracker {
           actionText: 'Pause Media',
           duration: 6000,
           cooldown: 20 * 60 * 1000,
-          efficiency: 'average'
+          efficiency: 'average',
+          icon: '📱'
         };
       }
       
@@ -1630,7 +1686,8 @@ class EnergyTracker {
           actionText: 'Reduce Animations',
           duration: 6000,
           cooldown: 15 * 60 * 1000,
-          efficiency: 'average'
+          efficiency: 'average',
+          icon: '✨'
         };
       }
     }
@@ -1650,7 +1707,8 @@ class EnergyTracker {
           actionText: 'Keep it up!',
           duration: 4000,
           cooldown: 60 * 60 * 1000, // 1 hour
-          efficiency: 'excellent'
+          efficiency: 'excellent',
+          icon: '🌱'
         };
       }
     }

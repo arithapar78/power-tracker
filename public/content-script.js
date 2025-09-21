@@ -991,6 +991,55 @@
               await window.safeSendMessage({ type: 'OPEN_SETTINGS' });
               this.hideTip();
               break;
+
+            case 'optimize_tab':
+              this.optimizeTab();
+              this.hideTip();
+              break;
+
+            case 'toggle_dark_mode':
+              this.toggleDarkMode();
+              this.hideTip();
+              break;
+
+            case 'reset_zoom':
+              document.body.style.zoom = '100%';
+              this.showActionFeedback('Zoom reset to 100%');
+              this.hideTip();
+              break;
+
+            case 'bookmark_current':
+              // Modern browsers don't allow direct bookmarking, show instruction
+              this.showActionFeedback('Press Ctrl+D (Cmd+D on Mac) to bookmark this page');
+              this.hideTip();
+              break;
+
+            case 'exit_fullscreen':
+              if (document.fullscreenElement) {
+                document.exitFullscreen();
+                this.showActionFeedback('Exited fullscreen mode');
+              }
+              this.hideTip();
+              break;
+
+            case 'show_history':
+              await window.safeSendMessage({ type: 'OPEN_SETTINGS', params: { tab: 'history' } });
+              this.hideTip();
+              break;
+
+            case 'share_tips':
+              this.showShareTipsDialog();
+              break;
+
+            case 'enable_battery_saver':
+              this.enableBatterySaver();
+              this.hideTip();
+              break;
+
+            case 'organize_tabs':
+              this.showActionFeedback('Tip: Use Ctrl+Shift+A to search all tabs, or bookmark tabs for later reading');
+              this.hideTip();
+              break;
               
             default:
               console.warn('[EnergyTipNotifications] Unknown action:', action);
@@ -1056,6 +1105,180 @@
             }
           }, 300);
         }, 3000);
+      }
+
+      /**
+       * Optimize tab by applying multiple energy-saving measures
+       */
+      optimizeTab() {
+        let optimizationCount = 0;
+        
+        // Pause media elements
+        const mediaElements = document.querySelectorAll('video, audio');
+        mediaElements.forEach(element => {
+          if (!element.paused) {
+            element.pause();
+            optimizationCount++;
+          }
+        });
+        
+        // Reduce animations
+        this.reduceAnimations();
+        if (document.getElementById('energy-tip-animation-reducer')) {
+          optimizationCount++;
+        }
+        
+        // Hide images that are not in viewport (lazy optimization)
+        const images = document.querySelectorAll('img');
+        images.forEach(img => {
+          const rect = img.getBoundingClientRect();
+          if (rect.bottom < 0 || rect.top > window.innerHeight) {
+            if (!img.dataset.originalSrc) {
+              img.dataset.originalSrc = img.src;
+              img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNjY2MiLz48L3N2Zz4=';
+              optimizationCount++;
+            }
+          }
+        });
+        
+        this.showActionFeedback(`Tab optimized! ${optimizationCount} energy-saving measures applied.`);
+      }
+
+      /**
+       * Toggle dark mode (best effort)
+       */
+      toggleDarkMode() {
+        // Try common dark mode toggles
+        const darkModeSelectors = [
+          '[data-theme="dark"]',
+          '.dark-mode-toggle',
+          '.theme-toggle',
+          '[aria-label*="dark"]',
+          '[aria-label*="theme"]'
+        ];
+        
+        let toggled = false;
+        for (const selector of darkModeSelectors) {
+          const toggle = document.querySelector(selector);
+          if (toggle) {
+            toggle.click();
+            toggled = true;
+            break;
+          }
+        }
+        
+        if (!toggled) {
+          // Apply a basic dark mode filter
+          let darkFilter = document.getElementById('energy-tip-dark-filter');
+          if (!darkFilter) {
+            darkFilter = document.createElement('style');
+            darkFilter.id = 'energy-tip-dark-filter';
+            darkFilter.textContent = `
+              html { filter: invert(1) hue-rotate(180deg) !important; }
+              img, video, iframe, svg { filter: invert(1) hue-rotate(180deg) !important; }
+            `;
+            document.head.appendChild(darkFilter);
+            this.showActionFeedback('Dark mode filter applied');
+          } else {
+            darkFilter.remove();
+            this.showActionFeedback('Dark mode filter removed');
+          }
+        } else {
+          this.showActionFeedback('Dark mode toggled');
+        }
+      }
+
+      /**
+       * Show share tips dialog
+       */
+      showShareTipsDialog() {
+        const dialog = document.createElement('div');
+        dialog.className = 'energy-share-dialog';
+        dialog.innerHTML = `
+          <div class="energy-share-content">
+            <h3>Share Energy-Saving Tips! 🌱</h3>
+            <p>Help others save energy too:</p>
+            <div class="energy-share-actions">
+              <button class="share-btn" data-action="copy">Copy Tips Link</button>
+              <button class="share-btn" data-action="twitter">Share on Twitter</button>
+              <button class="share-btn" data-action="close">Close</button>
+            </div>
+          </div>
+        `;
+        
+        // Style the dialog
+        dialog.style.cssText = `
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: white;
+          border-radius: 12px;
+          padding: 24px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+          z-index: 2147483647;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        `;
+        
+        document.body.appendChild(dialog);
+        
+        // Handle dialog actions
+        dialog.addEventListener('click', (e) => {
+          const action = e.target.dataset.action;
+          if (action === 'copy') {
+            navigator.clipboard.writeText('Check out this energy-saving browser extension: PowerAI Energy Tracker!');
+            this.showActionFeedback('Tips link copied to clipboard!');
+          } else if (action === 'twitter') {
+            window.open('https://twitter.com/intent/tweet?text=Save%20energy%20while%20browsing%20with%20PowerAI%20Energy%20Tracker!%20%23EnergyEfficiency%20%23GreenTech', '_blank');
+          }
+          
+          dialog.remove();
+          this.hideTip();
+        });
+        
+        // Close on escape
+        const escapeHandler = (e) => {
+          if (e.key === 'Escape') {
+            dialog.remove();
+            document.removeEventListener('keydown', escapeHandler);
+            this.hideTip();
+          }
+        };
+        document.addEventListener('keydown', escapeHandler);
+      }
+
+      /**
+       * Enable battery saver measures
+       */
+      enableBatterySaver() {
+        let savingsCount = 0;
+        
+        // Reduce screen brightness (filter approach)
+        let brightnessFilter = document.getElementById('energy-tip-brightness');
+        if (!brightnessFilter) {
+          brightnessFilter = document.createElement('style');
+          brightnessFilter.id = 'energy-tip-brightness';
+          brightnessFilter.textContent = 'html { filter: brightness(0.8) !important; }';
+          document.head.appendChild(brightnessFilter);
+          savingsCount++;
+        }
+        
+        // Pause all media
+        const mediaElements = document.querySelectorAll('video, audio');
+        mediaElements.forEach(element => {
+          if (!element.paused) {
+            element.pause();
+            savingsCount++;
+          }
+        });
+        
+        // Reduce animations
+        this.reduceAnimations();
+        if (document.getElementById('energy-tip-animation-reducer')) {
+          savingsCount++;
+        }
+        
+        this.showActionFeedback(`Battery saver enabled! ${savingsCount} optimizations applied.`);
       }
 
       getDomain() {
