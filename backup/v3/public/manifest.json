@@ -1,23 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "Power Tracker",
-  "version": "3.0.0",
-  "description": "Track your browser's energy use, save history, export data, and get AI tips to reduce power consumption.",
+  "name": "Power Tracker – Monitor Your Browser’s Energy Impact",
+  "version": "2.1.0",
+  "description": "Monitor your browser's power consumption, save usage history, export data to JSON, and get AI-powered tips to reduce energy use.",
   "permissions": ["activeTab", "storage", "alarms", "scripting"],
   "background": { "service_worker": "service-worker.js" },
   "action": {
     "default_popup": "popup.html",
-    "default_icon": {
-      "16": "icon-16.png",
-      "48": "icon-48.png",
-      "128": "icon-128.png"
-    }
+    "default_icon": { "16": "icon-16.png", "48": "icon-48.png", "128": "icon-128.png" }
   },
-  "icons": {
-    "16": "icon-16.png",
-    "48": "icon-48.png",
-    "128": "icon-128.png"
-  },
+  "icons": { "16": "icon-16.png", "48": "icon-48.png", "128": "icon-128.png" },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],

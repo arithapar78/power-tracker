@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power Tracker - Teacher Dashboard</title>
+  <link rel="stylesheet" href="popup.css">
+  <style>
+    /* Additional styles specific to teacher dashboard */
+    body {
+      width: 100vw;
+      max-width: 1200px;
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 20px;
+      background: var(--background);
+    }
+
+    .dashboard-container {
+      width: 100%;
+      max-width: none;
+      min-height: auto;
+      padding: 0;
+      gap: var(--space-6);
+    }
+
+    .dashboard-header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: var(--text-inverse);
+      padding: var(--space-8);
+      border-radius: var(--radius-xl);
+      text-align: center;
+      margin-bottom: var(--space-6);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .dashboard-header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 0 0 var(--space-2) 0;
+    }
+
+    .dashboard-header p {
+      font-size: var(--text-lg);
+      opacity: 0.9;
+      margin: 0;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-6);
+      margin-bottom: var(--space-6);
+    }
+
+    .dashboard-section {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-6);
+      box-shadow: var(--shadow-md);
+    }
+
+    .section-title {
+      font-size: var(--text-xl);
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 var(--space-4) 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .section-icon {
+      font-size: 1.5rem;
+    }
+
+    .class-code-display {
+      background: var(--surface);
+      border: 2px solid var(--primary);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      text-align: center;
+      margin-top: var(--space-4);
+      font-family: var(--font-mono);
+    }
+
+    .class-code-display .code {
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: var(--space-2);
+      letter-spacing: 2px;
+    }
+
+    .class-code-display .instructions {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      line-height: var(--leading-relaxed);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-4);
+      margin: var(--space-4) 0;
+    }
+
+    .stat-box {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .stat-box .stat-value {
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: var(--space-1);
+      font-family: var(--font-mono);
+    }
+
+    .stat-box .stat-label {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    .export-section {
+      background: linear-gradient(135deg, #fef3c7, #fed7aa);
+      border: 2px solid #f59e0b;
+    }
+
+    .export-section .section-title {
+      color: #92400e;
+    }
+
+    .report-preview {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      margin: var(--space-4) 0;
+      border: 1px solid var(--border);
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .report-preview table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--text-sm);
+    }
+
+    .report-preview th,
+    .report-preview td {
+      padding: var(--space-2);
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .report-preview th {
+      font-weight: 600;
+      color: var(--text-primary);
+      background: var(--surface-hover);
+    }
+
+    .report-preview td {
+      color: var(--text-secondary);
+    }
+
+    .no-data {
+      text-align: center;
+      color: var(--text-muted);
+      font-style: italic;
+      padding: var(--space-4);
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      body {
+        padding: 10px;
+      }
+      
+      .dashboard-header h1 {
+        font-size: 2rem;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+      <h1>🏫 Power Tracker Teacher Dashboard</h1>
+      <p>Manage classes and track student energy-saving progress locally</p>
+    </div>
+
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-grid">
+      <!-- Class Creation Section -->
+      <div class="dashboard-section">
+        <h2 class="section-title">
+          <span class="section-icon">🎓</span>
+          Create New Class
+        </h2>
+        <div class="form-group">
+          <label for="className">Class Name</label>
+          <input type="text" id="className" placeholder="e.g., Mrs. Smith's 5th Grade" maxlength="50">
+        </div>
+        <div class="form-group">
+          <label for="gradeLevel">Grade Level</label>
+          <select id="gradeLevel">
+            <option value="">Select Grade Level</option>
+            <option value="K-2">Kindergarten - 2nd Grade</option>
+            <option value="3-5">3rd - 5th Grade</option>
+            <option value="6-8">6th - 8th Grade</option>
+            <option value="9-12">9th - 12th Grade</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="generateClassCode">
+          <span class="btn-icon">🔗</span>
+          Generate Class Code
+        </button>
+        
+        <div id="generatedCodeDisplay" class="class-code-display" style="display: none;">
+          <div class="code" id="generatedCode">SAMPLE123</div>
+          <div class="instructions">
+            <strong>Share this code with your students!</strong><br>
+            Students can enter this code when they enable School Mode in the Power Tracker extension.
+          </div>
+        </div>
+      </div>
+
+      <!-- Current Classes Section -->
+      <div class="dashboard-section">
+        <h2 class="section-title">
+          <span class="section-icon">📚</span>
+          Your Classes
+        </h2>
+        <div id="classesList">
+          <div class="no-data">No classes created yet. Create your first class to get started!</div>
+        </div>
+      </div>
+
+      <!-- Local Statistics Section -->
+      <div class="dashboard-section">
+        <h2 class="section-title">
+          <span class="section-icon">📊</span>
+          This Device Statistics
+        </h2>
+        <p style="font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-4);">
+          <strong>Note:</strong> These statistics only show data from students who have used this specific device/browser.
+        </p>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-value" id="totalStudentsLocal">0</div>
+            <div class="stat-label">Students (This Device)</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="totalClassesLocal">0</div>
+            <div class="stat-label">Classes Created</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="avgEnergyScoreLocal">--</div>
+            <div class="stat-label">Avg Energy Score</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="totalCO2SavedLocal">--</div>
+            <div class="stat-label">CO₂ Saved (est.)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Energy Insights Section -->
+      <div class="dashboard-section">
+        <h2 class="section-title">
+          <span class="section-icon">🌱</span>
+          Energy Insights
+        </h2>
+        <div id="energyInsights">
+          <div class="no-data">Use the extension to generate energy insights!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export & Reports Section -->
+    <div class="dashboard-section export-section full-width">
+      <h2 class="section-title">
+        <span class="section-icon">📋</span>
+        Export Class Reports
+      </h2>
+      <p style="margin-bottom: var(--space-4); color: #92400e;">
+        Generate downloadable reports for your classes with energy saving statistics and student progress.
+      </p>
+      
+      <div class="form-group">
+        <label for="exportClass">Select Class to Export</label>
+        <select id="exportClass">
+          <option value="">Select a class...</option>
+        </select>
+      </div>
+      
+      <div class="form-actions">
+        <button class="btn btn-primary" id="exportCSVBtn">
+          <span class="btn-icon">📊</span>
+          Export as CSV
+        </button>
+        <button class="btn btn-secondary" id="previewReportBtn">
+          <span class="btn-icon">👁️</span>
+          Preview Report
+        </button>
+      </div>
+      
+      <div id="reportPreview" class="report-preview" style="display: none;">
+        <h4>Report Preview</h4>
+        <div id="reportContent">
+          <!-- Report content will be generated here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="dashboard-section" style="text-align: center; background: var(--surface); border: none; box-shadow: none;">
+      <p style="color: var(--text-muted); font-size: var(--text-sm); margin: 0;">
+        <strong>Local-Only System:</strong> All data is stored on this device only. 
+        No data is shared between different computers or sent to external servers.
+      </p>
+      <div style="margin-top: var(--space-4);">
+        <button class="btn btn-secondary" onclick="window.close()">
+          <span class="btn-icon">🏠</span>
+          Back to Extension
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="school-manager.js"></script>
+  <script src="teacher-dashboard.js"></script>
+</body>
+</html>
