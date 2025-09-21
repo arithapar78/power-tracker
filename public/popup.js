@@ -2745,17 +2745,8 @@ class PopupManager {
    * Real-time prompt input change handler
    */
   handlePromptInputChange() {
-    const promptInput = document.getElementById('promptInput');
-    const targetModel = document.getElementById('targetModel');
-    
-    if (!promptInput) return;
-    
-    const text = promptInput.value.trim();
-    const model = targetModel?.value || 'gpt-4';
-    
-    // Update original token count
-    const tokenCount = this.estimateTokenCount(text, model);
-    this.updateOriginalTokenCount(tokenCount);
+    // Use the improved real-time token counting system
+    this.updateRealTimeTokenCount();
     
     // Hide optimized metrics when input changes
     this.hideOptimizedMetrics();
@@ -3382,26 +3373,134 @@ class PopupManager {
   }
 
   /**
-   * REAL-TIME TOKEN COUNTING SYSTEM
+   * ENHANCED REAL-TIME TOKEN COUNTING SYSTEM
+   * Improved accuracy using GPT tokenization patterns
    */
   estimateTokenCount(text, model) {
     if (!text || typeof text !== 'string') return 0;
     
-    // Model-specific token estimation (approximate)
-    const baseTokens = text.length / 4; // ~4 characters = 1 token for English
+    // Enhanced tokenization approach based on GPT patterns
+    let tokenCount = 0;
     
+    // Preprocessing: normalize whitespace and handle special characters
+    const normalizedText = text.trim().replace(/\s+/g, ' ');
+    if (normalizedText.length === 0) return 0;
+    
+    // Split into words and punctuation
+    const tokens = normalizedText.match(/\w+|[^\w\s]/g) || [];
+    
+    for (const token of tokens) {
+      if (/^\w+$/.test(token)) {
+        // Word token: estimate based on length and common patterns
+        const wordLength = token.length;
+        
+        if (wordLength <= 3) {
+          tokenCount += 1; // Short words: "the", "and", "is"
+        } else if (wordLength <= 6) {
+          tokenCount += 1; // Medium words: "hello", "world"
+        } else if (wordLength <= 10) {
+          // Longer words may split: "understand" = 1, "development" = 2
+          tokenCount += Math.ceil(wordLength / 6);
+        } else {
+          // Very long words often split into multiple tokens
+          tokenCount += Math.ceil(wordLength / 5);
+        }
+        
+        // Adjust for common prefixes/suffixes that create token boundaries
+        if (token.match(/^(un|re|pre|dis|over|under|anti)/)) {
+          tokenCount += 0.2; // Slight increase for prefix boundaries
+        }
+        if (token.match(/(ing|ed|er|est|ly|tion|sion)$/)) {
+          tokenCount += 0.1; // Slight increase for suffix boundaries
+        }
+      } else {
+        // Punctuation and special characters: mostly 1 token each
+        tokenCount += 1;
+      }
+    }
+    
+    // Account for spaces between words (some models count spaces)
+    const spaceCount = (normalizedText.match(/\s/g) || []).length;
+    tokenCount += spaceCount * 0.1; // Small adjustment for spaces
+    
+    // Model-specific adjustments based on tokenization differences
     const modelMultipliers = {
-      'gpt-4': 1.0,
-      'gpt-5': 1.0,
-      'claude-4': 0.95,
-      'claude-sonnet': 0.95,
-      'grok-4': 1.05,
-      'deepseek-r1': 0.9,
-      'llama-4': 0.85
+      'gpt-4': 1.0,        // Baseline (GPT-4 tokenization)
+      'gpt-5': 0.98,       // Slightly more efficient
+      'claude-4': 0.92,    // Claude generally more efficient
+      'claude-sonnet': 0.94,
+      'grok-4': 1.08,      // Grok tends to use more tokens
+      'deepseek-r1': 0.88, // DeepSeek very efficient
+      'llama-4': 0.85      // Llama typically most efficient
     };
     
     const multiplier = modelMultipliers[model] || 1.0;
-    return Math.round(baseTokens * multiplier);
+    const finalCount = Math.round(tokenCount * multiplier);
+    
+    // Ensure minimum of 1 token for any non-empty text
+    return Math.max(1, finalCount);
+  }
+  
+  /**
+   * Real-time token count update for prompt input
+   */
+  updateRealTimeTokenCount() {
+    const promptInput = document.getElementById('promptInput');
+    const targetModel = document.getElementById('targetModel');
+    
+    if (!promptInput) return;
+    
+    const text = promptInput.value.trim();
+    const model = targetModel?.value || 'gpt-4';
+    
+    // Throttle updates to prevent excessive calculations
+    if (this.tokenCountThrottle) {
+      clearTimeout(this.tokenCountThrottle);
+    }
+    
+    this.tokenCountThrottle = setTimeout(() => {
+      const tokenCount = this.estimateTokenCount(text, model);
+      this.updateOriginalTokenCount(tokenCount);
+      
+      // Store for analytics
+      this.lastTokenCount = {
+        text: text,
+        tokens: tokenCount,
+        model: model,
+        timestamp: Date.now()
+      };
+      
+      // Show token density info
+      this.updateTokenDensityInfo(text, tokenCount);
+    }, 150); // 150ms debounce
+  }
+  
+  /**
+   * Update token density information
+   */
+  updateTokenDensityInfo(text, tokens) {
+    const density = text.length > 0 ? (tokens / text.length * 100).toFixed(1) : 0;
+    const wordsEstimate = text.split(/\s+/).filter(w => w.length > 0).length;
+    const tokensPerWord = wordsEstimate > 0 ? (tokens / wordsEstimate).toFixed(2) : 0;
+    
+    // Update density display if element exists
+    const densityInfo = document.getElementById('tokenDensityInfo');
+    if (densityInfo) {
+      densityInfo.innerHTML = `
+        <small class="token-density">
+          ${density}% density • ${tokensPerWord} tokens/word • ${wordsEstimate} words
+        </small>
+      `;
+      
+      // Color coding based on efficiency
+      if (parseFloat(density) > 30) {
+        densityInfo.className = 'token-density-high';
+      } else if (parseFloat(density) > 25) {
+        densityInfo.className = 'token-density-medium';
+      } else {
+        densityInfo.className = 'token-density-good';
+      }
+    }
   }
 
   calculateTokenSavings(originalTokens, optimizedTokens, model) {
