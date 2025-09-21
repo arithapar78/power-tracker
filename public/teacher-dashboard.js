@@ -87,9 +87,13 @@ class TeacherDashboard {
     // Export functionality
     this.safeAddEventListener('exportCSVBtn', 'click', this.handleExportCSV.bind(this));
     this.safeAddEventListener('previewReportBtn', 'click', this.handlePreviewReport.bind(this));
+    this.safeAddEventListener('advancedExportBtn', 'click', this.handleAdvancedExport.bind(this));
     
     // Update export class dropdown when classes change
     this.updateExportClassOptions();
+    
+    // Make this instance available globally for dialog buttons
+    window.teacherDashboard = this;
     
     console.log('[TeacherDashboard] Event listeners setup complete');
   }
@@ -494,6 +498,18 @@ class TeacherDashboard {
     `;
   }
   
+  handleAdvancedExport() {
+    const exportSelect = document.getElementById('exportClass');
+    const selectedClass = exportSelect?.value;
+    
+    if (!selectedClass) {
+      this.showMessage('Please select a class for advanced export', 'error');
+      return;
+    }
+    
+    this.showExportOptions(selectedClass);
+  }
+  
   updateDashboardUI() {
     this.updateClassesList();
     this.updateLocalStatistics();
@@ -626,6 +642,541 @@ class TeacherDashboard {
   
   getLocalStudentData() {
     return this.localStudentData;
+  }
+  
+  // Enhanced CSV Export with multiple report types
+  generateDetailedClassReport(classCode) {
+    const classData = this.getClass(classCode);
+    if (!classData) return null;
+    
+    const report = {
+      classInfo: {
+        name: classData.name,
+        code: classCode,
+        created: new Date(classData.created).toLocaleDateString(),
+        totalStudents: classData.statistics.totalStudents,
+        reportGenerated: new Date().toLocaleString()
+      },
+      
+      // Student performance summary
+      studentSummary: this.getStudentsForClass(classCode).map(student => ({
+        name: student.name,
+        joinedDate: student.joinedDate ? new Date(student.joinedDate).toLocaleDateString() : 'Unknown',
+        energyScore: student.energyScore || 0,
+        lessonsCompleted: student.lessonsCompleted || 0,
+        achievementsEarned: student.achievements ? student.achievements.length : 0,
+        totalPoints: student.totalPoints || 0,
+        goalCompletionRate: this.calculateGoalCompletionRate(student),
+        lastActive: student.lastActive ? new Date(student.lastActive).toLocaleDateString() : 'Never',
+        averageSessionTime: this.calculateAverageSessionTime(student)
+      })),
+      
+      // Class statistics
+      classStats: {
+        averageEnergyScore: classData.statistics.avgEnergyScore,
+        averageLessonsCompleted: this.calculateClassAverage(classData, 'lessonsCompleted'),
+        totalAchievements: this.getTotalAchievements(classData),
+        mostActiveStudent: this.findMostActiveStudent(classData),
+        topEnergySaver: this.findTopEnergySaver(classData),
+        classEngagementScore: this.calculateEngagementScore(classData)
+      },
+      
+      // Daily progress tracking
+      dailyProgress: this.generateDailyProgressReport(classCode),
+      
+      // Achievement distribution
+      achievementStats: this.generateAchievementDistribution(classCode),
+      
+      // Goal completion tracking
+      goalStats: this.generateGoalCompletionStats(classCode)
+    };
+    
+    return report;
+  }
+  
+  getStudentsForClass(classCode) {
+    // Get students from local data who are registered for this class
+    return Object.values(this.localStudentData).filter(student =>
+      student.classCode === classCode
+    );
+  }
+  
+  calculateGoalCompletionRate(student) {
+    if (!student.goalData || !student.goalData.goals) return 0;
+    
+    const goals = Object.values(student.goalData.goals);
+    const completedGoals = goals.filter(goal => goal.current >= goal.target).length;
+    
+    return goals.length > 0 ? Math.round((completedGoals / goals.length) * 100) : 0;
+  }
+  
+  calculateAverageSessionTime(student) {
+    if (!student.sessionData || !student.sessionData.sessions) return 0;
+    
+    const sessions = student.sessionData.sessions;
+    const totalTime = sessions.reduce((total, session) => total + (session.duration || 0), 0);
+    
+    return sessions.length > 0 ? Math.round(totalTime / sessions.length / 60) : 0; // Convert to minutes
+  }
+  
+  calculateClassAverage(classData, field) {
+    const students = this.getStudentsForClass(classData.code);
+    if (students.length === 0) return 0;
+    
+    const total = students.reduce((sum, student) => sum + (student[field] || 0), 0);
+    return Math.round((total / students.length) * 100) / 100;
+  }
+  
+  getTotalAchievements(classData) {
+    const students = this.getStudentsForClass(classData.code);
+    return students.reduce((total, student) =>
+      total + (student.achievements ? student.achievements.length : 0), 0);
+  }
+  
+  findMostActiveStudent(classData) {
+    const students = this.getStudentsForClass(classData.code);
+    if (students.length === 0) return 'N/A';
+    
+    const mostActive = students.reduce((most, student) => {
+      const studentSessions = student.sessionData ? student.sessionData.sessions.length : 0;
+      const mostSessions = most.sessionData ? most.sessionData.sessions.length : 0;
+      
+      return studentSessions > mostSessions ? student : most;
+    }, students[0]);
+    
+    return mostActive.name || 'Unknown';
+  }
+  
+  findTopEnergySaver(classData) {
+    const students = this.getStudentsForClass(classData.code);
+    if (students.length === 0) return 'N/A';
+    
+    const topSaver = students.reduce((top, student) => {
+      return (student.energyScore || 0) > (top.energyScore || 0) ? student : top;
+    }, students[0]);
+    
+    return topSaver.name || 'Unknown';
+  }
+  
+  calculateEngagementScore(classData) {
+    const students = this.getStudentsForClass(classData.code);
+    if (students.length === 0) return 0;
+    
+    const engagementFactors = students.map(student => {
+      const lessonsScore = Math.min((student.lessonsCompleted || 0) * 10, 50);
+      const achievementsScore = Math.min((student.achievements ? student.achievements.length : 0) * 5, 25);
+      const energyScore = Math.min((student.energyScore || 0), 25);
+      
+      return lessonsScore + achievementsScore + energyScore;
+    });
+    
+    const averageEngagement = engagementFactors.reduce((sum, score) => sum + score, 0) / students.length;
+    return Math.round(averageEngagement);
+  }
+  
+  generateDailyProgressReport(classCode) {
+    const students = this.getStudentsForClass(classCode);
+    const dailyData = {};
+    const last30Days = [];
+    
+    // Generate last 30 days
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+      const dateString = date.toDateString();
+      last30Days.push(dateString);
+      dailyData[dateString] = {
+        date: date.toLocaleDateString(),
+        activeStudents: 0,
+        totalEnergyScored: 0,
+        lessonsCompleted: 0,
+        achievementsEarned: 0
+      };
+    }
+    
+    // Populate with actual student data
+    students.forEach(student => {
+      if (student.dailyProgress) {
+        Object.entries(student.dailyProgress).forEach(([date, progress]) => {
+          if (dailyData[date]) {
+            dailyData[date].activeStudents++;
+            dailyData[date].totalEnergyScored += progress.energyReduction || 0;
+            dailyData[date].lessonsCompleted += progress.lessonsCompleted || 0;
+            dailyData[date].achievementsEarned += progress.achievementsEarned || 0;
+          }
+        });
+      }
+    });
+    
+    return Object.values(dailyData);
+  }
+  
+  generateAchievementDistribution(classCode) {
+    const students = this.getStudentsForClass(classCode);
+    const achievementCounts = {};
+    
+    students.forEach(student => {
+      if (student.achievements) {
+        student.achievements.forEach(achievement => {
+          const category = achievement.category || 'other';
+          achievementCounts[category] = (achievementCounts[category] || 0) + 1;
+        });
+      }
+    });
+    
+    return Object.entries(achievementCounts).map(([category, count]) => ({
+      category: category,
+      count: count,
+      percentage: students.length > 0 ? Math.round((count / students.length) * 100) : 0
+    }));
+  }
+  
+  generateGoalCompletionStats(classCode) {
+    const students = this.getStudentsForClass(classCode);
+    const goalTypes = ['daily-energy-reduction', 'weekly-lessons', 'co2-prevention', 'streak-maintenance'];
+    
+    return goalTypes.map(goalType => {
+      const studentsWithGoal = students.filter(student =>
+        student.goalData && student.goalData.goals && student.goalData.goals[goalType]
+      );
+      
+      const completedGoals = studentsWithGoal.filter(student => {
+        const goal = student.goalData.goals[goalType];
+        return goal.current >= goal.target;
+      });
+      
+      return {
+        goalType: goalType.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        totalStudents: studentsWithGoal.length,
+        completedCount: completedGoals.length,
+        completionRate: studentsWithGoal.length > 0
+          ? Math.round((completedGoals.length / studentsWithGoal.length) * 100)
+          : 0
+      };
+    });
+  }
+  
+  // Multiple CSV export formats
+  exportStudentSummaryCSV(classCode) {
+    const report = this.generateDetailedClassReport(classCode);
+    if (!report) {
+      this.showMessage('No data available for this class', 'error');
+      return;
+    }
+    
+    const headers = [
+      'Student Name',
+      'Joined Date',
+      'Energy Score',
+      'Lessons Completed',
+      'Achievements',
+      'Total Points',
+      'Goal Completion %',
+      'Last Active',
+      'Avg Session (min)'
+    ];
+    
+    const rows = report.studentSummary.map(student => [
+      student.name,
+      student.joinedDate,
+      student.energyScore,
+      student.lessonsCompleted,
+      student.achievementsEarned,
+      student.totalPoints,
+      student.goalCompletionRate + '%',
+      student.lastActive,
+      student.averageSessionTime
+    ]);
+    
+    const csv = this.arrayToCSV([headers, ...rows]);
+    this.downloadCSVFile(csv, `${classCode}-student-summary-${this.getDateString()}.csv`);
+  }
+  
+  exportDailyProgressCSV(classCode) {
+    const report = this.generateDetailedClassReport(classCode);
+    if (!report) {
+      this.showMessage('No data available for this class', 'error');
+      return;
+    }
+    
+    const headers = [
+      'Date',
+      'Active Students',
+      'Total Energy Scored',
+      'Lessons Completed',
+      'Achievements Earned'
+    ];
+    
+    const rows = report.dailyProgress.map(day => [
+      day.date,
+      day.activeStudents,
+      day.totalEnergyScored.toFixed(1),
+      day.lessonsCompleted,
+      day.achievementsEarned
+    ]);
+    
+    const csv = this.arrayToCSV([headers, ...rows]);
+    this.downloadCSVFile(csv, `${classCode}-daily-progress-${this.getDateString()}.csv`);
+  }
+  
+  exportDetailedAnalyticsCSV(classCode) {
+    const report = this.generateDetailedClassReport(classCode);
+    if (!report) {
+      this.showMessage('No data available for this class', 'error');
+      return;
+    }
+    
+    const sections = [];
+    
+    // Class Information Section
+    sections.push(['CLASS INFORMATION', '', '', '', '']);
+    sections.push(['Class Name', report.classInfo.name, '', '', '']);
+    sections.push(['Class Code', report.classInfo.code, '', '', '']);
+    sections.push(['Created Date', report.classInfo.created, '', '', '']);
+    sections.push(['Total Students', report.classInfo.totalStudents, '', '', '']);
+    sections.push(['Report Generated', report.classInfo.reportGenerated, '', '', '']);
+    sections.push(['', '', '', '', '']); // Empty row
+    
+    // Class Statistics Section
+    sections.push(['CLASS STATISTICS', '', '', '', '']);
+    sections.push(['Average Energy Score', report.classStats.averageEnergyScore, '', '', '']);
+    sections.push(['Average Lessons Completed', report.classStats.averageLessonsCompleted, '', '', '']);
+    sections.push(['Total Achievements Earned', report.classStats.totalAchievements, '', '', '']);
+    sections.push(['Most Active Student', report.classStats.mostActiveStudent, '', '', '']);
+    sections.push(['Top Energy Saver', report.classStats.topEnergySaver, '', '', '']);
+    sections.push(['Class Engagement Score', report.classStats.classEngagementScore, '', '', '']);
+    sections.push(['', '', '', '', '']); // Empty row
+    
+    // Goal Completion Statistics
+    sections.push(['GOAL COMPLETION STATS', '', '', '', '']);
+    sections.push(['Goal Type', 'Total Students', 'Completed', 'Completion Rate', '']);
+    report.goalStats.forEach(goal => {
+      sections.push([goal.goalType, goal.totalStudents, goal.completedCount, goal.completionRate + '%', '']);
+    });
+    sections.push(['', '', '', '', '']); // Empty row
+    
+    // Achievement Distribution
+    sections.push(['ACHIEVEMENT DISTRIBUTION', '', '', '', '']);
+    sections.push(['Category', 'Count', 'Percentage', '', '']);
+    report.achievementStats.forEach(achievement => {
+      sections.push([achievement.category, achievement.count, achievement.percentage + '%', '', '']);
+    });
+    
+    const csv = this.arrayToCSV(sections);
+    this.downloadCSVFile(csv, `${classCode}-detailed-analytics-${this.getDateString()}.csv`);
+  }
+  
+  arrayToCSV(data) {
+    return data.map(row =>
+      row.map(field => {
+        // Escape quotes and wrap in quotes if contains comma, quote, or newline
+        const stringField = String(field);
+        if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {
+          return '"' + stringField.replace(/"/g, '""') + '"';
+        }
+        return stringField;
+      }).join(',')
+    ).join('\n');
+  }
+  
+  downloadCSVFile(csv, filename) {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      console.log('[TeacherDashboard] CSV exported:', filename);
+      this.showMessage(`Report exported: ${filename}`, 'success');
+    } else {
+      console.error('[TeacherDashboard] CSV download not supported');
+      this.showMessage('CSV export not supported in this browser', 'error');
+    }
+  }
+  
+  getDateString() {
+    const now = new Date();
+    return now.toISOString().split('T')[0]; // YYYY-MM-DD format
+  }
+  
+  // Enhanced UI for export options
+  showExportOptions(classCode) {
+    const exportDialog = document.createElement('div');
+    exportDialog.className = 'export-dialog-overlay';
+    
+    exportDialog.innerHTML = `
+      <div class="export-dialog">
+        <div class="export-header">
+          <h3>📊 Export Class Reports</h3>
+          <button class="dialog-close" onclick="this.parentElement.parentElement.parentElement.remove()">×</button>
+        </div>
+        <div class="export-content">
+          <div class="export-option">
+            <div class="option-info">
+              <h4>👥 Student Summary Report</h4>
+              <p>Individual student performance, scores, and progress</p>
+            </div>
+            <button class="export-btn" onclick="window.teacherDashboard.exportStudentSummaryCSV('${classCode}')">
+              Export CSV
+            </button>
+          </div>
+          
+          <div class="export-option">
+            <div class="option-info">
+              <h4>📈 Daily Progress Report</h4>
+              <p>Daily activity and engagement trends over time</p>
+            </div>
+            <button class="export-btn" onclick="window.teacherDashboard.exportDailyProgressCSV('${classCode}')">
+              Export CSV
+            </button>
+          </div>
+          
+          <div class="export-option">
+            <div class="option-info">
+              <h4>🔍 Detailed Analytics Report</h4>
+              <p>Comprehensive class statistics and insights</p>
+            </div>
+            <button class="export-btn" onclick="window.teacherDashboard.exportDetailedAnalyticsCSV('${classCode}')">
+              Export CSV
+            </button>
+          </div>
+          
+          <div class="export-option preview">
+            <div class="option-info">
+              <h4>👁️ Live Report Preview</h4>
+              <p>View report data before exporting</p>
+            </div>
+            <button class="export-btn secondary" onclick="window.teacherDashboard.showReportPreview('${classCode}')">
+              Preview
+            </button>
+          </div>
+        </div>
+        <div class="export-footer">
+          <p class="export-note">💡 Reports include data from all students in this class</p>
+        </div>
+      </div>
+    `;
+    
+    exportDialog.style.cssText = `
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999; animation: slideInExport 0.3s ease-out;
+    `;
+    
+    document.body.appendChild(exportDialog);
+  }
+  
+  showReportPreview(classCode) {
+    const report = this.generateDetailedClassReport(classCode);
+    if (!report) {
+      this.showMessage('No data available for this class', 'error');
+      return;
+    }
+    
+    const previewDialog = document.createElement('div');
+    previewDialog.className = 'preview-dialog-overlay';
+    
+    previewDialog.innerHTML = `
+      <div class="preview-dialog">
+        <div class="preview-header">
+          <h3>📋 Report Preview - ${report.classInfo.name}</h3>
+          <button class="dialog-close" onclick="this.parentElement.parentElement.parentElement.remove()">×</button>
+        </div>
+        <div class="preview-content">
+          <div class="preview-section">
+            <h4>📊 Class Overview</h4>
+            <div class="preview-stats">
+              <div class="stat-item">
+                <span class="stat-value">${report.classInfo.totalStudents}</span>
+                <span class="stat-label">Total Students</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">${report.classStats.averageEnergyScore}</span>
+                <span class="stat-label">Avg Energy Score</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">${report.classStats.averageLessonsCompleted}</span>
+                <span class="stat-label">Avg Lessons</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">${report.classStats.classEngagementScore}</span>
+                <span class="stat-label">Engagement Score</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="preview-section">
+            <h4>🏆 Top Performers</h4>
+            <div class="top-performers">
+              <p><strong>Most Active:</strong> ${report.classStats.mostActiveStudent}</p>
+              <p><strong>Top Energy Saver:</strong> ${report.classStats.topEnergySaver}</p>
+              <p><strong>Total Achievements:</strong> ${report.classStats.totalAchievements}</p>
+            </div>
+          </div>
+          
+          <div class="preview-section">
+            <h4>🎯 Goal Completion Rates</h4>
+            <div class="goal-completion-chart">
+              ${report.goalStats.map(goal => `
+                <div class="goal-bar">
+                  <div class="goal-label">${goal.goalType}</div>
+                  <div class="goal-progress">
+                    <div class="goal-fill" style="width: ${goal.completionRate}%"></div>
+                    <span class="goal-percentage">${goal.completionRate}%</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          
+          <div class="preview-section">
+            <h4>👥 Student Summary</h4>
+            <div class="student-list">
+              ${report.studentSummary.slice(0, 5).map(student => `
+                <div class="student-row">
+                  <span class="student-name">${this.escapeHtml(student.name)}</span>
+                  <span class="student-score">${student.energyScore} pts</span>
+                  <span class="student-lessons">${student.lessonsCompleted} lessons</span>
+                </div>
+              `).join('')}
+              ${report.studentSummary.length > 5 ? `
+                <div class="student-row more">
+                  <span>... and ${report.studentSummary.length - 5} more students</span>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+        <div class="preview-actions">
+          <button class="btn btn-secondary" onclick="this.parentElement.parentElement.parentElement.remove()">
+            Close Preview
+          </button>
+          <button class="btn btn-primary" onclick="window.teacherDashboard.showExportOptions('${classCode}')">
+            Export Reports
+          </button>
+        </div>
+      </div>
+    `;
+    
+    previewDialog.style.cssText = `
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999; animation: slideInPreview 0.4s ease-out;
+    `;
+    
+    document.body.appendChild(previewDialog);
+  }
+  
+  showNotification(message, type = 'info') {
+    this.showMessage(message, type);
   }
 }
 

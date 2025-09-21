@@ -10,6 +10,7 @@ class SchoolManager {
     this.achievements = [];
     this.lessonManager = null;
     this.currentLesson = null;
+    this.goalSystem = null;
     
     // Storage keys for school data
     this.STORAGE_KEYS = {
@@ -34,6 +35,13 @@ class SchoolManager {
         this.lessonManager = new LessonContentManager();
         window.lessonManager = this.lessonManager; // Make globally available
         console.log('[SchoolManager] Lesson content manager initialized');
+      }
+      
+      // Initialize goal achievement system
+      if (typeof GoalAchievementSystem !== 'undefined') {
+        this.goalSystem = new GoalAchievementSystem(this);
+        window.goalSystem = this.goalSystem; // Make globally available
+        console.log('[SchoolManager] Goal achievement system initialized');
       }
       
       // Load existing school settings
@@ -625,38 +633,19 @@ class SchoolManager {
   }
   
   checkLessonAchievements() {
-    if (!this.studentInfo) return;
+    if (!this.studentInfo || !this.goalSystem) return;
     
-    const lessonsCompleted = this.studentInfo.lessonsCompleted || 0;
-    const newAchievements = [];
-    const existingAchievements = this.achievements.map(a => a.id);
+    // Use the enhanced goal achievement system
+    const energyData = {
+      lessonsCompleted: this.studentInfo.lessonsCompleted || 0
+    };
     
-    // Lesson Learner (3 lessons)
-    if (lessonsCompleted >= 3 && !existingAchievements.includes('lesson-learner')) {
-      newAchievements.push({
-        id: 'lesson-learner',
-        emoji: '🎓',
-        title: 'Lesson Learner',
-        description: 'Completed 3 energy lessons!',
-        earnedDate: Date.now()
-      });
-    }
-    
-    // Knowledge Master (10 lessons)
-    if (lessonsCompleted >= 10 && !existingAchievements.includes('knowledge-master')) {
-      newAchievements.push({
-        id: 'knowledge-master',
-        emoji: '🧠',
-        title: 'Knowledge Master',
-        description: 'Completed 10 energy lessons!',
-        earnedDate: Date.now()
-      });
-    }
+    const newAchievements = this.goalSystem.checkAchievements(energyData);
     
     if (newAchievements.length > 0) {
+      // Legacy achievements array (for backward compatibility)
       this.achievements.push(...newAchievements);
       this.saveAchievements();
-      this.showAchievementNotification(newAchievements[0]);
     }
   }
   
@@ -826,6 +815,390 @@ class SchoolManager {
   
   getAchievements() {
     return this.achievements;
+  }
+  
+  // Kid-friendly interface transformation
+  makeInterfaceKidFriendly() {
+    console.log('[SchoolManager] Making interface kid-friendly');
+    
+    // Transform power display to be more engaging
+    this.transformPowerDisplay();
+    
+    // Add kid-friendly descriptions
+    this.addKidFriendlyDescriptions();
+    
+    // Show lesson content area
+    this.showLessonContentArea();
+    
+    // Apply kid-friendly styling
+    this.applyKidFriendlyStyling();
+  }
+  
+  transformPowerDisplay() {
+    const powerValue = document.getElementById('powerValue');
+    const powerDescription = document.getElementById('powerDescription');
+    const powerCard = document.querySelector('.power-display-card');
+    
+    if (powerValue && powerDescription) {
+      // Make power value bigger and more colorful
+      powerValue.style.fontSize = '3rem';
+      powerValue.style.background = 'linear-gradient(45deg, #f59e0b, #d97706)';
+      powerValue.style.backgroundClip = 'text';
+      powerValue.style.webkitBackgroundClip = 'text';
+      powerValue.style.webkitTextFillColor = 'transparent';
+      powerValue.style.fontWeight = '800';
+      
+      // Add encouraging message
+      const currentWatts = parseFloat(powerValue.textContent) || 25;
+      let message = '';
+      let emoji = '';
+      
+      if (currentWatts < 15) {
+        message = "🌟 Wow! You're an energy superhero! Keep it up!";
+        emoji = '🦸‍♀️';
+      } else if (currentWatts < 25) {
+        message = "👍 Great job saving energy! You're doing awesome!";
+        emoji = '⭐';
+      } else if (currentWatts < 35) {
+        message = "🌱 Good work! Try closing some tabs to save more energy!";
+        emoji = '🌿';
+      } else {
+        message = "💪 You can do it! Let's save some energy together!";
+        emoji = '🚀';
+      }
+      
+      powerDescription.innerHTML = `
+        <div class="kid-friendly-description">
+          <div class="energy-emoji" style="font-size: 2rem; margin-bottom: 10px;">${emoji}</div>
+          <div class="energy-message" style="font-size: 1.1rem; font-weight: 600; color: #059669; line-height: 1.4;">
+            ${message}
+          </div>
+        </div>
+      `;
+    }
+    
+    // Add bouncy animation to power card
+    if (powerCard) {
+      powerCard.style.animation = 'kidFriendlyBounce 2s ease-in-out infinite';
+      powerCard.style.background = 'linear-gradient(135deg, #fef3c7, #fed7aa)';
+      powerCard.style.border = '3px solid #f59e0b';
+    }
+  }
+  
+  addKidFriendlyDescriptions() {
+    // Transform impact cards with kid-friendly language
+    const impactCards = document.querySelectorAll('.impact-card');
+    impactCards.forEach(card => {
+      const label = card.querySelector('.impact-label');
+      const description = card.querySelector('.impact-description');
+      
+      if (label && description) {
+        const labelText = label.textContent;
+        
+        if (labelText.includes('LED Bulbs')) {
+          label.innerHTML = '💡 Light Bulbs';
+          description.innerHTML = 'you could power!';
+        } else if (labelText.includes('Water')) {
+          label.innerHTML = '💧 Water Saved';
+          description.innerHTML = 'glasses per hour';
+        } else if (labelText.includes('Carbon')) {
+          label.innerHTML = '🌱 Earth Helper';
+          description.innerHTML = 'CO₂ prevented';
+        }
+      }
+      
+      // Add hover effects
+      card.style.transition = 'all 0.3s ease';
+    });
+    
+    // Transform section headers to be more engaging
+    const sectionHeaders = document.querySelectorAll('.section-header h2');
+    sectionHeaders.forEach(header => {
+      const text = header.textContent;
+      
+      if (text.includes('Environmental Impact')) {
+        header.innerHTML = '🌍 How You Help Our Planet';
+      } else if (text.includes("Today's Summary")) {
+        header.innerHTML = '📊 Your Amazing Stats Today';
+      }
+      
+      // Add colorful styling
+      header.style.background = 'linear-gradient(45deg, #059669, #10b981)';
+      header.style.backgroundClip = 'text';
+      header.style.webkitBackgroundClip = 'text';
+      header.style.webkitTextFillColor = 'transparent';
+      header.style.fontSize = '1.4rem';
+    });
+  }
+  
+  showLessonContentArea() {
+    // Create lesson launcher area
+    let lessonArea = document.getElementById('kidFriendlyLessonArea');
+    
+    if (!lessonArea) {
+      lessonArea = document.createElement('div');
+      lessonArea.id = 'kidFriendlyLessonArea';
+      lessonArea.className = 'kid-lesson-area';
+      
+      // Get enhanced progress data
+      const totalPoints = this.goalSystem?.getTotalPoints() || 0;
+      const streaks = this.goalSystem?.getStreaks() || {};
+      
+      lessonArea.innerHTML = `
+        <div class="lesson-launcher">
+          <div class="lesson-header">
+            <h3>🎓 Ready to Learn About Energy?</h3>
+            <p>Choose a fun lesson to become an energy expert!</p>
+          </div>
+          <div class="lesson-quick-actions">
+            <button class="kid-lesson-btn" onclick="window.schoolManager.startLesson()">
+              <span class="btn-emoji">📚</span>
+              <span>Start Learning!</span>
+            </button>
+            <button class="kid-lesson-btn secondary" onclick="window.schoolManager.showAvailableLessons()">
+              <span class="btn-emoji">🔍</span>
+              <span>Browse Lessons</span>
+            </button>
+            ${this.goalSystem ? `
+            <button class="kid-lesson-btn tertiary" onclick="window.schoolManager.showGoalProgress()">
+              <span class="btn-emoji">🎯</span>
+              <span>My Goals</span>
+            </button>
+            ` : ''}
+          </div>
+          <div class="progress-display" id="studentProgress">
+            <div class="progress-item">
+              <span class="progress-emoji">🏆</span>
+              <span class="progress-text">Lessons: ${this.studentInfo?.lessonsCompleted || 0}</span>
+            </div>
+            <div class="progress-item">
+              <span class="progress-emoji">⭐</span>
+              <span class="progress-text">Achievements: ${this.achievements.length}</span>
+            </div>
+            ${totalPoints > 0 ? `
+            <div class="progress-item">
+              <span class="progress-emoji">🌟</span>
+              <span class="progress-text">Points: ${totalPoints}</span>
+            </div>
+            ` : ''}
+            ${streaks.energySaving > 0 ? `
+            <div class="progress-item">
+              <span class="progress-emoji">🔥</span>
+              <span class="progress-text">Streak: ${streaks.energySaving} days</span>
+            </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+      
+      // Insert after power display card
+      const powerCard = document.querySelector('.power-display-card');
+      if (powerCard && powerCard.parentNode) {
+        powerCard.parentNode.insertBefore(lessonArea, powerCard.nextSibling);
+      }
+    }
+  }
+  
+  applyKidFriendlyStyling() {
+    // Add kid-friendly animations to CSS
+    if (!document.getElementById('kidFriendlyStyles')) {
+      const style = document.createElement('style');
+      style.id = 'kidFriendlyStyles';
+      style.textContent = `
+        @keyframes kidFriendlyBounce {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-3px); }
+        }
+        
+        .kid-lesson-area {
+          background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+          border: 3px solid #059669;
+          border-radius: 16px;
+          padding: 20px;
+          margin: 20px 0;
+          text-align: center;
+          animation: slideInKidArea 0.5s ease-out;
+        }
+        
+        @keyframes slideInKidArea {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .lesson-launcher h3 {
+          color: #14532d;
+          margin: 0 0 8px 0;
+          font-size: 1.3rem;
+          font-weight: 700;
+        }
+        
+        .lesson-launcher p {
+          color: #166534;
+          margin: 0 0 16px 0;
+          font-weight: 500;
+        }
+        
+        .lesson-quick-actions {
+          display: flex;
+          gap: 12px;
+          justify-content: center;
+          margin-bottom: 16px;
+          flex-wrap: wrap;
+        }
+        
+        .kid-lesson-btn {
+          background: linear-gradient(135deg, #f59e0b, #d97706);
+          color: white;
+          border: none;
+          padding: 12px 20px;
+          border-radius: 25px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+          min-width: 140px;
+          justify-content: center;
+        }
+        
+        .kid-lesson-btn:hover {
+          transform: translateY(-2px) scale(1.05);
+          box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+        }
+        
+        .kid-lesson-btn.secondary {
+          background: linear-gradient(135deg, #059669, #047857);
+          box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+        
+        .kid-lesson-btn.secondary:hover {
+          box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4);
+        }
+        
+        .btn-emoji {
+          font-size: 16px;
+        }
+        
+        .progress-display {
+          display: flex;
+          gap: 16px;
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+        
+        .progress-item {
+          background: rgba(255, 255, 255, 0.7);
+          padding: 8px 16px;
+          border-radius: 20px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 14px;
+          font-weight: 600;
+          color: #14532d;
+          border: 2px solid rgba(5, 150, 105, 0.3);
+        }
+        
+        .progress-emoji {
+          font-size: 16px;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    // Apply kid-mode class to power card
+    const powerCard = document.querySelector('.power-display-card');
+    if (powerCard) {
+      powerCard.classList.add('kid-mode');
+    }
+  }
+  
+  restoreNormalInterface() {
+    console.log('[SchoolManager] Restoring normal interface');
+    
+    // Remove kid-friendly lesson area
+    const lessonArea = document.getElementById('kidFriendlyLessonArea');
+    if (lessonArea) {
+      lessonArea.remove();
+    }
+    
+    // Reset power display
+    const powerValue = document.getElementById('powerValue');
+    const powerDescription = document.getElementById('powerDescription');
+    const powerCard = document.querySelector('.power-display-card');
+    
+    if (powerValue) {
+      powerValue.style.fontSize = '';
+      powerValue.style.background = '';
+      powerValue.style.backgroundClip = '';
+      powerValue.style.webkitBackgroundClip = '';
+      powerValue.style.webkitTextFillColor = '';
+      powerValue.style.fontWeight = '';
+    }
+    
+    if (powerDescription) {
+      powerDescription.innerHTML = 'Calculating power consumption...';
+    }
+    
+    if (powerCard) {
+      powerCard.style.animation = '';
+      powerCard.style.background = '';
+      powerCard.style.border = '';
+      powerCard.classList.remove('kid-mode');
+    }
+    
+    // Remove kid-friendly styles
+    const kidStyles = document.getElementById('kidFriendlyStyles');
+    if (kidStyles) {
+      kidStyles.remove();
+    }
+    
+    // Reset section headers and impact cards
+    this.resetToNormalStyling();
+  }
+  
+  resetToNormalStyling() {
+    // Reset section headers
+    const sectionHeaders = document.querySelectorAll('.section-header h2');
+    sectionHeaders.forEach(header => {
+      header.style.background = '';
+      header.style.backgroundClip = '';
+      header.style.webkitBackgroundClip = '';
+      header.style.webkitTextFillColor = '';
+      header.style.fontSize = '';
+      
+      const text = header.textContent;
+      if (text.includes('How You Help Our Planet')) {
+        header.innerHTML = '🌍 Environmental Impact';
+      } else if (text.includes('Your Amazing Stats Today')) {
+        header.innerHTML = "📊 Today's Summary";
+      }
+    });
+    
+    // Reset impact cards
+    const impactCards = document.querySelectorAll('.impact-card');
+    impactCards.forEach(card => {
+      const label = card.querySelector('.impact-label');
+      const description = card.querySelector('.impact-description');
+      
+      if (label && description) {
+        const labelText = label.textContent;
+        
+        if (labelText.includes('Light Bulbs')) {
+          label.innerHTML = '💡 LED Bulbs';
+          description.innerHTML = 'powered equivalent';
+        } else if (labelText.includes('Water Saved')) {
+          label.innerHTML = '💧 Water Usage';
+          description.innerHTML = 'gallons per hour';
+        } else if (labelText.includes('Earth Helper')) {
+          label.innerHTML = '🌱 Carbon Footprint';
+          description.innerHTML = 'CO₂ per hour';
+        }
+      }
+    });
   }
 }
 
