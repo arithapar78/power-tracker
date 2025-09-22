@@ -23,6 +23,11 @@ class PopupManager {
       ? new BackendPowerCalculator()
       : null;
     
+    // Initialize School Manager
+    this.schoolManager = typeof SchoolManager !== 'undefined'
+      ? new SchoolManager()
+      : null;
+    
     this.init();
   }
   

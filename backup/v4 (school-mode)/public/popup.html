@@ -21,9 +21,23 @@
             </div>
           </div>
         </div>
-        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Switch theme">
-          <span class="theme-icon">🌙</span>
-        </button>
+        <div class="header-controls">
+          <div class="school-mode-toggle">
+            <label class="toggle-label">
+              <input type="checkbox" id="schoolModeEnabled" class="toggle-checkbox">
+              <span class="toggle-text">🏫 School Mode</span>
+            </label>
+          </div>
+          <div class="lesson-mode-toggle" id="lessonModeContainer" style="display: none;">
+            <label class="toggle-label">
+              <input type="checkbox" id="lessonModeToggle" class="toggle-checkbox">
+              <span class="toggle-text">📚 Lesson Mode</span>
+            </label>
+          </div>
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Switch theme">
+            <span class="theme-icon">🌙</span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -267,6 +281,40 @@
     </div>
   </div>
 
+  <!-- Student Registration Interface -->
+  <div class="student-setup" id="studentSetup" style="display: none;">
+    <div class="setup-card">
+      <div class="card-header">
+        <div class="header-icon">🎓</div>
+        <h3>Student Setup</h3>
+      </div>
+      <div class="setup-form">
+        <div class="form-group">
+          <label for="studentName">Your Name</label>
+          <input type="text" id="studentName" placeholder="Enter your full name">
+        </div>
+        <div class="form-group">
+          <label for="classCodeInput">Class Code</label>
+          <input type="text" id="classCodeInput" placeholder="Get from teacher" maxlength="15">
+        </div>
+        <div class="form-group">
+          <label for="gradeLevel">Grade Level</label>
+          <select id="gradeLevel">
+            <option value="">Select Grade</option>
+            <option value="K-2">Kindergarten - 2nd Grade</option>
+            <option value="3-5">3rd - 5th Grade</option>
+            <option value="6-8">6th - 8th Grade</option>
+            <option value="9-12">9th - 12th Grade</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" id="joinClassBtn">Join Class</button>
+          <button class="btn btn-secondary" id="cancelSetupBtn">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Code Entry Modal -->
   <div class="modal-overlay" id="codeEntryModal" style="display: none;">
     <div class="modal-content">
@@ -436,6 +484,10 @@
   <script src="ai-model-comparison.js"></script>
   <script src="ai-energy-database.js"></script>
   <script src="backend-power-calculator.js"></script>
+  <script src="lesson-content.js"></script>
+  <script src="goal-achievement-system.js"></script>
+  <script src="school-debug-system.js"></script>
+  <script src="school-manager.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>
