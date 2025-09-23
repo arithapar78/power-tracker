@@ -83,6 +83,9 @@ class PopupManager {
     this.safeAddEventListener('closeRecommendedBtn', 'click', this.handleCloseRecommendedTabs.bind(this));
     this.safeAddEventListener('dismissSuggestionsBtn', 'click', this.handleDismissSuggestions.bind(this));
     
+    // Test button event listener
+    this.safeAddEventListener('testTipsBtn', 'click', this.handleTestButton.bind(this));
+    
     // Image error handlers with enhanced safety
     const popupLogo = document.getElementById('popupLogo');
     if (popupLogo) {
@@ -4769,6 +4772,198 @@ class PopupManager {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  /**
+   * Handles test button click to manually show energy tips on the webpage
+   */
+  async handleTestButton() {
+    console.log('[PopupManager] Test button clicked - showing energy tips on webpage');
+    
+    try {
+      // Get current active tab
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      const currentTab = tabs[0];
+      
+      if (!currentTab) {
+        this.showToast('No active tab found', 'error');
+        return;
+      }
+
+      // Check for restricted URLs where content scripts can't run
+      if (this.isRestrictedURL(currentTab.url)) {
+        this.showToast('Energy tips cannot be shown on this page (restricted URL)', 'warning');
+        return;
+      }
+
+      // Use the direct approach by injecting code that calls the existing notification manager
+      const currentPower = this.calculatePowerWattsWithFallback();
+      const tipMessage = this.generateSmartTipMessage(currentPower);
+      
+      await chrome.scripting.executeScript({
+        target: { tabId: currentTab.id },
+        func: (tipData) => {
+          // Clear any existing notifications first
+          const existingNotifications = document.querySelectorAll('.power-tracker-notification');
+          existingNotifications.forEach(notif => notif.remove());
+          
+          // Try to use the existing notification manager directly
+          if (window.energyNotificationManager && window.energyNotificationManager.showTip) {
+            console.log('[PowerAI] Using existing notification manager');
+            window.energyNotificationManager.showTip(tipData);
+            return { success: true, method: 'direct' };
+          }
+          
+          // Fallback: trigger the notification system if it exists but hasn't initialized the manager
+          if (window.__powerAINotificationManager && window.__powerAINotificationManager.showTip) {
+            console.log('[PowerAI] Using fallback notification manager');
+            window.__powerAINotificationManager.showTip(tipData);
+            return { success: true, method: 'fallback' };
+          }
+          
+          // Final fallback: create a simple notification if the system isn't available
+          console.log('[PowerAI] Creating fallback notification');
+          const notification = document.createElement('div');
+          notification.className = 'power-tracker-notification';
+          notification.style.cssText = `
+            position: fixed;
+            bottom: 80px;
+            right: 30px;
+            background: rgba(30, 41, 59, 0.95);
+            color: white;
+            padding: 20px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 999999;
+            max-width: 350px;
+            min-width: 300px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transform: translateX(0);
+            opacity: 1;
+            display: block;
+          `;
+          
+          notification.innerHTML = `
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 20px; margin-right: 10px;">${tipData.icon}</span>
+              <span style="font-weight: 600; font-size: 14px; flex: 1;">${tipData.title}</span>
+              <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 18px;">×</button>
+            </div>
+            <div style="font-size: 13px; line-height: 1.4; color: #cbd5e1; margin-bottom: ${tipData.actionText ? '12px' : '0'};">${tipData.message}</div>
+            ${tipData.actionText ? `
+              <button onclick="window.open('${tipData.actionUrl || 'https://www.learntav.com/ai-tools/power-tracker/index.html'}', '_blank')" style="
+                background: #3b82f6;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 8px 12px;
+                font-size: 12px;
+                font-weight: 500;
+                cursor: pointer;
+                width: 100%;
+                transition: background-color 0.2s;
+              " onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">
+                ${tipData.actionText}
+              </button>
+            ` : ''}
+          `;
+          
+          document.body.appendChild(notification);
+          
+          // Animate in
+          requestAnimationFrame(() => {
+            notification.style.transform = 'translateX(0)';
+          });
+          
+          // Auto-remove after duration
+          setTimeout(() => {
+            if (notification.parentElement) {
+              notification.style.transform = 'translateX(100%)';
+              setTimeout(() => {
+                if (notification.parentElement) {
+                  notification.remove();
+                }
+              }, 400);
+            }
+          }, tipData.duration || 8000);
+          
+          return { success: true, method: 'manual' };
+        },
+        args: [{
+          type: 'energy-saving',
+          icon: '💡',
+          title: 'Power Tracker Energy Tip',
+          message: tipMessage,
+          actionText: 'Learn More',
+          actionUrl: 'https://www.learntav.com/ai-tools/power-tracker/index.html',
+          severity: 'info',
+          duration: 8000
+        }]
+      });
+      
+      this.showToast('Energy tip displayed on webpage!', 'success');
+      
+      // Close the popup after showing the tip
+      setTimeout(() => {
+        window.close();
+      }, 1000);
+      
+    } catch (error) {
+      console.error('[PopupManager] Error showing test tip:', error);
+      
+      // Handle specific Chrome extension errors
+      if (error.message.includes('Cannot access a chrome:// URL') ||
+          error.message.includes('Cannot access chrome:// URLs') ||
+          error.message.includes('The extensions gallery cannot be scripted')) {
+        this.showToast('Energy tips cannot be shown on Chrome system pages', 'warning');
+      } else if (error.message.includes('Could not establish connection')) {
+        this.showToast('Content script not available on this page', 'warning');
+      } else {
+        this.showToast('Error: ' + (error.message || 'Unknown error'), 'error');
+      }
+    }
+  }
+
+  /**
+   * Checks if the current URL is restricted for content script injection
+   */
+  isRestrictedURL(url) {
+    if (!url) return true;
+    
+    const restrictedPrefixes = [
+      'chrome://',
+      'chrome-extension://',
+      'edge://',
+      'about:',
+      'moz-extension://',
+      'chrome-search://',
+      'chrome-devtools://',
+      'data:',
+      'file:///'
+    ];
+    
+    const lowerUrl = url.toLowerCase();
+    return restrictedPrefixes.some(prefix => lowerUrl.startsWith(prefix));
+  }
+
+  /**
+   * Generates a smart tip message based on current power consumption
+   */
+  generateSmartTipMessage(powerWatts) {
+    const currentMode = this.getCurrentEnergyMode();
+    const hasAI = !!this.detectedAIModel;
+    
+    if (powerWatts > 40) {
+      return `High power usage detected (${powerWatts.toFixed(1)}W)! ${hasAI ? 'AI model usage and ' : ''}Consider closing unused tabs or reducing video quality to save energy.`;
+    } else if (powerWatts > 25) {
+      return `Moderate power usage (${powerWatts.toFixed(1)}W). ${hasAI ? 'AI interactions are active. ' : ''}You could save energy by pausing videos or closing background tabs.`;
+    } else if (hasAI) {
+      return `AI model detected with ${powerWatts.toFixed(1)}W usage. ${currentMode === 'total' ? 'Total energy' : 'Frontend only'} mode is active. Great job keeping energy usage optimized!`;
+    } else {
+      return `Good energy efficiency! Current usage is ${powerWatts.toFixed(1)}W. Keep up the eco-friendly browsing habits.`;
+    }
   }
 }
 

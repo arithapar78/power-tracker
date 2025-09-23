@@ -282,11 +282,11 @@
           className: 'power-ai-notifications',
           styles: {
             position: 'fixed',
-            zIndex: '10001',
+            zIndex: '999999',
             pointerEvents: 'none',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             right: '30px',
-            bottom: '30px'
+            bottom: '80px'
           }
         });
         
@@ -355,20 +355,21 @@
           className: `energy-tip-notification ${this.settings?.darkMode ? 'dark-mode' : ''}`,
           styles: {
             position: 'fixed',
+            bottom: '80px',
             right: '30px',
-            background: this.settings?.darkMode 
-              ? 'rgba(30, 41, 59, 0.95)' 
+            background: this.settings?.darkMode
+              ? 'rgba(30, 41, 59, 0.95)'
               : 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(12px)',
-            border: this.settings?.darkMode 
-              ? '1px solid rgba(255, 255, 255, 0.1)' 
+            border: this.settings?.darkMode
+              ? '1px solid rgba(255, 255, 255, 0.1)'
               : '1px solid rgba(255, 255, 255, 0.2)',
             borderRadius: '12px',
-            padding: '16px 20px',
-            maxWidth: '320px',
-            minWidth: '280px',
+            padding: '20px 24px',
+            maxWidth: '350px',
+            minWidth: '300px',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
-            zIndex: '10002',
+            zIndex: '999999',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             transform: 'translateX(100%)',
             transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
