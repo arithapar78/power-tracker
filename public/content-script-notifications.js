@@ -150,7 +150,7 @@
       this.settings = {
         notificationsEnabled: true,
         notificationFrequency: 'normal',
-        notificationPosition: 'bottom-right',
+        notificationPosition: 'top-right',
         darkMode: this.detectDarkMode()
       };
       
@@ -239,7 +239,7 @@
       this.settings = {
         notificationsEnabled: true,
         notificationFrequency: 'normal',
-        notificationPosition: 'bottom-right',
+        notificationPosition: 'top-right',
         darkMode: this.detectDarkMode()
       };
     }
@@ -286,7 +286,7 @@
             pointerEvents: 'none',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             right: '30px',
-            bottom: '80px'
+            top: '80px'
           }
         });
         
@@ -355,7 +355,7 @@
           className: `energy-tip-notification ${this.settings?.darkMode ? 'dark-mode' : ''}`,
           styles: {
             position: 'fixed',
-            bottom: '80px',
+            top: '80px',
             right: '30px',
             background: this.settings?.darkMode
               ? 'rgba(30, 41, 59, 0.95)'

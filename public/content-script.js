@@ -1318,7 +1318,7 @@
         styles.textContent = `
           .energy-tip-notification {
             position: fixed;
-            bottom: 20px;
+            top: 20px;
             right: 20px;
             width: 320px;
             max-width: calc(100vw - 40px);
@@ -1448,7 +1448,7 @@
 
           .energy-tip-feedback {
             position: fixed;
-            bottom: 80px;
+            top: 80px;
             right: 20px;
             background: #28a745;
             color: white;
@@ -1470,7 +1470,7 @@
 
           @media (max-width: 480px) {
             .energy-tip-notification {
-              bottom: 10px;
+              top: 10px;
               right: 10px;
               left: 10px;
               width: auto;

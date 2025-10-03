@@ -4827,7 +4827,7 @@ class PopupManager {
           notification.className = 'power-tracker-notification';
           notification.style.cssText = `
             position: fixed;
-            bottom: 80px;
+            top: 80px;
             right: 30px;
             background: rgba(30, 41, 59, 0.95);
             color: white;

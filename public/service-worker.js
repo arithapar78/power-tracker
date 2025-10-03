@@ -1428,7 +1428,7 @@ class EnergyTracker {
   async getNotificationSettings() {
     const defaultSettings = {
       enabled: true,
-      position: 'bottom-right',
+      position: 'top-right',
       duration: 7000,
       maxVisible: 3,
       respectReducedMotion: true,
@@ -1496,7 +1496,7 @@ class EnergyTracker {
     
     // Ensure valid position
     const validPositions = ['bottom-right', 'bottom-left', 'top-right', 'top-left'];
-    if (!validPositions.includes(sanitized.position)) sanitized.position = 'bottom-right';
+    if (!validPositions.includes(sanitized.position)) sanitized.position = 'top-right';
     
     // Ensure valid duration
     if (typeof sanitized.duration !== 'number' || sanitized.duration < 1000 || sanitized.duration > 30000) {
