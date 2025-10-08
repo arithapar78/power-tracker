@@ -1,0 +1,284 @@
+Comprehensive Roo Code Prompt: LearnTav Extension Audit & Enhancement
+Hey Roo! I need you to perform a complete audit and enhancement of the LearnTav browser extension. Follow these steps methodically and check for errors before marking anything complete.
+
+PHASE 1: Button Functionality Audit
+Task: Audit every single interactive element across the entire extension.
+Where to look:
+
+All .html files in the project
+All popup interfaces (main popup, settings popup, tab-specific popups)
+Embedded buttons that appear dynamically after user interactions
+Buttons in nested menus or secondary popups
+Any onclick handlers, event listeners, or button elements in the codebase
+
+What to do:
+
+Create a comprehensive list of every button/interactive element you find
+Test each button to verify it triggers a function or action
+For buttons that don't work:
+
+If they serve a clear purpose: Implement the missing functionality
+If they're redundant or unclear: Remove them entirely
+
+
+Document what each button does in comments
+
+Specific removals:
+
+Remove the "Gmail dark mode" button (it doesn't do anything)
+Remove any other buttons that have no actual function
+
+
+PHASE 2: Popup Management
+Task 1: Remove Demo Popup
+
+Find and completely remove the "power ai learntav demo popup"
+Check all initialization code to ensure it doesn't get triggered
+
+Task 2: AI Energy Reduction Popups
+
+Every popup that appears on tabs related to reducing AI energy MUST have a dismiss button
+The dismiss button should:
+
+Close the popup completely
+Optionally save user preference to not show again (if appropriate)
+Be clearly visible and styled consistently with the LearnTav theme
+
+
+
+Task 3: Cleanup Non-Functional Elements
+
+Remove any buttons within popups that don't do anything
+Ensure every interactive element has a purpose
+
+
+PHASE 3: Help/Instructions Feature
+Task: Add a comprehensive help system in the settings page.
+Button placement:
+
+Location: Top right corner of the settings page
+Position it near the existing light/dark mode toggle button
+Use an icon (suggest: "?" or "info" icon) with tooltip text "Help & Instructions"
+
+Popup specifications:
+
+Position: Center of the screen with overlay backdrop
+Style: Match the existing LearnTav interface (use same colors, fonts, border-radius, shadows)
+Make it scrollable if content exceeds viewport height
+
+Content to include in the help article:
+
+Getting Started - Brief intro to what LearnTav does
+Key Features - List main features with brief descriptions
+Navigation Guide - Where to find different settings and tools
+Tab Energy Monitoring - How to read the energy metrics
+Prompt Generator - How to use this feature (see Phase 5)
+Compare Tabs Strip - What it shows and how to use it (see Phase 4)
+Tips for Reducing AI Energy - Best practices
+
+Implementation notes:
+
+Create a dedicated help-content.html or embed the content directly
+Use clean, readable typography
+Include close button (X) in top-right of popup
+Add smooth fade-in animation when opening
+
+
+PHASE 4: Compare Tabs Strip
+Task: Create a new UI component showing the top 3 energy-consuming tabs.
+Where to add it: Main popup interface, positioned prominently (suggest: near the top, below any header)
+Functionality:
+
+Data collection:
+
+In the background worker, maintain a rolling average of watts per tab
+Track tab titles and their energy consumption
+Update this data continuously
+
+
+Display format:
+
+Horizontal strip/list layout
+Show for each of the top 3 tabs:
+
+Tab title (truncate if too long)
+Watt usage number (e.g., "2.3W")
+Close icon (×) to close that specific tab
+Mute icon (🔇) to mute that tab
+
+
+
+
+Styling:
+
+Use compact, card-like design for each tab entry
+Color-code by energy level (e.g., green for low, yellow for medium, red for high)
+Match LearnTav's design system
+
+
+Interactions:
+
+Click close icon → close that tab
+Click mute icon → mute/unmute that tab
+Clicking the tab entry itself could optionally switch to that tab
+
+
+
+
+PHASE 5: Prompt Generator Improvements
+Task: Make the Prompt Generator use real data instead of dummy data.
+Changes needed:
+
+Rename section: Change "Advanced Features" to "Prompt Generator" everywhere in the UI and code
+Graph data:
+
+Currently shows random/dummy data
+Replace with actual user activity metrics:
+
+Real tab energy consumption over time
+Actual AI model usage statistics
+True query patterns from the user's browsing
+
+
+
+
+Information displays:
+
+All statistics should pull from actual tracked data
+Remove any hardcoded placeholder values
+Connect to the background worker's real-time data
+
+
+Data sources to use:
+
+Tab activity logs
+Energy consumption history
+AI model usage records
+Time-series data from monitoring
+
+
+
+
+PHASE 6: AI Model Display Fix
+Task: Fix the AI model name display issue.
+Problem: The AI model field currently always displays "claude sonnet 4"
+Solution:
+
+Find where the AI model name is retrieved/displayed
+Ensure it pulls from the actual AI model being used by the user
+If multiple models are supported, detect which one is active
+Display the correct model name dynamically
+Handle cases where model info isn't available (show "Unknown" or "Not detected")
+
+
+PHASE 7: Scrollbar Fix
+Task: Fix the scrolling interface in the main popup.
+Problem: Two scrollbars appear (likely nested scrollable containers)
+Solution:
+
+Identify the nested scrollable elements causing the issue
+Remove redundant scroll containers
+Keep only ONE vertical scrollbar that controls the entire popup
+Ensure smooth scrolling from top to bottom
+Test with varying content heights
+
+
+PHASE 8: Remove Test Energy Tips
+Task: Find and remove the "test energy tips" element/section.
+
+Search for references to "test energy tips" in the codebase
+Remove the feature entirely
+Clean up any related code, CSS, and HTML
+
+
+PHASE 9: Settings Page Button Cleanup
+Task: Audit all buttons on the settings page specifically.
+Process:
+
+List every button on the settings page
+For each button:
+
+If it works: Document what it does
+If it doesn't work but should:
+
+Implement the expected functionality
+Connect it to appropriate functions
+Example: If there's a "Reset Settings" button, make it actually reset settings
+
+
+If it's unclear what it should do: Remove it
+
+
+Common button types to check:
+
+Save/Apply buttons
+Reset/Clear buttons
+Export/Import settings
+Toggle buttons for features
+Navigation buttons
+
+
+
+
+PHASE 10: Final Error Check
+Before completing the task:
+
+Run the extension:
+
+Load it in the browser
+Test all new features
+Click every button you've touched
+
+
+Check console for errors:
+
+Look for JavaScript errors
+Check for broken references
+Verify all event listeners work
+
+
+Validate functionality:
+
+Verify Compare Tabs Strip pulls real data
+Confirm Help popup opens and displays correctly
+Test that all AI energy popups have dismiss buttons
+Ensure Prompt Generator shows real user data
+Check that settings page buttons all function
+
+
+Cross-browser testing (if applicable):
+
+Test in Chrome/Chromium
+Test in Firefox if extension supports it
+
+
+Code cleanup:
+
+Remove console.log statements used for debugging
+Clean up commented-out code
+Ensure consistent code formatting
+
+
+
+
+Success Criteria Checklist
+
+ Every button in the extension has been audited
+ All non-functional buttons removed or fixed
+ Power AI LearnTav demo popup removed
+ All AI energy popups have dismiss buttons
+ Help button added to settings page
+ Help popup displays correctly with full instructions
+ Compare Tabs Strip implemented and showing top 3 tabs
+ Close and mute icons functional on Compare Tabs Strip
+ Only one scrollbar in popup interface
+ Test energy tips removed
+ AI model displays correctly (not hardcoded)
+ Prompt Generator uses real user data
+ "Advanced Features" renamed to "Prompt Generator"
+ All settings page buttons work or are removed
+ No console errors
+ Extension loads and runs smoothly
+
+
+Final note: Work through these phases systematically. After each phase, test that functionality before moving to the next. Document any issues you encounter and how you resolved them. Let me know when you've completed each phase so I can review the changes.

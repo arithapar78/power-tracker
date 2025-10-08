@@ -1,0 +1,73 @@
+PHASE_2.md
+Copy this into a file called PHASE_2.md in your project root:
+markdown# PHASE 2: Popup Management
+
+## Prerequisites
+Phase 1 button audit must be complete.
+BUTTON_AUDIT.md should list buttons marked for removal.
+
+## Task 1: Remove Demo Popup
+Find and completely remove "power ai learntav demo popup":
+- Search for: "demo", "power ai", "learntav demo"
+- Remove the popup HTML/component
+- Remove CSS styling for it
+- Remove JavaScript that triggers it
+- Remove any initialization code
+
+## Task 2: AI Energy Popups - Add Dismiss Buttons
+Find all popups related to "reducing AI energy" or "AI energy reduction".
+
+For each popup:
+- Check if it has a dismiss/close button
+- If NO dismiss button exists:
+  - Add dismiss button (X icon or "Dismiss" text)
+  - Button should close the popup completely
+  - Use LearnTav's existing button styles
+  - Position in top-right corner of popup
+
+## Task 3: Remove Non-Functional Popup Buttons
+Based on BUTTON_AUDIT.md:
+- Remove all buttons marked for removal
+- Focus on popup-related buttons first
+- Remove from HTML
+- Remove associated CSS
+- Remove JavaScript function calls
+- Remove unused function definitions
+
+## Task 4: Document Changes
+Create file: `PHASE_2_CHANGES.md`
+
+Format:
+Phase 2 Completed Changes
+Demo Popup Removal
+
+Removed from: [file names]
+Lines removed: [line numbers]
+
+Dismiss Buttons Added
+
+Popup 1: [name] - dismiss button added at line X
+Popup 2: [name] - dismiss button added at line X
+
+Buttons Removed
+
+[Button name] from [file] line X
+[Button name] from [file] line X
+
+Files Modified
+
+[filename]
+[filename]
+
+
+## Task 5: Test Changes
+After making changes:
+- Load extension in browser
+- Test that demo popup no longer appears
+- Test each AI energy popup has working dismiss button
+- Check console for errors
+- Confirm removed buttons are gone
+
+## Task 6: Stop and Report
+Show me PHASE_2_CHANGES.md for review.
+List any issues encountered.

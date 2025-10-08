@@ -13,6 +13,11 @@
       <span class="theme-icon">☀️</span>
     </button>
 
+    <!-- Help Button -->
+    <button class="help-button" id="help-button" aria-label="Help & Instructions" title="Help & Instructions">
+      <span class="help-icon">❓</span>
+    </button>
+
     <!-- Header -->
     <header class="header">
       <div class="header-content">
@@ -1289,6 +1294,375 @@
         <div class="modal-footer">
           <button class="btn btn-secondary" id="modalExportBtn">Export Details</button>
           <button class="btn btn-primary" id="modalOkBtn">Got it!</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="modal-overlay hidden">
+      <div class="modal-content help-modal-content">
+        <div class="modal-header">
+          <h2>Power Tracker - Help & Instructions</h2>
+          <button class="modal-close-btn" id="helpModalCloseBtn">&times;</button>
+        </div>
+        
+        <div class="modal-body help-modal-body">
+          <!-- Help Navigation -->
+          <nav class="help-nav">
+            <button class="help-nav-item active" data-section="getting-started">Getting Started</button>
+            <button class="help-nav-item" data-section="key-features">Key Features</button>
+            <button class="help-nav-item" data-section="navigation-guide">Navigation Guide</button>
+            <button class="help-nav-item" data-section="tab-energy-monitoring">Tab Energy Monitoring</button>
+            <button class="help-nav-item" data-section="prompt-generator">Prompt Generator</button>
+            <button class="help-nav-item" data-section="compare-tabs">Compare Tabs Strip</button>
+            <button class="help-nav-item" data-section="tips-reducing-energy">Tips for Reducing AI Energy</button>
+          </nav>
+
+          <!-- Help Content Sections -->
+          <div class="help-content">
+            <!-- Getting Started -->
+            <div class="help-section active" id="getting-started">
+              <h3>🚀 Getting Started</h3>
+              <div class="help-section-content">
+                <p>Welcome to Power Tracker! This extension helps you monitor and optimize your browser's energy consumption, especially when using AI tools.</p>
+                
+                <div class="help-steps">
+                  <div class="help-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                      <h4>Enable Tracking</h4>
+                      <p>Make sure "Enable Energy Tracking" is turned on in Settings to start monitoring your browser's power consumption.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="help-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                      <h4>View Live Data</h4>
+                      <p>Click the extension icon in your browser toolbar to see real-time energy consumption for your current tab.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="help-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                      <h4>Explore Features</h4>
+                      <p>Use the navigation tabs to explore Backend Energy logging, Prompt Generator, History, and Insights.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Key Features -->
+            <div class="help-section" id="key-features">
+              <h3>✨ Key Features</h3>
+              <div class="help-section-content">
+                <div class="feature-grid">
+                  <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-text">
+                      <h4>Real-time Energy Monitoring</h4>
+                      <p>Track power consumption across all browser tabs with ~85% accuracy using advanced algorithms.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="feature-item">
+                    <div class="feature-icon">🤖</div>
+                    <div class="feature-text">
+                      <h4>Backend AI Energy Tracking</h4>
+                      <p>Log energy consumption from AI models like GPT-4, Claude, and Gemini for complete digital footprint tracking.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="feature-item">
+                    <div class="feature-icon">📝</div>
+                    <div class="feature-text">
+                      <h4>Prompt Optimization</h4>
+                      <p>Reduce token usage and energy consumption by optimizing your AI prompts with built-in analytics.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="feature-item">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-text">
+                      <h4>Historical Analytics</h4>
+                      <p>View detailed energy consumption history, trends, and identify the most energy-intensive activities.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="feature-item">
+                    <div class="feature-icon">💡</div>
+                    <div class="feature-text">
+                      <h4>Smart Recommendations</h4>
+                      <p>Receive personalized tips and actionable insights to reduce your digital energy footprint.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="feature-item">
+                    <div class="feature-icon">🔒</div>
+                    <div class="feature-text">
+                      <h4>Privacy-First</h4>
+                      <p>All data is stored locally on your device with no external server communication.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Navigation Guide -->
+            <div class="help-section" id="navigation-guide">
+              <h3>🧭 Navigation Guide</h3>
+              <div class="help-section-content">
+                <div class="nav-guide">
+                  <div class="nav-item">
+                    <div class="nav-label">Settings</div>
+                    <p>Configure tracking preferences, notification thresholds, and privacy settings.</p>
+                  </div>
+                  
+                  <div class="nav-item">
+                    <div class="nav-label">Backend Energy</div>
+                    <p>Log AI model usage manually or with quick-log buttons. View energy consumption database for different models.</p>
+                  </div>
+                  
+                  <div class="nav-item">
+                    <div class="nav-label">Prompt Generator</div>
+                    <p>Optimize prompts for AI models, track token reduction analytics, and view optimization statistics.</p>
+                  </div>
+                  
+                  <div class="nav-item">
+                    <div class="nav-label">History</div>
+                    <p>Review detailed energy consumption history with charts, statistics, and per-website breakdowns.</p>
+                  </div>
+                  
+                  <div class="nav-item">
+                    <div class="nav-label">Insights</div>
+                    <p>Discover energy-saving opportunities, view achievements, and get personalized recommendations.</p>
+                  </div>
+                  
+                  <div class="nav-item">
+                    <div class="nav-label">About</div>
+                    <p>Learn about accuracy validation, technical methodology, and privacy commitments.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab Energy Monitoring -->
+            <div class="help-section" id="tab-energy-monitoring">
+              <h3>🖥️ Tab Energy Monitoring</h3>
+              <div class="help-section-content">
+                <div class="monitoring-info">
+                  <h4>How It Works</h4>
+                  <p>Power Tracker monitors your browser tabs using advanced algorithms that analyze:</p>
+                  
+                  <ul class="monitoring-factors">
+                    <li>CPU usage and processing intensity</li>
+                    <li>Memory allocation and DOM complexity</li>
+                    <li>Network activity and data transfer</li>
+                    <li>Rendering operations and graphics processing</li>
+                    <li>Background processes and extensions</li>
+                  </ul>
+                  
+                  <h4>Power Levels</h4>
+                  <div class="power-levels">
+                    <div class="power-level excellent">
+                      <div class="level-badge">Excellent</div>
+                      <div class="level-range">8-15W</div>
+                      <p>Optimal energy efficiency for basic browsing</p>
+                    </div>
+                    
+                    <div class="power-level good">
+                      <div class="level-badge">Good</div>
+                      <div class="level-range">15-25W</div>
+                      <p>Normal consumption for interactive content</p>
+                    </div>
+                    
+                    <div class="power-level medium">
+                      <div class="level-badge">Medium</div>
+                      <div class="level-range">25-40W</div>
+                      <p>Higher usage for media or complex sites</p>
+                    </div>
+                    
+                    <div class="power-level high">
+                      <div class="level-badge">High</div>
+                      <div class="level-range">40W+</div>
+                      <p>Intensive applications or multiple processes</p>
+                    </div>
+                  </div>
+                  
+                  <div class="accuracy-note">
+                    <strong>Accuracy:</strong> Our algorithms achieve ~85% accuracy across tested devices and scenarios. Results may vary based on hardware and browser configuration.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Prompt Generator -->
+            <div class="help-section" id="prompt-generator">
+              <h3>📝 Prompt Generator</h3>
+              <div class="help-section-content">
+                <div class="generator-help">
+                  <h4>Token Optimization</h4>
+                  <p>Reduce AI energy consumption by optimizing your prompts:</p>
+                  
+                  <div class="optimization-tips">
+                    <div class="tip-item">
+                      <h5>Remove Politeness Markers</h5>
+                      <p>Words like "please," "thank you," and "kindly" add tokens without improving results.</p>
+                      <div class="example">
+                        <div class="before">❌ "Could you please help me understand..."</div>
+                        <div class="after">✅ "Explain..."</div>
+                      </div>
+                    </div>
+                    
+                    <div class="tip-item">
+                      <h5>Eliminate Filler Words</h5>
+                      <p>Remove "very," "really," "basically," and similar intensifiers.</p>
+                      <div class="example">
+                        <div class="before">❌ "This is very important and really needs..."</div>
+                        <div class="after">✅ "This is important and needs..."</div>
+                      </div>
+                    </div>
+                    
+                    <div class="tip-item">
+                      <h5>Simplify Verbose Phrases</h5>
+                      <p>Replace long phrases with shorter alternatives.</p>
+                      <div class="example">
+                        <div class="before">❌ "in order to" → "due to the fact that"</div>
+                        <div class="after">✅ "to" → "because"</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <h4>Energy Impact by Model</h4>
+                  <div class="model-energy-info">
+                    <div class="model-row">
+                      <span class="model">GPT-4:</span>
+                      <span class="energy">~47 mWh per 1K tokens</span>
+                    </div>
+                    <div class="model-row">
+                      <span class="model">Claude Opus:</span>
+                      <span class="energy">~45 mWh per 1K tokens</span>
+                    </div>
+                    <div class="model-row">
+                      <span class="model">GPT-3.5:</span>
+                      <span class="energy">~12 mWh per 1K tokens</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Compare Tabs Strip -->
+            <div class="help-section" id="compare-tabs">
+              <h3>📊 Compare Tabs Strip</h3>
+              <div class="help-section-content">
+                <div class="compare-help">
+                  <h4>Real-time Comparison</h4>
+                  <p>The popup interface shows a comparison strip of all your open tabs, helping you identify energy hotspots:</p>
+                  
+                  <div class="comparison-features">
+                    <div class="feature">
+                      <h5>Visual Energy Indicators</h5>
+                      <p>Color-coded badges show each tab's power consumption level at a glance.</p>
+                    </div>
+                    
+                    <div class="feature">
+                      <h5>Quick Actions</h5>
+                      <p>Take immediate action on high-energy tabs with optimization suggestions.</p>
+                    </div>
+                    
+                    <div class="feature">
+                      <h5>Tab Management</h5>
+                      <p>Identify and close unused tabs that may be consuming background energy.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="usage-tips">
+                    <h4>Usage Tips</h4>
+                    <ul>
+                      <li>Focus on tabs showing "High" or "Medium" energy consumption</li>
+                      <li>Close tabs you're not actively using to reduce overall consumption</li>
+                      <li>Use the popup's optimization suggestions for immediate improvements</li>
+                      <li>Monitor streaming or interactive tabs that typically use more energy</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tips for Reducing AI Energy -->
+            <div class="help-section" id="tips-reducing-energy">
+              <h3>🌱 Tips for Reducing AI Energy</h3>
+              <div class="help-section-content">
+                <div class="energy-tips">
+                  <div class="tip-category">
+                    <h4>Prompt Optimization</h4>
+                    <ul>
+                      <li>Use the Prompt Generator to reduce token count by 15-45%</li>
+                      <li>Be specific and direct in your requests</li>
+                      <li>Avoid repetitive phrasing and unnecessary context</li>
+                      <li>Use bullet points instead of full sentences when possible</li>
+                    </ul>
+                  </div>
+                  
+                  <div class="tip-category">
+                    <h4>Model Selection</h4>
+                    <ul>
+                      <li>Use lighter models (GPT-3.5, Claude Haiku) for simple tasks</li>
+                      <li>Reserve heavy models (GPT-4, Claude Opus) for complex reasoning</li>
+                      <li>Consider model-specific energy costs when choosing</li>
+                      <li>Use the Backend Energy database to compare model efficiency</li>
+                    </ul>
+                  </div>
+                  
+                  <div class="tip-category">
+                    <h4>Browser Optimization</h4>
+                    <ul>
+                      <li>Close unused tabs to reduce background processing</li>
+                      <li>Use dark mode on OLED displays to save 2-5W</li>
+                      <li>Reduce video quality on streaming sites</li>
+                      <li>Disable auto-playing videos and animations</li>
+                      <li>Enable hardware acceleration in browser settings</li>
+                    </ul>
+                  </div>
+                  
+                  <div class="tip-category">
+                    <h4>System-Level Tips</h4>
+                    <ul>
+                      <li>Use power saving mode when on battery</li>
+                      <li>Close unnecessary background applications</li>
+                      <li>Adjust screen brightness to comfortable levels</li>
+                      <li>Use wired internet when possible to reduce WiFi power</li>
+                    </ul>
+                  </div>
+                  
+                  <div class="impact-summary">
+                    <h4>Potential Energy Savings</h4>
+                    <div class="savings-grid">
+                      <div class="savings-item">
+                        <div class="savings-value">25-45%</div>
+                        <div class="savings-label">Prompt Optimization</div>
+                      </div>
+                      <div class="savings-item">
+                        <div class="savings-value">10-30%</div>
+                        <div class="savings-label">Model Selection</div>
+                      </div>
+                      <div class="savings-item">
+                        <div class="savings-value">20-40%</div>
+                        <div class="savings-label">System Optimization</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button class="btn btn-primary" id="helpModalOkBtn">Got it!</button>
         </div>
       </div>
     </div>
