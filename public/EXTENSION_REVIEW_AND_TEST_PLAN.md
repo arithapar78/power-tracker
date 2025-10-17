@@ -57,7 +57,7 @@
 - **✅ Energy saving suggestions** - Interactive tab management
 - **✅ Today's summary statistics** - Calculating correctly
 
-### Advanced Features (Prompt Generator) ✅
+### Prompt Generator ✅
 - **✅ Access code modal opens** when clicking ⚡ button
 - **✅ Access code "0410" validation** working correctly
 - **✅ Prompt generator appears** after successful authentication

@@ -46,7 +46,7 @@ PowerTrackingApp/
   - Real-time power display
   - Tab-specific energy information
   - Quick actions and tips
-  - **Advanced Features**: Secure access to integrated prompt optimization tools
+  - **Prompt Generator**: Secure access to integrated prompt optimization tools
 
 #### 4. Options Page (`options.js`)
 - **Purpose**: Settings management and historical data viewing
@@ -368,7 +368,7 @@ PowerTrackingApp includes a comprehensive data migration system that:
 - Efficiency trends
 - Backend AI energy tracking
 
-### 🚀 Advanced Features: AI Prompt Optimization
+### 🚀 Prompt Generator: AI Prompt Optimization
 - **Secure Access**: Protected by access code system (enter "0410")
 - **Prompt Energy Optimizer**: Reduces AI prompt energy consumption by optimizing token usage
 - **Multi-Level Optimization**: Conservative, Balanced, and Aggressive optimization modes
@@ -377,7 +377,7 @@ PowerTrackingApp includes a comprehensive data migration system that:
 - **Copy-to-Clipboard**: Easy copying of optimized prompts
 - **Professional UI**: Seamless integration with glassmorphism design system
 
-#### How to Access Advanced Features
+#### How to Access Prompt Generator
 1. **Click the ⚡ (lightning bolt) button** in the extension popup
 2. **Enter access code**: `0410`
 3. **Start optimizing prompts** to save energy and tokens!
@@ -455,7 +455,7 @@ For integration support or conflict resolution:
 4. Review message type conflicts
 5. Validate storage key separation
 
-## 🎯 Advanced Features Usage Guide
+## 🎯 Prompt Generator Usage Guide
 
 ### Accessing the Prompt Energy Optimizer
 
@@ -513,7 +513,7 @@ Include detailed information on each type, advantages, disadvantages, and thorou
 ### Integration Architecture
 
 #### New UI Components
-- **Advanced Features Button**: Lightning bolt (⚡) in popup action bar
+- **Prompt Generator Button**: Lightning bolt (⚡) in popup action bar
 - **Code Entry Modal**: Secure access control with blur overlay
 - **Prompt Generator Interface**: Full-screen optimization workspace
 - **Statistics Dashboard**: Real-time tracking of optimization metrics
@@ -534,8 +534,8 @@ Include detailed information on each type, advantages, disadvantages, and thorou
 
 #### New JavaScript Functions
 ```javascript
-// Advanced Features Integration
-handleAdvancedFeatures()     // Lightning bolt button handler
+// Prompt Generator Integration
+handlePromptGenerator()     // Lightning bolt button handler
 showCodeEntryModal()         // Display access code modal
 validateAccessCode(code)     // Verify access code (0410)
 showPromptGenerator()        // Display optimization interface

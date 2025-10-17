@@ -1918,7 +1918,7 @@ body {
   flex-wrap: wrap;
   gap: 6px;
   max-height: 120px;
-  overflow-y: auto;
+  overflow-y: visible;
   padding: 8px;
   background: var(--surface-elevated);
   border-radius: var(--radius);
