@@ -145,6 +145,11 @@ class EnergyTracker {
     // Updated to track power consumption in watts instead of energy score
     this.currentTabs = new Map(); // tabId -> { startTime, lastUpdate, url, title, powerWatts, lastMetrics, powerData }
 
+    // Phase 4: Rolling Average Tracking for Compare Tabs Strip
+    this.tabRollingData = new Map(); // tabId -> { title, samples, rollingAverage, lastUpdate }
+    this.ROLLING_WINDOW_SIZE = 10; // Number of samples for rolling average
+    this.UPDATE_INTERVAL = 2000; // 2 seconds update interval for compare strip
+
     // Kick off init
     this.initPromise = this.init();
   }
@@ -461,6 +466,28 @@ class EnergyTracker {
               await this.updateNotificationSettings(message.settings);
               return { success: true };
             }
+            case 'GET_TOP_TABS': {
+              const topTabs = await this.getTopEnergyTabs(message.count || 3);
+              return { success: true, topTabs };
+            }
+            case 'CLOSE_TAB': {
+              const tabId = message.tabId;
+              if (tabId) {
+                await chrome.tabs.remove(tabId);
+                this.stopTrackingTab(tabId);
+                return { success: true };
+              }
+              return { success: false, error: 'No tab ID provided' };
+            }
+            case 'MUTE_TAB': {
+              const tabId = message.tabId;
+              const muted = message.muted;
+              if (tabId && typeof muted === 'boolean') {
+                await chrome.tabs.update(tabId, { muted });
+                return { success: true, muted };
+              }
+              return { success: false, error: 'Invalid tab ID or mute state' };
+            }
             case 'PING': {
               return { success: true, message: 'Service worker alive' };
             }
@@ -668,6 +695,9 @@ class EnergyTracker {
       console.warn('[EnergyTracker] save on close failed:', e);
     });
     this.currentTabs.delete(tabId);
+    
+    // Phase 4: Clean up rolling average data
+    this.tabRollingData.delete(tabId);
   }
 
   updateTabInfo(tabId, tab) {
@@ -696,6 +726,9 @@ class EnergyTracker {
     data.lastMetrics = metrics;
     data.lastUpdate = Date.now();
     this.currentTabs.set(tabId, data);
+
+    // Phase 4: Update rolling average for Compare Tabs Strip
+    this.updateTabRollingAverage(tabId, powerWatts, data.title);
 
     // Show browser notification for high power (legacy)
     await this.maybeNotifyHighPower(powerWatts);
@@ -1727,6 +1760,140 @@ class EnergyTracker {
       console.warn('[EnergyTracker] Failed to extract domain from URL:', url);
       return '';
     }
+  }
+
+  /**
+   * Phase 4: Update rolling average for tab energy consumption
+   */
+  updateTabRollingAverage(tabId, powerWatts, title) {
+    const now = Date.now();
+    
+    if (!this.tabRollingData.has(tabId)) {
+      // Initialize new tab rolling data
+      this.tabRollingData.set(tabId, {
+        tabId: tabId,
+        title: title || 'Unknown',
+        samples: [],
+        rollingAverage: powerWatts,
+        lastUpdate: now
+      });
+      return;
+    }
+
+    const rollingData = this.tabRollingData.get(tabId);
+    
+    // Update title if provided
+    if (title) {
+      rollingData.title = title;
+    }
+    
+    // Add new sample
+    rollingData.samples.push({
+      watts: powerWatts,
+      timestamp: now
+    });
+    
+    // Keep only recent samples within the rolling window
+    if (rollingData.samples.length > this.ROLLING_WINDOW_SIZE) {
+      rollingData.samples.shift(); // Remove oldest sample
+    }
+    
+    // Calculate rolling average
+    const totalWatts = rollingData.samples.reduce((sum, sample) => sum + sample.watts, 0);
+    rollingData.rollingAverage = totalWatts / rollingData.samples.length;
+    rollingData.lastUpdate = now;
+    
+    this.tabRollingData.set(tabId, rollingData);
+    
+    console.log(`[EnergyTracker] Updated rolling average for tab ${tabId}: ${rollingData.rollingAverage.toFixed(1)}W`);
+  }
+
+  /**
+   * Phase 4: Get top energy consuming tabs for Compare Tabs Strip
+   */
+  async getTopEnergyTabs(count = 3) {
+    try {
+      const topTabs = [];
+      
+      // Get all tabs with rolling data
+      for (const [tabId, rollingData] of this.tabRollingData.entries()) {
+        try {
+          // Verify tab still exists
+          const tab = await chrome.tabs.get(parseInt(tabId));
+          
+          if (tab && tab.url && !this.isSystemUrl(tab.url)) {
+            // Get current tab data for additional info
+            const currentData = this.currentTabs.get(parseInt(tabId));
+            
+            topTabs.push({
+              tabId: parseInt(tabId),
+              title: this.truncateTitle(rollingData.title || tab.title || 'Unknown', 30),
+              fullTitle: rollingData.title || tab.title || 'Unknown',
+              watts: Math.round(rollingData.rollingAverage * 10) / 10,
+              rollingAverage: rollingData.rollingAverage,
+              url: tab.url,
+              muted: tab.mutedInfo?.muted || false,
+              lastUpdate: rollingData.lastUpdate,
+              sampleCount: rollingData.samples.length,
+              // Add color coding level
+              energyLevel: this.getEnergyLevel(rollingData.rollingAverage),
+              // Additional metadata
+              powerData: currentData?.powerData || null,
+              domain: this.getDomain(tab.url)
+            });
+          }
+        } catch (tabError) {
+          // Tab no longer exists, remove from tracking
+          console.log(`[EnergyTracker] Removing closed tab ${tabId} from rolling data`);
+          this.tabRollingData.delete(tabId);
+          this.currentTabs.delete(parseInt(tabId));
+        }
+      }
+      
+      // Sort by rolling average watts (descending) and take top N
+      const sortedTabs = topTabs
+        .sort((a, b) => b.rollingAverage - a.rollingAverage)
+        .slice(0, count);
+      
+      console.log(`[EnergyTracker] Returning top ${sortedTabs.length} tabs for Compare Tabs Strip`);
+      return sortedTabs;
+      
+    } catch (error) {
+      console.error('[EnergyTracker] Error getting top energy tabs:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Check if URL is a system URL that should be excluded
+   */
+  isSystemUrl(url) {
+    return url.startsWith('chrome://') ||
+           url.startsWith('edge://') ||
+           url.startsWith('about:') ||
+           url.startsWith('moz-extension://') ||
+           url.startsWith('chrome-extension://') ||
+           url === 'chrome://newtab/' ||
+           url === 'about:blank';
+  }
+
+  /**
+   * Truncate tab title to specified length
+   */
+  truncateTitle(title, maxLength) {
+    if (!title || title.length <= maxLength) {
+      return title || 'Unknown';
+    }
+    return title.substring(0, maxLength - 3) + '...';
+  }
+
+  /**
+   * Get energy level classification for color coding
+   */
+  getEnergyLevel(watts) {
+    if (watts < 15) return 'low';      // Green: < 15W
+    if (watts < 30) return 'medium';   // Yellow: 15-30W
+    return 'high';                     // Red: > 30W
   }
 }
 

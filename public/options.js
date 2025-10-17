@@ -175,6 +175,21 @@ class OptionsManager {
           e.preventDefault();
           this.handleThemeToggle();
         }
+        // Help button
+        else if (e.target.id === 'help-button') {
+          e.preventDefault();
+          this.showHelpModal();
+        }
+        // Help modal interactions
+        else if (e.target.id === 'helpModalCloseBtn' || e.target.classList.contains('modal-close-btn')) {
+          e.preventDefault();
+          this.hideHelpModal();
+        }
+        else if (e.target.classList.contains('help-nav-item')) {
+          e.preventDefault();
+          const sectionId = e.target.dataset.section;
+          this.showHelpSection(sectionId);
+        }
       };
       
       // Change event handler for form controls
@@ -264,7 +279,8 @@ class OptionsManager {
         { id: 'saveSettingsBtn', handler: this.saveSettings.bind(this) },
         { id: 'resetSettingsBtn', handler: this.resetSettings.bind(this) },
         { id: 'exportDataBtn', handler: this.exportData.bind(this) },
-        { id: 'clearDataBtn', handler: this.clearData.bind(this) }
+        { id: 'clearDataBtn', handler: this.clearData.bind(this) },
+        { id: 'help-button', handler: this.showHelpModal.bind(this) }
       ];
       
       this.boundListeners = [];
@@ -299,6 +315,48 @@ class OptionsManager {
       document.addEventListener('click', tabClickHandler);
       this.boundListeners.push({ element: document, event: 'click', handler: tabClickHandler });
       console.log('[OptionsManager] Tab navigation added to basic listeners');
+      
+      // CRITICAL: Add help modal interactions to basic listeners
+      const helpModalClickHandler = (e) => {
+        // Help modal close buttons
+        if (e.target.id === 'helpModalCloseBtn' || e.target.classList.contains('modal-close-btn')) {
+          e.preventDefault();
+          console.log('[OptionsManager] Help modal close button clicked');
+          this.hideHelpModal();
+        }
+        // Help section navigation
+        else if (e.target.classList.contains('help-nav-item')) {
+          e.preventDefault();
+          const sectionId = e.target.dataset.section;
+          console.log(`[OptionsManager] Help section clicked: ${sectionId}`);
+          this.showHelpSection(sectionId);
+        }
+        // Help modal backdrop click
+        else if (e.target.id === 'helpModal') {
+          console.log('[OptionsManager] Help modal backdrop clicked');
+          this.hideHelpModal();
+        }
+      };
+      
+      document.addEventListener('click', helpModalClickHandler);
+      this.boundListeners.push({ element: document, event: 'click', handler: helpModalClickHandler });
+      console.log('[OptionsManager] Help modal interactions added to basic listeners');
+      
+      // CRITICAL: Add ESC key listener for help modal
+      const helpModalKeyHandler = (e) => {
+        if (e.key === 'Escape') {
+          const helpModal = document.getElementById('helpModal');
+          if (helpModal && !helpModal.classList.contains('hidden')) {
+            e.preventDefault();
+            console.log('[OptionsManager] ESC key pressed, closing help modal');
+            this.hideHelpModal();
+          }
+        }
+      };
+      
+      document.addEventListener('keydown', helpModalKeyHandler);
+      this.boundListeners.push({ element: document, event: 'keydown', handler: helpModalKeyHandler });
+      console.log('[OptionsManager] Help modal ESC key handler added to basic listeners');
       
     } catch (error) {
       console.error('[OptionsManager] Failed to setup basic event listeners:', error);
@@ -4193,6 +4251,157 @@ class OptionsManager {
         }
       }, 300);
     });
+  }
+
+  // ===== HELP SYSTEM METHODS =====
+
+  showHelpModal() {
+    try {
+      console.log('[OptionsManager] Opening help modal...');
+      
+      const helpModal = document.getElementById('helpModal');
+      if (!helpModal) {
+        console.error('[OptionsManager] Help modal not found in DOM');
+        this.showError('Help system not available');
+        return;
+      }
+
+      // Show the modal
+      helpModal.classList.remove('hidden');
+      
+      // Set initial focus to first navigation item
+      const firstNavItem = helpModal.querySelector('.help-nav-item');
+      if (firstNavItem) {
+        firstNavItem.focus();
+      }
+
+      // Show the first section by default
+      this.showHelpSection('getting-started');
+
+      // Add ESC key listener
+      this.addHelpModalKeyListener();
+
+      // Add click outside to close
+      this.addHelpModalBackdropListener();
+
+      console.log('[OptionsManager] Help modal opened successfully');
+    } catch (error) {
+      console.error('[OptionsManager] Error opening help modal:', error);
+      this.showError('Failed to open help system');
+    }
+  }
+
+  hideHelpModal() {
+    try {
+      console.log('[OptionsManager] Closing help modal...');
+      
+      const helpModal = document.getElementById('helpModal');
+      if (!helpModal) {
+        console.warn('[OptionsManager] Help modal not found when trying to close');
+        return;
+      }
+
+      // Hide the modal
+      helpModal.classList.add('hidden');
+
+      // Remove event listeners
+      this.removeHelpModalKeyListener();
+      this.removeHelpModalBackdropListener();
+
+      // Return focus to help button
+      const helpButton = document.getElementById('help-button');
+      if (helpButton) {
+        helpButton.focus();
+      }
+
+      console.log('[OptionsManager] Help modal closed successfully');
+    } catch (error) {
+      console.error('[OptionsManager] Error closing help modal:', error);
+    }
+  }
+
+  showHelpSection(sectionId) {
+    try {
+      console.log('[OptionsManager] Showing help section:', sectionId);
+
+      // Update navigation active state
+      const navItems = document.querySelectorAll('.help-nav-item');
+      navItems.forEach(item => {
+        if (item.dataset.section === sectionId) {
+          item.classList.add('active');
+          item.setAttribute('aria-current', 'page');
+        } else {
+          item.classList.remove('active');
+          item.removeAttribute('aria-current');
+        }
+      });
+
+      // Show the corresponding content section
+      const contentSections = document.querySelectorAll('.help-section');
+      contentSections.forEach(section => {
+        if (section.id === `help-${sectionId}`) {
+          section.classList.add('active');
+          section.classList.remove('hidden');
+        } else {
+          section.classList.remove('active');
+          section.classList.add('hidden');
+        }
+      });
+
+      // Scroll content to top
+      const contentArea = document.querySelector('.help-content');
+      if (contentArea) {
+        contentArea.scrollTop = 0;
+      }
+
+      console.log('[OptionsManager] Help section updated successfully');
+    } catch (error) {
+      console.error('[OptionsManager] Error showing help section:', error);
+    }
+  }
+
+  addHelpModalKeyListener() {
+    // Store bound listener for cleanup
+    this.helpModalKeyListener = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        this.hideHelpModal();
+      }
+    };
+
+    document.addEventListener('keydown', this.helpModalKeyListener);
+  }
+
+  removeHelpModalKeyListener() {
+    if (this.helpModalKeyListener) {
+      document.removeEventListener('keydown', this.helpModalKeyListener);
+      this.helpModalKeyListener = null;
+    }
+  }
+
+  addHelpModalBackdropListener() {
+    // Store bound listener for cleanup
+    this.helpModalBackdropListener = (e) => {
+      const helpModal = document.getElementById('helpModal');
+      if (helpModal && e.target === helpModal) {
+        this.hideHelpModal();
+      }
+    };
+
+    const helpModal = document.getElementById('helpModal');
+    if (helpModal) {
+      helpModal.addEventListener('click', this.helpModalBackdropListener);
+    }
+  }
+
+  removeHelpModalBackdropListener() {
+    if (this.helpModalBackdropListener) {
+      const helpModal = document.getElementById('helpModal');
+      if (helpModal) {
+        helpModal.removeEventListener('click', this.helpModalBackdropListener);
+      }
+      this.helpModalBackdropListener = null;
+    }
   }
 }
 

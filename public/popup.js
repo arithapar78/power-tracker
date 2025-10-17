@@ -9,6 +9,8 @@ class PopupManager {
     this.aiEnergyData = null;
     this.settings = null;
     this.updateInterval = null;
+    this.compareTabsData = null;
+    this.compareTabsUpdateInterval = null;
     
     // Initialize Enhanced AI Energy Manager
     this.aiEnergyManager = typeof EnhancedAIEnergyManager !== 'undefined'
@@ -35,6 +37,9 @@ class PopupManager {
       
       // Load initial data
       await this.loadInitialData();
+      
+      // Load Compare Tabs Strip data
+      await this.loadCompareTabsData();
       
       // Start periodic updates
       this.startPeriodicUpdates();
@@ -106,6 +111,9 @@ class PopupManager {
     
     // Setup tab energy recommendations
     this.setupTabRecommendations();
+    
+    // Setup Compare Tabs Strip event listeners
+    this.setupCompareTabsEventListeners();
   }
 
   setupKeyboardNavigation() {
@@ -237,6 +245,212 @@ class PopupManager {
     
     // Update UI
     this.updateUI();
+  }
+  
+  /**
+   * Load Compare Tabs Strip data from background worker
+   */
+  async loadCompareTabsData() {
+    try {
+      if (!this.isChromeApiAvailable()) {
+        console.log('[PopupManager] Chrome APIs not available for Compare Tabs Strip');
+        this.loadDemoCompareTabsData();
+        return;
+      }
+
+      console.log('[PopupManager] Loading Compare Tabs Strip data...');
+      
+      const response = await this.sendMessageWithRetry({
+        type: 'GET_TOP_TABS',
+        count: 3
+      }, 2);
+      
+      if (response && response.success && response.topTabs) {
+        this.compareTabsData = response.topTabs;
+        console.log('[PopupManager] Compare Tabs data loaded:', this.compareTabsData);
+      } else {
+        console.warn('[PopupManager] Failed to load Compare Tabs data:', response?.error);
+        this.compareTabsData = [];
+      }
+    } catch (error) {
+      console.error('[PopupManager] Compare Tabs data request failed:', error);
+      this.compareTabsData = [];
+    }
+  }
+  
+  /**
+   * Load demo data for Compare Tabs Strip when Chrome APIs unavailable
+   */
+  loadDemoCompareTabsData() {
+    this.compareTabsData = [
+      {
+        tabId: 12346,
+        title: 'YouTube - 4K Video Playing',
+        watts: 45.2,
+        rollingAverage: 43.8,
+        energyLevel: 'high'
+      },
+      {
+        tabId: 12347,
+        title: 'Netflix - Streaming Movie',
+        watts: 38.9,
+        rollingAverage: 40.1,
+        energyLevel: 'high'
+      },
+      {
+        tabId: 12349,
+        title: 'Google Sheets - Large Spreadsheet',
+        watts: 28.3,
+        rollingAverage: 26.7,
+        energyLevel: 'medium'
+      }
+    ];
+  }
+  
+  /**
+   * Setup event listeners for Compare Tabs Strip
+   */
+  setupCompareTabsEventListeners() {
+    // Event delegation for tab cards since they're dynamically created
+    const compareTabsStrip = document.getElementById('compareTabsStrip');
+    if (compareTabsStrip) {
+      compareTabsStrip.addEventListener('click', this.handleCompareTabsClick.bind(this));
+    }
+  }
+  
+  /**
+   * Handle clicks within the Compare Tabs Strip
+   */
+  async handleCompareTabsClick(event) {
+    const target = event.target;
+    const tabCard = target.closest('.tab-card');
+    
+    if (!tabCard) return;
+    
+    const tabId = parseInt(tabCard.getAttribute('data-tab-id'));
+    
+    if (target.classList.contains('close-btn')) {
+      event.preventDefault();
+      event.stopPropagation();
+      await this.handleCompareTabClose(tabId);
+    } else if (target.classList.contains('mute-btn')) {
+      event.preventDefault();
+      event.stopPropagation();
+      await this.handleCompareTabMute(tabId);
+    } else if (tabCard) {
+      // Optional: Click tab card to switch to that tab
+      event.preventDefault();
+      await this.handleCompareTabSwitch(tabId);
+    }
+  }
+  
+  /**
+   * Handle closing a tab from the Compare Tabs Strip
+   */
+  async handleCompareTabClose(tabId) {
+    try {
+      console.log('[PopupManager] Closing tab from Compare Strip:', tabId);
+      
+      if (!this.isChromeApiAvailable()) {
+        console.log('[PopupManager] Chrome APIs not available for tab close');
+        return;
+      }
+
+      // Send close message to background worker
+      const response = await this.sendMessageWithRetry({
+        type: 'CLOSE_TAB',
+        tabId: tabId
+      }, 1);
+      
+      if (response && response.success) {
+        this.showToast('Tab closed', 'success');
+        
+        // Refresh Compare Tabs data
+        setTimeout(() => {
+          this.loadCompareTabsData();
+        }, 500);
+      } else {
+        console.error('[PopupManager] Failed to close tab:', response?.error);
+        this.showToast('Failed to close tab', 'error');
+      }
+    } catch (error) {
+      console.error('[PopupManager] Error closing tab:', error);
+      this.showToast('Error closing tab', 'error');
+    }
+  }
+  
+  /**
+   * Handle muting/unmuting a tab from the Compare Tabs Strip
+   */
+  async handleCompareTabMute(tabId) {
+    try {
+      console.log('[PopupManager] Toggling mute for tab:', tabId);
+      
+      if (!this.isChromeApiAvailable()) {
+        console.log('[PopupManager] Chrome APIs not available for tab mute');
+        return;
+      }
+
+      // Send mute message to background worker
+      const response = await this.sendMessageWithRetry({
+        type: 'MUTE_TAB',
+        tabId: tabId
+      }, 1);
+      
+      if (response && response.success) {
+        const action = response.isMuted ? 'muted' : 'unmuted';
+        this.showToast(`Tab ${action}`, 'success');
+        
+        // Update the UI immediately to show the change
+        this.updateTabMuteState(tabId, response.isMuted);
+      } else {
+        console.error('[PopupManager] Failed to mute/unmute tab:', response?.error);
+        this.showToast('Failed to mute tab', 'error');
+      }
+    } catch (error) {
+      console.error('[PopupManager] Error muting tab:', error);
+      this.showToast('Error muting tab', 'error');
+    }
+  }
+  
+  /**
+   * Handle switching to a tab from the Compare Tabs Strip (optional feature)
+   */
+  async handleCompareTabSwitch(tabId) {
+    try {
+      console.log('[PopupManager] Switching to tab:', tabId);
+      
+      if (!this.isChromeApiAvailable()) {
+        console.log('[PopupManager] Chrome APIs not available for tab switch');
+        return;
+      }
+
+      await chrome.tabs.update(tabId, { active: true });
+      this.showToast('Switched to tab', 'success');
+      
+      // Close the popup after switching
+      setTimeout(() => {
+        window.close();
+      }, 500);
+    } catch (error) {
+      console.error('[PopupManager] Error switching to tab:', error);
+      this.showToast('Error switching to tab', 'error');
+    }
+  }
+  
+  /**
+   * Update the mute state of a specific tab in the UI
+   */
+  updateTabMuteState(tabId, isMuted) {
+    const tabCard = document.querySelector(`.tab-card[data-tab-id="${tabId}"]`);
+    if (!tabCard) return;
+    
+    const muteBtn = tabCard.querySelector('.mute-btn');
+    if (muteBtn) {
+      muteBtn.textContent = isMuted ? '🔊' : '🔇';
+      muteBtn.setAttribute('aria-label', isMuted ? 'Unmute tab' : 'Mute tab');
+      muteBtn.setAttribute('title', isMuted ? 'Unmute tab' : 'Mute tab');
+    }
   }
   
   /**
@@ -1097,6 +1311,7 @@ class PopupManager {
       this.updateAIModelInfoSection();
       this.updateEnergyModeUI(this.getCurrentEnergyMode());
       this.updateTabEnergyRecommendations();
+      this.updateCompareTabsStrip();
       
       console.log('[PopupManager] UI update completed successfully');
     } catch (error) {
@@ -2063,8 +2278,94 @@ class PopupManager {
       await this.loadCurrentEnergyData();
       await this.loadBackendEnergyData();
       await this.loadEnhancedAIEnergyData();
+      await this.loadCompareTabsData();
       this.updateUI();
     }, 5000);
+    
+    // Start Compare Tabs Strip updates every 2-3 seconds as specified
+    this.compareTabsUpdateInterval = setInterval(async () => {
+      await this.loadCompareTabsData();
+      this.updateCompareTabsStrip();
+    }, 2500);
+  }
+  
+  /**
+   * Update the Compare Tabs Strip UI with current data
+   */
+  updateCompareTabsStrip() {
+    const compareTabsStrip = document.getElementById('compareTabsStrip');
+    const tabsContainer = compareTabsStrip?.querySelector('.tabs-container');
+    
+    if (!compareTabsStrip || !tabsContainer) {
+      console.warn('[PopupManager] Compare Tabs Strip elements not found');
+      return;
+    }
+
+    try {
+      // Show/hide the strip based on data availability
+      if (!this.compareTabsData || this.compareTabsData.length === 0) {
+        compareTabsStrip.style.display = 'none';
+        return;
+      }
+
+      compareTabsStrip.style.display = 'block';
+      
+      // Clear existing content
+      tabsContainer.innerHTML = '';
+      
+      // Create tab cards for top energy consumers
+      this.compareTabsData.slice(0, 3).forEach((tabData, index) => {
+        const tabCard = this.createTabCard(tabData, index);
+        tabsContainer.appendChild(tabCard);
+      });
+      
+      console.log('[PopupManager] Compare Tabs Strip updated with', this.compareTabsData.length, 'tabs');
+    } catch (error) {
+      console.error('[PopupManager] Error updating Compare Tabs Strip:', error);
+    }
+  }
+  
+  /**
+   * Create a tab card element for the Compare Tabs Strip
+   */
+  createTabCard(tabData, index) {
+    const tabCard = document.createElement('div');
+    tabCard.className = `tab-card energy-${tabData.energyLevel || this.getEnergyLevelFromWatts(tabData.watts)}`;
+    tabCard.setAttribute('data-tab-id', tabData.tabId);
+    
+    // Truncate title to 30 characters as specified
+    const truncatedTitle = this.truncateText(tabData.title || 'Unknown Tab', 30);
+    const formattedWatts = (tabData.watts || 0).toFixed(1);
+    
+    tabCard.innerHTML = `
+      <div class="tab-info">
+        <div class="tab-title" title="${this.escapeHtml(tabData.title || 'Unknown Tab')}">${this.escapeHtml(truncatedTitle)}</div>
+        <div class="tab-watts">${formattedWatts}W</div>
+      </div>
+      <div class="tab-actions">
+        <button class="tab-action-btn mute-btn" aria-label="Mute tab" title="Mute tab">🔇</button>
+        <button class="tab-action-btn close-btn" aria-label="Close tab" title="Close tab">×</button>
+      </div>
+    `;
+    
+    return tabCard;
+  }
+  
+  /**
+   * Get energy level classification from watts
+   */
+  getEnergyLevelFromWatts(watts) {
+    if (watts < 15) return 'low';
+    if (watts < 30) return 'medium';
+    return 'high';
+  }
+  
+  /**
+   * Truncate text to specified length
+   */
+  truncateText(text, maxLength) {
+    if (!text || text.length <= maxLength) return text;
+    return text.substring(0, maxLength - 3) + '...';
   }
   
   
@@ -2258,6 +2559,9 @@ class PopupManager {
     // Clean up
     if (this.updateInterval) {
       clearInterval(this.updateInterval);
+    }
+    if (this.compareTabsUpdateInterval) {
+      clearInterval(this.compareTabsUpdateInterval);
     }
   }
   
