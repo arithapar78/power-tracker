@@ -701,7 +701,6 @@ class DeterministicPredictor {
         });
       }
     } catch (error) {
-      console.warn('[DeterministicPredictor] Could not save model weights:', error);
     }
   }
 

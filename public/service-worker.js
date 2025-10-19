@@ -3,15 +3,12 @@
 // Robust against restarts, handles async sendResponse correctly, and
 // never crashes the content script if the SW gets reloaded.
 
-console.log('[EnergyTracker] SW loaded');
 
 // Keep service worker alive
 chrome.runtime.onStartup.addListener(() => {
-  console.log('[EnergyTracker] Extension startup detected');
 });
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('[EnergyTracker] Extension installed/updated');
 });
 
 // Global flags for dependency availability
@@ -23,9 +20,7 @@ let AGENT_SYSTEM_AVAILABLE = false;
 try {
   importScripts('power-calculator.js');
   POWER_CALCULATOR_AVAILABLE = true;
-  console.log('[EnergyTracker] PowerCalculator loaded successfully');
 } catch (error) {
-  console.warn('[EnergyTracker] PowerCalculator not available:', error.message);
 }
 
 // Import Energy-Saving Tips Database
@@ -33,17 +28,13 @@ let ENERGY_TIPS_AVAILABLE = false;
 try {
   importScripts('energy-saving-tips.js');
   ENERGY_TIPS_AVAILABLE = true;
-  console.log('[EnergyTracker] Energy-saving tips database loaded successfully');
 } catch (error) {
-  console.warn('[EnergyTracker] Energy-saving tips database not available:', error.message);
 }
 
 try {
   importScripts('data-migration.js');
   DATA_MIGRATION_AVAILABLE = true;
-  console.log('[EnergyTracker] DataMigrationUtility loaded successfully');
 } catch (error) {
-  console.warn('[EnergyTracker] DataMigrationUtility not available:', error.message);
 }
 
 // Import Enhanced Power Tracker with Agent System and Enhanced Integration
@@ -52,29 +43,21 @@ let ENHANCED_INTEGRATION_AVAILABLE = false;
 try {
   importScripts('energy-tracker-with-agent.js');
   AGENT_SYSTEM_AVAILABLE = true;
-  console.log('[EnergyTracker] Agent system loaded successfully');
 } catch (error) {
-  console.warn('[EnergyTracker] Agent system not available:', error.message);
-  console.log('[EnergyTracker] Falling back to base EnergyTracker');
 }
 
 // Try to load enhanced AI energy database and integration
 try {
   importScripts('enhanced-ai-energy-database.js');
-  console.log('[EnergyTracker] Enhanced AI energy database loaded successfully');
 } catch (error) {
-  console.warn('[EnergyTracker] Enhanced AI database not available:', error.message);
 }
 
 try {
   importScripts('energy-tracker-enhanced-integration.js');
   ENHANCED_INTEGRATION_AVAILABLE = true;
-  console.log('[EnergyTracker] Enhanced integration loaded successfully');
 } catch (error) {
-  console.warn('[EnergyTracker] Enhanced integration not available:', error.message);
 }
 
-console.log('[EnergyTracker] Dependency status - PowerCalculator:', POWER_CALCULATOR_AVAILABLE, 'DataMigration:', DATA_MIGRATION_AVAILABLE, 'AgentSystem:', AGENT_SYSTEM_AVAILABLE, 'EnhancedIntegration:', ENHANCED_INTEGRATION_AVAILABLE, 'EnergyTips:', ENERGY_TIPS_AVAILABLE);
 
 class EnergyTracker {
   constructor() {
@@ -87,18 +70,14 @@ class EnergyTracker {
       try {
         if (typeof PowerCalculator !== 'undefined') {
           this.powerCalculator = new PowerCalculator();
-          console.log('[EnergyTracker] PowerCalculator initialized successfully');
         } else {
-          console.warn('[EnergyTracker] PowerCalculator class not found despite successful import');
         }
       } catch (error) {
-        console.error('[EnergyTracker] PowerCalculator initialization failed:', error.message);
         this.powerCalculator = null;
       }
     }
     
     if (!this.powerCalculator) {
-      console.log('[EnergyTracker] Using fallback power calculations');
     }
 
     // Initialize energy-saving tips database
@@ -107,18 +86,14 @@ class EnergyTracker {
       try {
         if (typeof EnergySavingTipsDatabase !== 'undefined') {
           this.energyTipsDatabase = new EnergySavingTipsDatabase();
-          console.log('[EnergyTracker] Energy-saving tips database initialized successfully');
         } else {
-          console.warn('[EnergyTracker] EnergySavingTipsDatabase class not found despite successful import');
         }
       } catch (error) {
-        console.error('[EnergyTracker] Energy-saving tips database initialization failed:', error.message);
         this.energyTipsDatabase = null;
       }
     }
     
     if (!this.energyTipsDatabase) {
-      console.log('[EnergyTracker] Using fallback tip generation');
     }
     
     // Initialize data migration utility with enhanced safety
@@ -127,18 +102,14 @@ class EnergyTracker {
       try {
         if (typeof DataMigrationUtility !== 'undefined') {
           this.dataMigration = new DataMigrationUtility();
-          console.log('[EnergyTracker] DataMigrationUtility initialized successfully');
         } else {
-          console.warn('[EnergyTracker] DataMigrationUtility class not found despite successful import');
         }
       } catch (error) {
-        console.error('[EnergyTracker] DataMigrationUtility initialization failed:', error.message);
         this.dataMigration = null;
       }
     }
     
     if (!this.dataMigration) {
-      console.log('[EnergyTracker] Migration features disabled - using fallback methods');
     }
 
     // Runtime state (in‑memory; OK to rebuild after SW restart)
@@ -156,7 +127,6 @@ class EnergyTracker {
 
   async init() {
     if (this.isReady) return;
-    console.log('[EnergyTracker] initializing…');
 
     // Check and run comprehensive data migration if needed
     await this.checkAndRunMigration();
@@ -166,7 +136,6 @@ class EnergyTracker {
     this.setupKeepAlive();
 
     this.isReady = true;
-    console.log('[EnergyTracker] initialized');
   }
 
   /**
@@ -175,7 +144,6 @@ class EnergyTracker {
   async checkAndRunMigration() {
     // Skip migration if DataMigrationUtility is not available
     if (!this.dataMigration) {
-      console.log('[EnergyTracker] Migration skipped - DataMigrationUtility not available');
       return;
     }
     
@@ -187,28 +155,23 @@ class EnergyTracker {
       
       // Don't retry migration if attempted within last 24 hours
       if (lastMigrationAttempt && hoursSinceLastAttempt < 24) {
-        console.log('[EnergyTracker] Migration attempted recently, skipping');
         return;
       }
       
-      console.log('[EnergyTracker] Checking comprehensive migration status...');
       const migrationStats = await this.dataMigration.getMigrationStats();
       
       if (!migrationStats.completed) {
-        console.log('[EnergyTracker] Starting migration with safety checks...');
         
         // Create backup before migration
         const backupKey = `migration_backup_${Date.now()}`;
         await this.createSafetyBackup(backupKey);
         
-        console.log('[EnergyTracker] Comprehensive migration needed, starting process...');
         const result = await this.dataMigration.migrateLegacyData();
         
         // Record attempt regardless of outcome
         await chrome.storage.local.set({ lastMigrationAttempt: now });
         
         if (result.success) {
-          console.log('[EnergyTracker] Comprehensive migration completed successfully:', result.stats);
           
           // Show notification about successful migration
           if (chrome.notifications) {
@@ -220,18 +183,14 @@ class EnergyTracker {
                 message: `Successfully migrated ${result.stats.entriesMigrated} entries to the new power-based system.`
               });
             } catch (notificationError) {
-              console.log('[EnergyTracker] Could not show migration notification:', notificationError);
             }
           }
         } else {
-          console.error('[EnergyTracker] Comprehensive migration failed, backup available at:', backupKey);
           // Don't retry automatically - let user handle it
         }
       } else {
-        console.log('[EnergyTracker] Comprehensive migration already completed at version:', migrationStats.version);
       }
     } catch (error) {
-      console.error('[EnergyTracker] Comprehensive migration check failed:', error);
       // Record failed attempt to prevent infinite retries
       await chrome.storage.local.set({ lastMigrationAttempt: Date.now() });
     }
@@ -241,9 +200,7 @@ class EnergyTracker {
     try {
       const data = await chrome.storage.local.get(['energyHistory', 'settings', 'backendEnergyHistory']);
       await chrome.storage.local.set({ [backupKey]: data });
-      console.log('[EnergyTracker] Safety backup created:', backupKey);
     } catch (error) {
-      console.error('[EnergyTracker] Failed to create safety backup:', error);
       throw new Error('Cannot proceed with migration - backup failed');
     }
   }
@@ -251,14 +208,12 @@ class EnergyTracker {
   setupListeners() {
     // Install/open welcome
     chrome.runtime.onInstalled.addListener((details) => {
-      console.log('[EnergyTracker] onInstalled:', details.reason);
       if (details.reason === 'install') {
         chrome.tabs.create({ url: chrome.runtime.getURL('options.html?welcome=true') });
       }
     });
 
     chrome.runtime.onStartup.addListener(() => {
-      console.log('[EnergyTracker] onStartup');
       this.init(); // best-effort
     });
 
@@ -267,7 +222,6 @@ class EnergyTracker {
       try {
         await this.startTrackingTab(info.tabId);
       } catch (e) {
-        console.warn('[EnergyTracker] onActivated error:', e);
       }
     });
 
@@ -280,7 +234,6 @@ class EnergyTracker {
           }
         }
       } catch (e) {
-        console.warn('[EnergyTracker] onUpdated error:', e);
       }
     });
 
@@ -312,7 +265,6 @@ class EnergyTracker {
             case 'ENSURE_TAB_TRACKING': {
               const tabId = message.tabId;
               const tabInfo = message.tabInfo;
-              console.log('[EnergyTracker] Ensuring tab tracking for:', tabId, tabInfo?.url?.substring(0, 50));
               
               if (tabId && tabInfo) {
                 // Force start tracking this tab
@@ -344,12 +296,9 @@ class EnergyTracker {
                       files: ['content-script.js']
                     });
                     contentScriptInjected = true;
-                    console.log('[EnergyTracker] Content script injected successfully for tab:', tabId);
                   } else {
-                    console.log('[EnergyTracker] Cannot inject content script into tab:', tab?.url?.substring(0, 50));
                   }
                 } catch (scriptError) {
-                  console.log('[EnergyTracker] Content script injection failed:', scriptError.message);
                 }
                 
                 return {
@@ -521,7 +470,6 @@ class EnergyTracker {
                   }
                 };
               } catch (error) {
-                console.error('[EnergyTracker] GET_HISTORICAL_AI_USAGE failed:', error);
                 return { success: false, error: error.message };
               }
             }
@@ -544,7 +492,6 @@ class EnergyTracker {
                   granularity: granularity
                 };
               } catch (error) {
-                console.error('[EnergyTracker] GET_ENERGY_HISTORY failed:', error);
                 return { success: false, error: error.message };
               }
             }
@@ -571,7 +518,6 @@ class EnergyTracker {
                   }
                 };
               } catch (error) {
-                console.error('[EnergyTracker] GET_AI_MODEL_USAGE_SUMMARY failed:', error);
                 return { success: false, error: error.message };
               }
             }
@@ -586,7 +532,6 @@ class EnergyTracker {
                   comparison: comparison
                 };
               } catch (error) {
-                console.error('[EnergyTracker] GET_MODEL_COMPARISON failed:', error);
                 return { success: false, error: error.message };
               }
             }
@@ -600,7 +545,6 @@ class EnergyTracker {
                   benchmarks: benchmarks
                 };
               } catch (error) {
-                console.error('[EnergyTracker] GET_MODEL_BENCHMARKS failed:', error);
                 return { success: false, error: error.message };
               }
             }
@@ -614,7 +558,6 @@ class EnergyTracker {
                   trending: trending
                 };
               } catch (error) {
-                console.error('[EnergyTracker] GET_TRENDING_MODELS failed:', error);
                 return { success: false, error: error.message };
               }
             }
@@ -629,7 +572,6 @@ class EnergyTracker {
                   exportData: exportData
                 };
               } catch (error) {
-                console.error('[EnergyTracker] EXPORT_COMPARISON_DATA failed:', error);
                 return { success: false, error: error.message };
               }
             }
@@ -637,7 +579,6 @@ class EnergyTracker {
               return { success: false, error: 'Unknown message type: ' + message.type };
           }
         } catch (error) {
-          console.error('[EnergyTracker] Message handling error:', error);
           return { success: false, error: error.message || String(error) };
         }
       };
@@ -649,16 +590,13 @@ class EnergyTracker {
             sendResponse(response);
           }
         } catch (responseError) {
-          console.error('[EnergyTracker] Send response error:', responseError);
         }
       }).catch(error => {
-        console.error('[EnergyTracker] Async handler error:', error);
         try {
           if (sendResponse) {
             sendResponse({ success: false, error: error.message || String(error) });
           }
         } catch (responseError) {
-          console.error('[EnergyTracker] Error response failed:', responseError);
         }
       });
 
@@ -667,46 +605,29 @@ class EnergyTracker {
     });
 
     // Alarms (keep SW warm + cleanup) - WITH DIAGNOSTIC LOGGING
-    console.log('[EnergyTracker] DIAGNOSTIC: Checking chrome.alarms availability');
-    console.log('[EnergyTracker] DIAGNOSTIC: chrome object exists:', typeof chrome !== 'undefined');
-    console.log('[EnergyTracker] DIAGNOSTIC: chrome.alarms exists:', typeof chrome?.alarms !== 'undefined');
     
     if (typeof chrome !== 'undefined' && chrome.alarms && chrome.alarms.onAlarm) {
-      console.log('[EnergyTracker] DIAGNOSTIC: Alarms API available - setting up alarm listener');
       chrome.alarms.onAlarm.addListener(async (alarm) => {
         try {
-          console.log('[EnergyTracker] DIAGNOSTIC: Alarm triggered:', alarm.name);
           if (alarm.name === 'et_process') {
             await this.periodicCleanup();
           }
         } catch (e) {
-          console.warn('[EnergyTracker] alarm error:', e);
         }
       });
     } else {
-      console.error('[EnergyTracker] DIAGNOSTIC: Alarms API not available - missing "alarms" permission in manifest.json');
-      console.error('[EnergyTracker] DIAGNOSTIC: This will cause onAlarm errors throughout the extension');
     }
   }
 
   setupKeepAlive() {
     // 1) periodic alarm keeps the SW from going cold forever - WITH DIAGNOSTIC LOGGING
-    console.log('[EnergyTracker] DIAGNOSTIC: Attempting to create keep-alive alarm');
-    console.log('[EnergyTracker] DIAGNOSTIC: chrome.alarms.create available:', typeof chrome?.alarms?.create === 'function');
     
     try {
       if (typeof chrome !== 'undefined' && chrome.alarms && chrome.alarms.create) {
-        console.log('[EnergyTracker] DIAGNOSTIC: Creating et_process alarm with 1 minute interval');
         chrome.alarms.create('et_process', { periodInMinutes: 1 });
-        console.log('[EnergyTracker] DIAGNOSTIC: Alarm created successfully');
       } else {
-        console.error('[EnergyTracker] DIAGNOSTIC: Cannot create alarm - chrome.alarms.create not available');
-        console.error('[EnergyTracker] DIAGNOSTIC: This indicates missing "alarms" permission in manifest.json');
-        console.warn('[EnergyTracker] Service worker keep-alive disabled due to missing alarms permission');
       }
     } catch (e) {
-      console.error('[EnergyTracker] DIAGNOSTIC: Exception creating alarm:', e.name, e.message);
-      console.warn('[EnergyTracker] failed to create alarm:', e);
     }
   }
 
@@ -728,7 +649,6 @@ class EnergyTracker {
         await chrome.storage.local.set({ energyHistory: [] });
       }
     } catch (e) {
-      console.warn('[EnergyTracker] storage init failed:', e);
     }
   }
 
@@ -738,11 +658,9 @@ class EnergyTracker {
     try {
       tab = await chrome.tabs.get(tabId);
     } catch {
-      console.log('[EnergyTracker] Tab', tabId, 'no longer exists');
       return false;
     }
     if (!tab?.url) {
-      console.log('[EnergyTracker] Tab', tabId, 'has no URL');
       return false;
     }
 
@@ -753,17 +671,14 @@ class EnergyTracker {
       u.startsWith('moz-extension://') || u.startsWith('chrome-extension://') ||
       u === 'chrome://newtab/' || u === 'about:blank'
     ) {
-      console.log('[EnergyTracker] Skipping system page:', u.substring(0, 50));
       return false;
     }
     if (!u.startsWith('http://') && !u.startsWith('https://')) {
-      console.log('[EnergyTracker] Skipping non-http URL:', u.substring(0, 50));
       return false;
     }
 
     // Check if already tracking
     if (this.currentTabs.has(tabId)) {
-      console.log('[EnergyTracker] Already tracking tab', tabId);
       // Update existing data
       const existingData = this.currentTabs.get(tabId);
       this.currentTabs.set(tabId, {
@@ -775,7 +690,6 @@ class EnergyTracker {
       return true;
     }
 
-    console.log('[EnergyTracker] Starting to track new tab:', tabId, u.substring(0, 50));
 
     try {
       await chrome.scripting.executeScript({
@@ -785,10 +699,8 @@ class EnergyTracker {
       
       // Wait for content script to be ready with timeout
       const isReady = await this.waitForContentScriptReady(tabId);
-      console.log('[EnergyTracker] Content script ready for tab', tabId, ':', isReady);
     } catch (e) {
       // Some sites disallow injection; that's fine.
-      console.log('[EnergyTracker] Content script injection skipped for tab', tabId, ':', e?.message || e);
     }
 
     // Create initial tab data
@@ -806,7 +718,6 @@ class EnergyTracker {
 
     this.currentTabs.set(tabId, tabData);
 
-    console.log('[EnergyTracker] Now tracking tab', tabId, 'Total tabs:', this.currentTabs.size);
     return true;
   }
 
@@ -817,7 +728,6 @@ class EnergyTracker {
         return true; // Content script is ready
       } catch (e) {
         if (i === maxRetries - 1) {
-          console.warn('[EnergyTracker] Content script not ready after', maxRetries, 'attempts');
           return false;
         }
         await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms
@@ -830,7 +740,6 @@ class EnergyTracker {
     if (!data) return;
 
     this.saveHistoryEntry(tabId, data).catch((e) => {
-      console.warn('[EnergyTracker] save on close failed:', e);
     });
     this.currentTabs.delete(tabId);
     
@@ -980,7 +889,6 @@ class EnergyTracker {
         }
       }
     } catch (e) {
-      console.warn('[EnergyTracker] notify failed:', e);
     }
   }
 
@@ -1016,9 +924,7 @@ class EnergyTracker {
               type: 'SHOW_ENERGY_TIP',
               tipData: tipData
             });
-            console.log('[EnergyTracker] Advanced tip sent to tab:', tabId, tipData.type);
           } catch (contentScriptError) {
-            console.log('[EnergyTracker] Could not send tip to content script:', contentScriptError);
             // Fallback to browser notification
             if (chrome.notifications) {
               chrome.notifications.create({
@@ -1032,7 +938,6 @@ class EnergyTracker {
         }
       }
     } catch (e) {
-      console.warn('[EnergyTracker] contextual tip failed:', e);
     }
   }
 
@@ -1059,12 +964,10 @@ class EnergyTracker {
         });
       }
     } catch (e) {
-      console.warn('[EnergyTracker] notify failed:', e);
     }
   }
 
   async getCurrentEnergySnapshot() {
-    console.log('[EnergyTracker] Getting current energy snapshot, in-memory tabs:', this.currentTabs.size);
     
     const out = {};
     
@@ -1102,7 +1005,6 @@ class EnergyTracker {
     
     // If no in-memory data, try to recover from persistent storage
     if (Object.keys(out).length === 0) {
-      console.log('[EnergyTracker] No in-memory data, attempting recovery from storage...');
       try {
         const { currentTabsSnapshot } = await chrome.storage.local.get('currentTabsSnapshot');
         if (currentTabsSnapshot && typeof currentTabsSnapshot === 'object') {
@@ -1119,7 +1021,6 @@ class EnergyTracker {
                   isRecovered: true,
                   dataSource: 'recovered_storage'
                 };
-                console.log('[EnergyTracker] Recovered data for tab:', tabId);
               } catch {
                 // Tab no longer exists
               }
@@ -1127,7 +1028,6 @@ class EnergyTracker {
           }
         }
       } catch (storageError) {
-        console.warn('[EnergyTracker] Storage recovery failed:', storageError);
       }
     }
     
@@ -1139,11 +1039,9 @@ class EnergyTracker {
           lastSnapshotTime: Date.now()
         });
       } catch (persistError) {
-        console.warn('[EnergyTracker] Failed to persist snapshot:', persistError);
       }
     }
     
-    console.log('[EnergyTracker] Returning energy snapshot with', Object.keys(out).length, 'tabs');
     return out;
   }
 
@@ -1159,20 +1057,17 @@ class EnergyTracker {
 
     try {
       if (typeof chrome === 'undefined' || !chrome.storage) {
-        console.warn('[EnergyTracker] Chrome storage API not available');
         return defaultSettings;
       }
 
       const { settings } = await chrome.storage.local.get('settings');
       if (!settings || typeof settings !== 'object') {
-        console.log('[EnergyTracker] No valid settings found, using defaults');
         return defaultSettings;
       }
 
       // Merge with defaults to ensure all required properties exist
       return { ...defaultSettings, ...settings };
     } catch (error) {
-      console.error('[EnergyTracker] Failed to load settings:', error.message);
       return defaultSettings;
     }
   }
@@ -1180,22 +1075,18 @@ class EnergyTracker {
   async updateSettings(newSettings) {
     try {
       if (typeof chrome === 'undefined' || !chrome.storage) {
-        console.warn('[EnergyTracker] Chrome storage API not available for settings update');
         return false;
       }
 
       if (!newSettings || typeof newSettings !== 'object') {
-        console.error('[EnergyTracker] Invalid settings provided for update');
         return false;
       }
 
       // Sanitize settings before saving
       const sanitizedSettings = this.sanitizeSettings(newSettings);
       await chrome.storage.local.set({ settings: sanitizedSettings });
-      console.log('[EnergyTracker] Settings updated successfully');
       return true;
     } catch (error) {
-      console.error('[EnergyTracker] Failed to update settings:', error.message);
       return false;
     }
   }
@@ -1294,10 +1185,8 @@ class EnergyTracker {
       const filtered = energyHistory.filter(e => e.timestamp > cutoff);
       if (filtered.length !== energyHistory.length) {
         await chrome.storage.local.set({ energyHistory: filtered });
-        console.log(`[EnergyTracker] cleaned ${energyHistory.length - filtered.length} old entries`);
       }
     } catch (e) {
-      console.warn('[EnergyTracker] cleanup failed:', e);
     }
   }
 
@@ -1310,7 +1199,6 @@ class EnergyTracker {
       const cutoff = now - dur;
       return backendEnergyHistory.filter(e => e.timestamp > cutoff);
     } catch (e) {
-      console.warn('[EnergyTracker] backend history failed:', e);
       return [];
     }
   }
@@ -1327,9 +1215,7 @@ class EnergyTracker {
       }
       
       await chrome.storage.local.set({ backendEnergyHistory });
-      console.log('[EnergyTracker] backend energy logged:', entry);
     } catch (e) {
-      console.warn('[EnergyTracker] log backend energy failed:', e);
       throw e;
     }
   }
@@ -1339,9 +1225,7 @@ class EnergyTracker {
       const { backendEnergyHistory = [] } = await chrome.storage.local.get('backendEnergyHistory');
       const filtered = backendEnergyHistory.filter(e => e.id !== entryId);
       await chrome.storage.local.set({ backendEnergyHistory: filtered });
-      console.log('[EnergyTracker] backend energy entry deleted:', entryId);
     } catch (e) {
-      console.warn('[EnergyTracker] delete backend entry failed:', e);
       throw e;
     }
   }
@@ -1356,7 +1240,6 @@ class EnergyTracker {
         entryCount: history.length
       };
     } catch (e) {
-      console.warn('[EnergyTracker] backend summary failed:', e);
       return { totalEnergy: 0, recentEntries: [], entryCount: 0 };
     }
   }
@@ -1407,7 +1290,6 @@ class EnergyTracker {
         recentEntries: history.slice(-10)
       };
     } catch (e) {
-      console.warn('[EnergyTracker] power summary failed:', e);
       return {
         totalEntries: 0,
         averagePowerWatts: 0,
@@ -1424,7 +1306,6 @@ class EnergyTracker {
 
   async migrateLegacyEnergyData() {
     try {
-      console.log('[EnergyTracker] Starting legacy data migration...');
       const { energyHistory = [] } = await chrome.storage.local.get('energyHistory');
       
       let migratedCount = 0;
@@ -1465,7 +1346,6 @@ class EnergyTracker {
       // Save migrated data
       await chrome.storage.local.set({ energyHistory: migratedHistory });
       
-      console.log(`[EnergyTracker] Migration complete: ${migratedCount} entries migrated, ${alreadyMigratedCount} already up-to-date`);
       
       return {
         migratedCount,
@@ -1474,7 +1354,6 @@ class EnergyTracker {
       };
       
     } catch (e) {
-      console.error('[EnergyTracker] Migration failed:', e);
       return {
         error: e.message,
         migratedCount: 0,
@@ -1519,7 +1398,6 @@ class EnergyTracker {
    * Execute tip actions from the notification system
    */
   async executeTipAction(action, notificationData, tabId) {
-    console.log('[EnergyTracker] Executing tip action:', action, 'for tab:', tabId);
     
     try {
       switch (action) {
@@ -1581,14 +1459,12 @@ class EnergyTracker {
           break;
           
         default:
-          console.warn('[EnergyTracker] Unknown tip action:', action);
           return { success: false, error: 'Unknown action' };
       }
       
       return { success: false, error: 'Action could not be executed' };
       
     } catch (error) {
-      console.error('[EnergyTracker] Action execution failed:', error);
       return { success: false, error: error.message };
     }
   }
@@ -1618,7 +1494,6 @@ class EnergyTracker {
       const { notificationSettings } = await chrome.storage.local.get('notificationSettings');
       return { ...defaultSettings, ...notificationSettings };
     } catch (error) {
-      console.error('[EnergyTracker] Failed to get notification settings:', error);
       return defaultSettings;
     }
   }
@@ -1644,10 +1519,8 @@ class EnergyTracker {
         }
       }
       
-      console.log('[EnergyTracker] Notification settings updated');
       return true;
     } catch (error) {
-      console.error('[EnergyTracker] Failed to update notification settings:', error);
       return false;
     }
   }
@@ -1712,7 +1585,6 @@ class EnergyTracker {
         return currentTime >= start && currentTime <= end;
       }
     } catch (error) {
-      console.error('[EnergyTracker] Quiet hours check failed:', error);
       return false;
     }
   }
@@ -1740,11 +1612,9 @@ class EnergyTracker {
       try {
         const tip = this.energyTipsDatabase.getContextualTip(powerWatts, tabData, settings);
         if (tip) {
-          console.log('[EnergyTracker] Generated contextual tip:', tip.type, 'for', powerWatts + 'W');
           return tip;
         }
       } catch (error) {
-        console.error('[EnergyTracker] Tips database error:', error);
         // Fall through to legacy system
       }
     }
@@ -1895,7 +1765,6 @@ class EnergyTracker {
       if (!url || typeof url !== 'string') return '';
       return new URL(url).hostname;
     } catch (error) {
-      console.warn('[EnergyTracker] Failed to extract domain from URL:', url);
       return '';
     }
   }
@@ -1943,7 +1812,6 @@ class EnergyTracker {
     
     this.tabRollingData.set(tabId, rollingData);
     
-    console.log(`[EnergyTracker] Updated rolling average for tab ${tabId}: ${rollingData.rollingAverage.toFixed(1)}W`);
   }
 
   /**
@@ -1982,7 +1850,6 @@ class EnergyTracker {
           }
         } catch (tabError) {
           // Tab no longer exists, remove from tracking
-          console.log(`[EnergyTracker] Removing closed tab ${tabId} from rolling data`);
           this.tabRollingData.delete(tabId);
           this.currentTabs.delete(parseInt(tabId));
         }
@@ -1993,11 +1860,9 @@ class EnergyTracker {
         .sort((a, b) => b.rollingAverage - a.rollingAverage)
         .slice(0, count);
       
-      console.log(`[EnergyTracker] Returning top ${sortedTabs.length} tabs for Compare Tabs Strip`);
       return sortedTabs;
       
     } catch (error) {
-      console.error('[EnergyTracker] Error getting top energy tabs:', error);
       return [];
     }
   }
@@ -2258,14 +2123,9 @@ class EnergyTracker {
 let tracker;
 
 if (ENHANCED_INTEGRATION_AVAILABLE && typeof EnergyTrackerEnhancedIntegration !== 'undefined') {
-  console.log('[EnergyTracker] Initializing Enhanced Power Tracker with Full Integration');
   tracker = new EnergyTrackerEnhancedIntegration();
 } else if (AGENT_SYSTEM_AVAILABLE && typeof EnergyTrackerWithAgent !== 'undefined') {
-  console.log('[EnergyTracker] Initializing Enhanced Power Tracker with Agent System');
   tracker = new EnergyTrackerWithAgent();
 } else {
-  console.log('[EnergyTracker] Initializing Base Power Tracker (Enhanced features not available)');
   tracker = new EnergyTracker();
 }
-
-console.log('[EnergyTracker] Tracker initialized:', tracker.constructor.name);

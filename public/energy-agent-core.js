@@ -29,7 +29,6 @@ class EnergyAgent {
   }
 
   async initialize() {
-    console.log('[EnergyAgent] Initializing intelligent energy optimization...');
     
     try {
       // Load user behavior patterns
@@ -45,9 +44,7 @@ class EnergyAgent {
       await this.loadUserPreferences();
       
       this.isActive = true;
-      console.log('[EnergyAgent] Agent initialized and active');
     } catch (error) {
-      console.error('[EnergyAgent] Initialization failed:', error);
       throw error;
     }
   }
@@ -140,7 +137,6 @@ class EnergyAgent {
         }
         
       } catch (error) {
-        console.error('[EnergyAgent] Action execution failed:', error);
         executionResults.push({
           action: action.type,
           success: false,
@@ -184,7 +180,6 @@ class EnergyAgent {
         this.patterns = new Map(result.behaviorPatterns || []);
       }
     } catch (error) {
-      console.warn('[EnergyAgent] Could not load behavior patterns:', error);
     }
   }
 
@@ -197,7 +192,6 @@ class EnergyAgent {
         }
       }
     } catch (error) {
-      console.warn('[EnergyAgent] Could not load user preferences:', error);
     }
   }
 
@@ -222,7 +216,6 @@ class EnergyAgent {
         }
       }
     } catch (error) {
-      console.error('[EnergyAgent] Routine analysis failed:', error);
     }
   }
 
@@ -442,7 +435,6 @@ class EnergyAgent {
 
   async executeAction(action) {
     // This will be implemented by the IntelligentActions class
-    console.log('[EnergyAgent] Executing action:', action.type);
     
     // Placeholder implementation
     return {
@@ -585,7 +577,6 @@ class EnergyAgent {
         });
       }
     } catch (error) {
-      console.error('[EnergyAgent] Failed to save state:', error);
     }
   }
 }

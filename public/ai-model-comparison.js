@@ -24,7 +24,6 @@ class AIModelComparisonEngine {
   }
 
   init() {
-    console.log('[AIModelComparisonEngine] Initializing comparison engine...');
     this.loadUsageHistory();
     this.calculateGlobalBenchmarks();
   }
@@ -36,9 +35,7 @@ class AIModelComparisonEngine {
     try {
       const stored = localStorage.getItem('ai_usage_history');
       this.usageHistory = stored ? JSON.parse(stored) : [];
-      console.log('[AIModelComparisonEngine] Loaded usage history:', this.usageHistory.length, 'entries');
     } catch (error) {
-      console.warn('[AIModelComparisonEngine] Failed to load usage history:', error);
       this.usageHistory = [];
     }
   }
@@ -75,7 +72,6 @@ class AIModelComparisonEngine {
     try {
       localStorage.setItem('ai_usage_history', JSON.stringify(this.usageHistory));
     } catch (error) {
-      console.warn('[AIModelComparisonEngine] Failed to save usage history:', error);
     }
   }
 
@@ -109,7 +105,6 @@ class AIModelComparisonEngine {
       }
     };
 
-    console.log('[AIModelComparisonEngine] Global benchmarks calculated:', this.benchmarks);
   }
 
   /**

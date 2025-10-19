@@ -14,14 +14,10 @@ class DataMigrationUtility {
       // Initialize PowerCalculator for energy score conversion synchronously
       if (typeof PowerCalculator !== 'undefined') {
         this.powerCalculator = new PowerCalculator();
-        console.log('[DataMigration] PowerCalculator initialized successfully');
       } else {
-        console.error('[DataMigration] PowerCalculator not available');
         // Don't throw error to prevent service worker from failing
-        console.warn('[DataMigration] Continuing without PowerCalculator - migration features will be limited');
       }
     } catch (error) {
-      console.error('[DataMigration] Failed to initialize PowerCalculator:', error);
       // Don't throw error to prevent service worker from failing
     }
   }
@@ -30,13 +26,11 @@ class DataMigrationUtility {
    * Main migration method - migrates all legacy energy data to power-based format
    */
   async migrateLegacyData() {
-    console.log('[DataMigration] Starting legacy energy data migration...');
     
     try {
       // Check if migration has already been completed
       const migrationStatus = await this.checkMigrationStatus();
       if (migrationStatus.completed) {
-        console.log('[DataMigration] Migration already completed at version:', migrationStatus.version);
         return {
           success: true,
           message: 'Migration already completed',
@@ -51,7 +45,6 @@ class DataMigrationUtility {
       const energyHistory = this.extractEnergyHistory(allData);
       const settings = this.extractSettings(allData);
       
-      console.log('[DataMigration] Found', energyHistory.length, 'energy history entries to migrate');
 
       // Migrate energy history data
       const migratedHistory = await this.migrateEnergyHistoryData(energyHistory);
@@ -77,7 +70,6 @@ class DataMigrationUtility {
       
       await this.markMigrationComplete(migrationStats);
       
-      console.log('[DataMigration] Migration completed successfully:', migrationStats);
       
       return {
         success: true,
@@ -86,7 +78,6 @@ class DataMigrationUtility {
       };
       
     } catch (error) {
-      console.error('[DataMigration] Migration failed:', error);
       return {
         success: false,
         message: 'Migration failed: ' + error.message,
@@ -103,7 +94,6 @@ class DataMigrationUtility {
       const result = await chrome.storage.local.get(['migration_status']);
       return result.migration_status || { completed: false };
     } catch (error) {
-      console.error('[DataMigration] Failed to check migration status:', error);
       return { completed: false };
     }
   }
@@ -115,7 +105,6 @@ class DataMigrationUtility {
     try {
       return await chrome.storage.local.get(null);
     } catch (error) {
-      console.error('[DataMigration] Failed to get stored data:', error);
       throw error;
     }
   }
@@ -159,7 +148,6 @@ class DataMigrationUtility {
         const migratedEntry = await this.migrateHistoryEntry(entry);
         migratedEntries.push(migratedEntry);
       } catch (error) {
-        console.warn('[DataMigration] Failed to migrate entry:', entry, error);
         // Keep original entry if migration fails
         migratedEntries.push(entry);
       }
@@ -185,7 +173,6 @@ class DataMigrationUtility {
     try {
       // Check if PowerCalculator is available
       if (!this.powerCalculator) {
-        console.warn('[DataMigration] PowerCalculator not available, using fallback conversion');
         // Fallback conversion logic
         const estimatedWatts = this.fallbackEnergyScoreToWatts(entry.energyScore);
         const durationHours = (entry.duration || 0) / (1000 * 60 * 60);
@@ -231,7 +218,6 @@ class DataMigrationUtility {
       return migratedEntry;
       
     } catch (error) {
-      console.error('[DataMigration] Failed to migrate entry:', entry, error);
       throw error;
     }
   }
@@ -270,10 +256,8 @@ class DataMigrationUtility {
       };
       
       await chrome.storage.local.set({ [backupKey]: backupData });
-      console.log('[DataMigration] Backup created with key:', backupKey);
       
     } catch (error) {
-      console.error('[DataMigration] Failed to create backup:', error);
       throw error;
     }
   }
@@ -293,10 +277,8 @@ class DataMigrationUtility {
         await chrome.storage.local.set({ [`energy_${dateKey}`]: entries });
       }
 
-      console.log('[DataMigration] Migrated data stored successfully');
       
     } catch (error) {
-      console.error('[DataMigration] Failed to store migrated data:', error);
       throw error;
     }
   }
@@ -334,10 +316,8 @@ class DataMigrationUtility {
       };
       
       await chrome.storage.local.set({ migration_status: migrationStatus });
-      console.log('[DataMigration] Migration marked as complete');
       
     } catch (error) {
-      console.error('[DataMigration] Failed to mark migration complete:', error);
       throw error;
     }
   }
@@ -366,11 +346,9 @@ class DataMigrationUtility {
       // Reset migration status
       await chrome.storage.local.remove(['migration_status']);
       
-      console.log('[DataMigration] Successfully restored from backup:', backupKey);
       return { success: true, message: 'Backup restored successfully' };
       
     } catch (error) {
-      console.error('[DataMigration] Failed to restore from backup:', error);
       return { success: false, message: 'Backup restore failed: ' + error.message };
     }
   }
@@ -387,7 +365,6 @@ class DataMigrationUtility {
         version: migrationStatus.version
       };
     } catch (error) {
-      console.error('[DataMigration] Failed to get migration stats:', error);
       return { completed: false, stats: {}, error: error.message };
     }
   }
@@ -424,13 +401,11 @@ class DataMigrationUtility {
       
       if (keysToRemove.length > 0) {
         await chrome.storage.local.remove(keysToRemove);
-        console.log('[DataMigration] Cleaned up', keysToRemove.length, 'old backups');
       }
       
       return { success: true, removedBackups: keysToRemove.length };
       
     } catch (error) {
-      console.error('[DataMigration] Failed to cleanup old backups:', error);
       return { success: false, error: error.message };
     }
   }

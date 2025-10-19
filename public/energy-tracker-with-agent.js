@@ -33,7 +33,6 @@ class EnergyTrackerWithAgent extends EnergyTracker {
 
   async initAgent() {
     try {
-      console.log('[EnergyTrackerWithAgent] Initializing Energy Agent system...');
       
       // Wait for base tracker to be ready
       await this.initPromise;
@@ -51,13 +50,11 @@ class EnergyTrackerWithAgent extends EnergyTracker {
       this.startOptimizationCycle();
       
       this.agentInitialized = true;
-      console.log('[EnergyTrackerWithAgent] Energy Agent system initialized successfully');
       
       // Show welcome notification
       this.showAgentWelcomeNotification();
       
     } catch (error) {
-      console.error('[EnergyTrackerWithAgent] Agent initialization failed:', error);
       this.agentEnabled = false;
     }
   }
@@ -77,9 +74,7 @@ class EnergyTrackerWithAgent extends EnergyTracker {
     for (const dep of dependencies) {
       try {
         await this.importScript(dep);
-        console.log(`[EnergyTrackerWithAgent] Loaded: ${dep}`);
       } catch (error) {
-        console.warn(`[EnergyTrackerWithAgent] Failed to load ${dep}:`, error);
       }
     }
   }
@@ -100,31 +95,25 @@ class EnergyTrackerWithAgent extends EnergyTracker {
       // Initialize core components if classes are available
       if (typeof EnergyAgent !== 'undefined') {
         this.energyAgent = new EnergyAgent();
-        console.log('[EnergyTrackerWithAgent] EnergyAgent initialized');
       }
 
       if (typeof OptimizationController !== 'undefined') {
         this.optimizationController = new OptimizationController();
-        console.log('[EnergyTrackerWithAgent] OptimizationController initialized');
       }
 
       if (typeof AdvancedLearningSystem !== 'undefined') {
         this.advancedLearningSystem = new AdvancedLearningSystem();
-        console.log('[EnergyTrackerWithAgent] AdvancedLearningSystem initialized');
       }
 
       if (typeof PatternRecognitionSystem !== 'undefined') {
         this.patternRecognitionSystem = new PatternRecognitionSystem();
-        console.log('[EnergyTrackerWithAgent] PatternRecognitionSystem initialized');
       }
 
       if (typeof IntelligentActions !== 'undefined') {
         this.intelligentActions = new IntelligentActions();
-        console.log('[EnergyTrackerWithAgent] IntelligentActions initialized');
       }
 
     } catch (error) {
-      console.error('[EnergyTrackerWithAgent] Component initialization failed:', error);
     }
   }
 
@@ -202,7 +191,6 @@ class EnergyTrackerWithAgent extends EnergyTracker {
               return null; // Let base class handle
           }
         } catch (error) {
-          console.error('[EnergyTrackerWithAgent] Agent message handling error:', error);
           return { success: false, error: error.message };
         }
       };
@@ -215,16 +203,13 @@ class EnergyTrackerWithAgent extends EnergyTracker {
               sendResponse(response);
             }
           } catch (responseError) {
-            console.error('[EnergyTrackerWithAgent] Send response error:', responseError);
           }
         }).catch(error => {
-          console.error('[EnergyTrackerWithAgent] Agent request error:', error);
           try {
             if (sendResponse) {
               sendResponse({ success: false, error: error.message });
             }
           } catch (responseError) {
-            console.error('[EnergyTrackerWithAgent] Error response failed:', responseError);
           }
         });
         return true; // Indicate async response
@@ -242,7 +227,6 @@ class EnergyTrackerWithAgent extends EnergyTracker {
       await this.runOptimizationCycle();
     }, 30000); // Run every 30 seconds
 
-    console.log('[EnergyTrackerWithAgent] Optimization cycle started');
   }
 
   stopOptimizationCycle() {
@@ -250,7 +234,6 @@ class EnergyTrackerWithAgent extends EnergyTracker {
       clearInterval(this.optimizationInterval);
       this.optimizationInterval = null;
     }
-    console.log('[EnergyTrackerWithAgent] Optimization cycle stopped');
   }
 
   async runOptimizationCycle() {
@@ -273,11 +256,9 @@ class EnergyTrackerWithAgent extends EnergyTracker {
           await this.learnFromOptimization(currentState, optimizationResult);
         }
         
-        console.log('[EnergyTrackerWithAgent] Optimization completed:', optimizationResult.strategy);
       }
       
     } catch (error) {
-      console.error('[EnergyTrackerWithAgent] Optimization cycle error:', error);
     }
   }
 
@@ -541,7 +522,6 @@ class EnergyTrackerWithAgent extends EnergyTracker {
       
       return [];
     } catch (error) {
-      console.error('[EnergyTrackerWithAgent] Failed to get recommendations:', error);
       return [];
     }
   }
@@ -580,7 +560,6 @@ class EnergyTrackerWithAgent extends EnergyTracker {
       
       return result;
     } catch (error) {
-      console.error('[EnergyTrackerWithAgent] Agent action execution failed:', error);
       return { success: false, error: error.message };
     }
   }
@@ -605,7 +584,6 @@ class EnergyTrackerWithAgent extends EnergyTracker {
       
       return { patterns: [], insights: {} };
     } catch (error) {
-      console.error('[EnergyTrackerWithAgent] Pattern analysis failed:', error);
       return { patterns: [], insights: {} };
     }
   }
@@ -626,7 +604,6 @@ class EnergyTrackerWithAgent extends EnergyTracker {
         learningVelocity: insights.learningVelocity || 0.5
       };
     } catch (error) {
-      console.error('[EnergyTrackerWithAgent] Learning insights failed:', error);
       return { insights: {}, modelStatus: 'error' };
     }
   }
@@ -650,7 +627,6 @@ class EnergyTrackerWithAgent extends EnergyTracker {
       
       return result;
     } catch (error) {
-      console.error('[EnergyTrackerWithAgent] Manual optimization failed:', error);
       return { success: false, error: error.message };
     }
   }
@@ -674,7 +650,6 @@ class EnergyTrackerWithAgent extends EnergyTracker {
         learningInsights: await this.getLearningInsights()
       };
     } catch (error) {
-      console.error('[EnergyTrackerWithAgent] Dashboard data failed:', error);
       return { error: error.message };
     }
   }
@@ -718,9 +693,7 @@ class EnergyTrackerWithAgent extends EnergyTracker {
         // Update learning system settings
       }
 
-      console.log('[EnergyTrackerWithAgent] Agent settings updated:', settings);
     } catch (error) {
-      console.error('[EnergyTrackerWithAgent] Settings update failed:', error);
       throw error;
     }
   }
@@ -736,7 +709,6 @@ class EnergyTrackerWithAgent extends EnergyTracker {
         });
       }
     } catch (error) {
-      console.log('[EnergyTrackerWithAgent] Welcome notification failed:', error);
     }
   }
 
@@ -759,7 +731,6 @@ class EnergyTrackerWithAgent extends EnergyTracker {
           });
         }
       } catch (error) {
-        console.warn('[EnergyTrackerWithAgent] Agent data processing failed:', error);
       }
     }
   }
@@ -780,7 +751,6 @@ class EnergyTrackerWithAgent extends EnergyTracker {
               optimizationRecommendations: await this.getTabOptimizationRecommendations(tabId)
             };
           } catch (error) {
-            console.warn('[EnergyTrackerWithAgent] Failed to get agent insights for tab:', tabId, error);
           }
         }
       }
@@ -851,7 +821,6 @@ class EnergyTrackerWithAgent extends EnergyTracker {
           };
         }
       } catch (error) {
-        console.warn('[EnergyTrackerWithAgent] Agent cleanup failed:', error);
       }
     }
   }
@@ -864,14 +833,12 @@ class EnergyTrackerWithAgent extends EnergyTracker {
       try {
         this.agentDashboard.destroy();
       } catch (error) {
-        console.warn('[EnergyTrackerWithAgent] Dashboard cleanup failed:', error);
       }
     }
     
     this.agentEnabled = false;
     this.agentInitialized = false;
     
-    console.log('[EnergyTrackerWithAgent] Agent system shut down');
   }
 }
 

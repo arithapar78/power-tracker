@@ -14,7 +14,6 @@ class AdvancedLearningSystem {
   }
 
   async learn(state, action, reward, nextState, context) {
-    console.log('[AdvancedLearningSystem] Learning from experience');
 
     try {
       // Create experience tuple
@@ -53,7 +52,6 @@ class AdvancedLearningSystem {
       };
 
     } catch (error) {
-      console.error('[AdvancedLearningSystem] Learning failed:', error);
       return {
         success: false,
         error: error.message
@@ -62,7 +60,6 @@ class AdvancedLearningSystem {
   }
 
   async predictOptimalAction(state, context, availableActions) {
-    console.log('[AdvancedLearningSystem] Predicting optimal action');
 
     try {
       const encodedState = this.encodeState(state);
@@ -87,7 +84,6 @@ class AdvancedLearningSystem {
       };
 
     } catch (error) {
-      console.error('[AdvancedLearningSystem] Prediction failed:', error);
       return {
         action: availableActions[0] || null,
         confidence: 0.1,
@@ -408,7 +404,6 @@ class AdvancedLearningSystem {
       }
       return true;
     } catch (error) {
-      console.error('[AdvancedLearningSystem] Import failed:', error);
       return false;
     }
   }
@@ -1162,11 +1157,9 @@ class AdaptationEngine {
           return this.personalizeEnergyTargets(adaptationSpec.level);
           
         default:
-          console.warn(`[AdaptationEngine] Unknown adaptation type: ${adaptationSpec.type}`);
           return null;
       }
     } catch (error) {
-      console.error('[AdaptationEngine] Adaptation execution failed:', error);
       return null;
     }
   }

@@ -91,7 +91,6 @@ class IntelligentActions {
       throw new Error(`Unknown action type: ${actionType}`);
     }
 
-    console.log(`[IntelligentActions] Executing ${actionType}`);
 
     // Pre-execution safety check
     const safetyCheck = await this.safetyLimits.checkAction(actionType, context);
@@ -124,7 +123,6 @@ class IntelligentActions {
       };
 
     } catch (error) {
-      console.error(`[IntelligentActions] Action ${actionType} failed:`, error);
       return {
         success: false,
         actionType,
@@ -135,7 +133,6 @@ class IntelligentActions {
   }
 
   async intelligentTabSuspension(context) {
-    console.log('[IntelligentActions] Starting intelligent tab suspension');
     
     const tabAnalysis = await this.analyzeTabUsage(context);
     const suspensionCandidates = this.identifyOptimalSuspensionCandidates(tabAnalysis);
@@ -193,7 +190,6 @@ class IntelligentActions {
 
       return analysis;
     } catch (error) {
-      console.error('[IntelligentActions] Tab analysis failed:', error);
       return new Map();
     }
   }
@@ -210,7 +206,6 @@ class IntelligentActions {
         lastActive: Date.now() - Math.random() * 3600000 // Up to 1 hour ago
       };
     } catch (error) {
-      console.warn(`[IntelligentActions] Could not get metrics for tab ${tabId}:`, error);
       return {
         powerUsage: 10,
         cpuUsage: 20,
@@ -365,7 +360,6 @@ class IntelligentActions {
   }
 
   async dynamicVideoOptimization(context) {
-    console.log('[IntelligentActions] Starting dynamic video optimization');
     
     const videoTabs = await this.findActiveVideoTabs();
     const optimizations = [];
@@ -420,7 +414,6 @@ class IntelligentActions {
       
       return videoTabs;
     } catch (error) {
-      console.error('[IntelligentActions] Failed to find video tabs:', error);
       return [];
     }
   }
@@ -492,7 +485,6 @@ class IntelligentActions {
   }
 
   async resourcePreemption(context) {
-    console.log('[IntelligentActions] Starting resource preemption');
     
     const blockedResources = [];
     let totalEnergyPrevented = 0;
@@ -549,7 +541,6 @@ class IntelligentActions {
         });
       }
     } catch (error) {
-      console.error('[IntelligentActions] Resource prediction failed:', error);
     }
     
     return predictions;
@@ -615,7 +606,6 @@ class IntelligentActions {
   }
 
   async contextualDarkMode(context) {
-    console.log('[IntelligentActions] Starting contextual dark mode');
     
     const darkModeChanges = [];
     let totalEnergySaved = 0;
@@ -701,7 +691,6 @@ class IntelligentActions {
   async enableDarkModeForTab(tab) {
     try {
       // In a real implementation, this would inject CSS or trigger site's dark mode
-      console.log(`[IntelligentActions] Enabling dark mode for ${tab.url}`);
       
       return {
         success: true,
@@ -984,19 +973,16 @@ class TabSuspender {
 
   async nativeSuspension(tab) {
     // Use Chrome's native tab suspension (if available)
-    console.log(`[TabSuspender] Native suspension for tab ${tab.id}`);
     return { success: true };
   }
 
   async contentFreeze(tab) {
     // Freeze tab content by injecting pause script
-    console.log(`[TabSuspender] Content freeze for tab ${tab.id}`);
     return { success: true };
   }
 
   async resourcePause(tab) {
     // Pause resource loading while keeping tab responsive
-    console.log(`[TabSuspender] Resource pause for tab ${tab.id}`);
     return { success: true };
   }
 
@@ -1019,7 +1005,6 @@ class TabSuspender {
  */
 class VideoOptimizer {
   async optimizeQuality(tab, targetQuality) {
-    console.log(`[VideoOptimizer] Optimizing video quality to ${targetQuality} for tab ${tab.id}`);
     
     try {
       // In a real implementation, this would inject scripts to change video quality
@@ -1060,7 +1045,6 @@ class ResourceBlocker {
   }
 
   async blockPreemptively(resourcePrediction) {
-    console.log(`[ResourceBlocker] Blocking ${resourcePrediction.type}: ${resourcePrediction.url}`);
     
     try {
       // In a real implementation, this would set up request blocking

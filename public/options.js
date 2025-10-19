@@ -12,14 +12,11 @@ class OptionsManager {
   }
   
   async init() {
-    console.log('[OptionsManager] Initializing options page...');
     
     try {
       // Check Chrome API availability first
       if (!this.isChromeApiAvailable()) {
-        console.error('[OptionsManager] Chrome APIs not available - extension context may be invalid');
         this.showError('Extension context unavailable. Please reload the page.');
-        console.log('[OptionsManager] Setting up basic listeners due to Chrome API unavailability');
         this.setupBasicEventListeners();
         return;
       }
@@ -38,9 +35,7 @@ class OptionsManager {
       // Initialize PowerCalculator with error handling
       try {
         this.powerCalculator = new PowerCalculator();
-        console.log('[OptionsManager] PowerCalculator initialized successfully');
       } catch (pcError) {
-        console.warn('[OptionsManager] PowerCalculator initialization failed:', pcError);
         // Continue without PowerCalculator - functions will use fallbacks
         this.powerCalculator = null;
       }
@@ -66,21 +61,17 @@ class OptionsManager {
       // Handle URL parameters for direct tab navigation
       this.handleURLParams();
       
-      console.log('[OptionsManager] Initialization completed successfully');
       
     } catch (error) {
-      console.error('[OptionsManager] Initialization failed:', error);
       this.showError('Failed to initialize settings page: ' + error.message);
       
       // Still try to set up basic button functionality
-      console.log('[OptionsManager] Setting up basic listeners due to initialization failure');
       this.setupBasicEventListeners();
     }
   }
   
   setupEventListeners() {
     try {
-      console.log('[OptionsManager] Setting up event listeners...');
       
       // Remove existing listeners first
       this.removeExistingListeners();
@@ -245,10 +236,8 @@ class OptionsManager {
         });
       }
       
-      console.log('[OptionsManager] Event listeners setup completed');
       
     } catch (error) {
-      console.error('[OptionsManager] Error setting up event listeners:', error);
       // Fallback to basic button functionality
       this.setupBasicEventListeners();
     }
@@ -268,15 +257,12 @@ class OptionsManager {
     const element = document.getElementById(elementId);
     if (element) {
       element.addEventListener(eventType, handler);
-      console.log(`[OptionsManager] Added ${eventType} listener to ${elementId}`);
     } else {
-      console.warn(`[OptionsManager] Element ${elementId} not found, skipping event listener`);
     }
   }
   
   // Fallback method for basic button functionality
   setupBasicEventListeners() {
-    console.log('[OptionsManager] Setting up basic event listeners as fallback...');
     
     try {
       // Remove existing listeners first
@@ -298,15 +284,12 @@ class OptionsManager {
         if (element) {
           const safeHandler = (e) => {
             e.preventDefault();
-            console.log(`[OptionsManager] Button ${id} clicked`);
             handler();
           };
           
           element.addEventListener('click', safeHandler);
           this.boundListeners.push({ element, event: 'click', handler: safeHandler });
-          console.log(`[OptionsManager] Basic listener added to ${id}`);
         } else {
-          console.error(`[OptionsManager] Critical button ${id} not found`);
         }
       });
       
@@ -315,40 +298,34 @@ class OptionsManager {
         if (e.target.classList.contains('nav-tab')) {
           e.preventDefault();
           const tabName = e.target.dataset.tab;
-          console.log(`[OptionsManager] Tab clicked: ${tabName}`);
           this.switchTab(tabName);
         }
       };
       
       document.addEventListener('click', tabClickHandler);
       this.boundListeners.push({ element: document, event: 'click', handler: tabClickHandler });
-      console.log('[OptionsManager] Tab navigation added to basic listeners');
       
       // CRITICAL: Add help modal interactions to basic listeners
       const helpModalClickHandler = (e) => {
         // Help modal close buttons
         if (e.target.id === 'helpModalCloseBtn' || e.target.classList.contains('modal-close-btn')) {
           e.preventDefault();
-          console.log('[OptionsManager] Help modal close button clicked');
           this.hideHelpModal();
         }
         // Help section navigation
         else if (e.target.classList.contains('help-nav-item')) {
           e.preventDefault();
           const sectionId = e.target.dataset.section;
-          console.log(`[OptionsManager] Help section clicked: ${sectionId}`);
           this.showHelpSection(sectionId);
         }
         // Help modal backdrop click
         else if (e.target.id === 'helpModal') {
-          console.log('[OptionsManager] Help modal backdrop clicked');
           this.hideHelpModal();
         }
       };
       
       document.addEventListener('click', helpModalClickHandler);
       this.boundListeners.push({ element: document, event: 'click', handler: helpModalClickHandler });
-      console.log('[OptionsManager] Help modal interactions added to basic listeners');
       
       // CRITICAL: Add ESC key listener for help modal
       const helpModalKeyHandler = (e) => {
@@ -356,7 +333,6 @@ class OptionsManager {
           const helpModal = document.getElementById('helpModal');
           if (helpModal && !helpModal.classList.contains('hidden')) {
             e.preventDefault();
-            console.log('[OptionsManager] ESC key pressed, closing help modal');
             this.hideHelpModal();
           }
         }
@@ -364,10 +340,8 @@ class OptionsManager {
       
       document.addEventListener('keydown', helpModalKeyHandler);
       this.boundListeners.push({ element: document, event: 'keydown', handler: helpModalKeyHandler });
-      console.log('[OptionsManager] Help modal ESC key handler added to basic listeners');
       
     } catch (error) {
-      console.error('[OptionsManager] Failed to setup basic event listeners:', error);
     }
   }
 
@@ -379,31 +353,26 @@ class OptionsManager {
     try {
       // Check if chrome object exists
       if (typeof chrome === 'undefined') {
-        console.warn('[OptionsManager] Chrome object not available');
         return false;
       }
 
       // Check if runtime API exists
       if (!chrome.runtime) {
-        console.warn('[OptionsManager] Chrome runtime API not available');
         return false;
       }
 
       // Check if extension ID is valid
       if (!chrome.runtime.id) {
-        console.warn('[OptionsManager] Chrome runtime ID not available - extension context invalid');
         return false;
       }
 
       // Check if storage API exists
       if (!chrome.storage || !chrome.storage.local) {
-        console.warn('[OptionsManager] Chrome storage API not available');
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('[OptionsManager] Error checking Chrome API availability:', error);
       return false;
     }
   }
@@ -412,7 +381,6 @@ class OptionsManager {
   async sendMessageWithRetry(message, maxRetries = 3, timeout = 5000) {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`[OptionsManager] Sending message (attempt ${attempt}/${maxRetries}):`, message.type);
         
         // Create a promise that rejects after timeout
         const timeoutPromise = new Promise((_, reject) => {
@@ -426,13 +394,11 @@ class OptionsManager {
         ]);
         
         if (response) {
-          console.log(`[OptionsManager] Message successful on attempt ${attempt}`);
           return response;
         }
         
         throw new Error('Empty response');
       } catch (error) {
-        console.warn(`[OptionsManager] Message attempt ${attempt} failed:`, error.message);
         
         if (attempt === maxRetries) {
           throw error;
@@ -449,7 +415,6 @@ class OptionsManager {
     try {
       // Double-check Chrome API availability before making requests
       if (!this.isChromeApiAvailable()) {
-        console.warn('[OptionsManager] Chrome APIs unavailable, using default settings');
         this.settings = this.getDefaultSettings();
         return;
       }
@@ -458,13 +423,10 @@ class OptionsManager {
       if (response && response.success) {
         // Convert settings to proper types after loading from storage
         this.settings = this.convertSettingsTypes(response.settings);
-        console.log('[OptionsManager] Settings loaded and type-converted:', this.settings);
       } else {
-        console.error('[OptionsManager] Failed to load settings:', response?.error || 'No response');
         this.settings = this.getDefaultSettings();
       }
     } catch (error) {
-      console.error('[OptionsManager] Settings request failed:', error);
       
       // Try direct storage access as fallback
       if (this.isStorageApiAvailable()) {
@@ -472,16 +434,13 @@ class OptionsManager {
           const fallbackSettings = await this.loadSettingsFromStorageDirect();
           if (fallbackSettings) {
             this.settings = this.convertSettingsTypes(fallbackSettings);
-            console.log('[OptionsManager] Settings loaded via fallback storage access');
             return;
           }
         } catch (storageError) {
-          console.error('[OptionsManager] Fallback storage access failed:', storageError);
         }
       }
       
       this.settings = this.getDefaultSettings();
-      console.log('[OptionsManager] Using default settings due to load failure');
     }
   }
 
@@ -496,7 +455,6 @@ class OptionsManager {
              chrome.storage.local &&
              typeof chrome.storage.local.get === 'function';
     } catch (error) {
-      console.error('[OptionsManager] Error checking storage API:', error);
       return false;
     }
   }
@@ -517,7 +475,6 @@ class OptionsManager {
         });
       });
     } catch (error) {
-      console.error('[OptionsManager] Direct storage access failed:', error);
       return null;
     }
   }
@@ -630,16 +587,13 @@ class OptionsManager {
     });
     
     if (missingCritical.length > 0) {
-      console.error('[OptionsManager] Missing critical DOM elements:', missingCritical);
       return false;
     }
     
     if (missingOptional.length > 0) {
-      console.warn('[OptionsManager] Missing optional DOM elements:', missingOptional);
       // Still return true - we can work with missing optional elements
     }
     
-    console.log('[OptionsManager] DOM validation passed');
     return true;
   }
 
@@ -651,19 +605,16 @@ class OptionsManager {
   safeGetElement(elementId) {
     try {
       if (!elementId || typeof elementId !== 'string') {
-        console.warn('[OptionsManager] Invalid element ID provided:', elementId);
         return null;
       }
 
       const element = document.getElementById(elementId);
       if (!element) {
-        console.warn(`[OptionsManager] Element '${elementId}' not found in DOM`);
         return null;
       }
 
       return element;
     } catch (error) {
-      console.error(`[OptionsManager] Error getting element '${elementId}':`, error);
       return null;
     }
   }
@@ -673,15 +624,12 @@ class OptionsManager {
       const element = this.safeGetElement(elementId);
       if (element && element.type === 'checkbox') {
         element.checked = Boolean(checked);
-        console.log(`[OptionsManager] Checkbox '${elementId}' set to ${checked}`);
         return true;
       } else if (element) {
-        console.warn(`[OptionsManager] Element '${elementId}' is not a checkbox`);
         return false;
       }
       return false;
     } catch (error) {
-      console.error(`[OptionsManager] Error setting checkbox '${elementId}':`, error);
       return false;
     }
   }
@@ -697,15 +645,12 @@ class OptionsManager {
         } else {
           element.value = String(value);
         }
-        console.log(`[OptionsManager] Value for '${elementId}' set to ${value}`);
         return true;
       } else if (element) {
-        console.warn(`[OptionsManager] Element '${elementId}' does not support value property`);
         return false;
       }
       return false;
     } catch (error) {
-      console.error(`[OptionsManager] Error setting value for '${elementId}':`, error);
       return false;
     }
   }
@@ -719,7 +664,6 @@ class OptionsManager {
       }
       return false;
     } catch (error) {
-      console.error(`[OptionsManager] Error setting text content for '${elementId}':`, error);
       return false;
     }
   }
@@ -739,7 +683,6 @@ class OptionsManager {
       }
       return false;
     } catch (error) {
-      console.error(`[OptionsManager] Error adding class '${className}' to '${elementId}':`, error);
       return false;
     }
   }
@@ -759,7 +702,6 @@ class OptionsManager {
       }
       return false;
     } catch (error) {
-      console.error(`[OptionsManager] Error removing class '${className}' from '${elementId}':`, error);
       return false;
     }
   }
@@ -777,7 +719,6 @@ class OptionsManager {
       }
       return null;
     } catch (error) {
-      console.error(`[OptionsManager] Error getting value from '${elementId}':`, error);
       return null;
     }
   }
@@ -795,7 +736,6 @@ class OptionsManager {
       }
       return null;
     } catch (error) {
-      console.error(`[OptionsManager] Error getting checkbox state from '${elementId}':`, error);
       return null;
     }
   }
@@ -804,12 +744,10 @@ class OptionsManager {
     try {
       // Validate required elements first
       if (!this.validateRequiredElements()) {
-        console.warn('[OptionsManager] Some elements missing, initializing UI with available elements only');
       }
       
       // Ensure settings have proper types before UI initialization
       this.settings = this.convertSettingsTypes(this.settings);
-      console.log('[OptionsManager] Initializing UI with converted settings:', this.settings);
       
       // Populate settings form with safe methods using explicit Boolean conversion
       this.safeSetCheckbox('trackingEnabled', Boolean(this.settings.trackingEnabled));
@@ -823,7 +761,6 @@ class OptionsManager {
       this.updateSliderDisplaySafe('powerThreshold', this.settings.powerThreshold || this.settings.energyThreshold || 40, 'W');
       
     } catch (error) {
-      console.error('[OptionsManager] Error during UI initialization:', error);
       this.showError('Failed to initialize settings interface');
     }
   }
@@ -883,7 +820,6 @@ class OptionsManager {
       // For numeric inputs, convert to number
       value = parseFloat(event.target.value);
       if (isNaN(value)) {
-        console.warn(`[OptionsManager] Invalid numeric value for ${setting}, using fallback`);
         value = this.getDefaultSettings()[setting] || 0;
       }
     } else {
@@ -891,7 +827,6 @@ class OptionsManager {
       value = event.target.value;
     }
     
-    console.log(`[OptionsManager] Setting ${setting} updated to:`, value, `(type: ${typeof value})`);
     this.settings[setting] = value;
     
     // Real-time validation for numeric inputs
@@ -926,7 +861,6 @@ class OptionsManager {
     if (element) {
       element.textContent = value + suffix;
     } else {
-      console.warn(`[OptionsManager] Display element ${displayId} not found`);
     }
   }
   
@@ -1007,7 +941,6 @@ class OptionsManager {
     converted.trackingEnabled = this.convertToBoolean(converted.trackingEnabled);
     converted.notificationsEnabled = this.convertToBoolean(converted.notificationsEnabled);
     
-    console.log('[OptionsManager] Settings sanitized:', converted);
     return converted;
   }
   
@@ -1151,7 +1084,6 @@ class OptionsManager {
   }
   
   async saveSettings() {
-    console.log('[OptionsManager] Save settings button clicked');
     
     try {
       // Check Chrome API availability before proceeding
@@ -1167,16 +1099,13 @@ class OptionsManager {
         saveBtn.textContent = 'Validating...';
       }
       
-      console.log('[OptionsManager] Current settings before conversion:', this.settings);
       
       // Convert settings to proper types before validation
       this.settings = this.convertSettingsTypes(this.settings);
-      console.log('[OptionsManager] Settings after type conversion:', this.settings);
       
       // Validate settings after type conversion
       const validation = this.validateSettings();
       if (!validation.isValid) {
-        console.warn('[OptionsManager] Settings validation failed:', validation.errors);
         
         // Show detailed validation errors
         const errorMessage = 'Settings validation failed:\n• ' + validation.errors.join('\n• ');
@@ -1209,7 +1138,6 @@ class OptionsManager {
       // Final sanitization (in case of minor floating point issues)
       this.settings = this.sanitizeSettings();
       
-      console.log('[OptionsManager] Final validated settings to save:', this.settings);
       
       // Attempt to save via service worker first
       let saveSuccessful = false;
@@ -1219,7 +1147,6 @@ class OptionsManager {
           settings: this.settings
         });
         
-        console.log('[OptionsManager] Save settings response:', response);
         
         if (response && response.success) {
           saveSuccessful = true;
@@ -1229,7 +1156,6 @@ class OptionsManager {
           throw new Error(response?.error || 'Service worker save failed');
         }
       } catch (serviceWorkerError) {
-        console.warn('[OptionsManager] Service worker save failed, trying direct storage:', serviceWorkerError);
         
         // Fallback to direct storage save
         if (this.isStorageApiAvailable()) {
@@ -1239,7 +1165,6 @@ class OptionsManager {
             this.showSuccess('Settings saved successfully (via fallback)!');
             this.hideUnsavedChanges();
           } catch (storageError) {
-            console.error('[OptionsManager] Direct storage save also failed:', storageError);
           }
         }
       }
@@ -1249,7 +1174,6 @@ class OptionsManager {
       }
       
     } catch (error) {
-      console.error('[OptionsManager] Save settings failed:', error);
       this.showError('Failed to save settings: ' + error.message);
     } finally {
       // Restore button state
@@ -1278,13 +1202,11 @@ class OptionsManager {
         });
       });
     } catch (error) {
-      console.error('[OptionsManager] Direct storage save failed:', error);
       throw error;
     }
   }
   
   async resetSettings() {
-    console.log('[OptionsManager] Reset settings button clicked');
     
     if (confirm('Reset all settings to default values? This cannot be undone.')) {
       try {
@@ -1296,7 +1218,6 @@ class OptionsManager {
         }
         
         this.settings = this.getDefaultSettings();
-        console.log('[OptionsManager] Settings reset to defaults:', this.settings);
         
         this.initializeUI();
         await this.saveSettings();
@@ -1304,7 +1225,6 @@ class OptionsManager {
         this.showSuccess('Settings reset to defaults successfully!');
         
       } catch (error) {
-        console.error('[OptionsManager] Reset settings failed:', error);
         this.showError('Failed to reset settings: ' + error.message);
       } finally {
         // Restore button state
@@ -1318,7 +1238,6 @@ class OptionsManager {
   }
   
   async exportData() {
-    console.log('[OptionsManager] Export data button clicked');
     
     try {
       // Add visual feedback
@@ -1334,7 +1253,6 @@ class OptionsManager {
         timeRange: '30d'
       });
       
-      console.log('[OptionsManager] Export data response:', response);
       
       if (response && response.success) {
         const exportData = {
@@ -1364,7 +1282,6 @@ class OptionsManager {
         this.showError('Failed to export data: ' + (response?.error || 'Unknown error'));
       }
     } catch (error) {
-      console.error('[OptionsManager] Export data failed:', error);
       this.showError('Failed to export data: ' + error.message);
     } finally {
       // Restore button state
@@ -1377,7 +1294,6 @@ class OptionsManager {
   }
   
   async clearData() {
-    console.log('[OptionsManager] Clear data button clicked');
     
     const confirmed = confirm(
       'Clear all power tracking data? This will delete:\n\n' +
@@ -1395,7 +1311,6 @@ class OptionsManager {
           clearBtn.textContent = 'Clearing...';
         }
         
-        console.log('[OptionsManager] Clearing all data...');
         
         // Check Chrome API availability first
         if (!this.isStorageApiAvailable()) {
@@ -1405,13 +1320,11 @@ class OptionsManager {
         await chrome.storage.local.clear();
         
         this.settings = this.getDefaultSettings();
-        console.log('[OptionsManager] Settings reset to defaults after clear');
         
         this.initializeUI();
         this.showSuccess('All data cleared successfully!');
         
       } catch (error) {
-        console.error('[OptionsManager] Clear data failed:', error);
         this.showError('Failed to clear data: ' + error.message);
       } finally {
         // Restore button state
@@ -1437,11 +1350,9 @@ class OptionsManager {
         this.updateHistoryStats(response.history);
         this.renderPowerChart(response.history);
       } else {
-        console.error('[OptionsManager] Failed to load history:', response.error);
         this.showError('Failed to load history data');
       }
     } catch (error) {
-      console.error('[OptionsManager] History request failed:', error);
       this.showError('Failed to load history data');
     }
   }
@@ -1579,7 +1490,6 @@ class OptionsManager {
   renderPowerChart(history) {
     const canvas = document.getElementById('powerChart');
     if (!canvas) {
-      console.warn('[OptionsManager] Power chart canvas element not found');
       return;
     }
     
@@ -1699,10 +1609,8 @@ class OptionsManager {
         }
       });
       
-      console.log('[OptionsManager] Chart.js chart rendered successfully');
       
     } catch (error) {
-      console.error('[OptionsManager] Error creating Chart.js chart:', error);
       // Fallback to native canvas if Chart.js fails
       this.renderFallbackChart(canvas, history);
     }
@@ -1712,7 +1620,6 @@ class OptionsManager {
     try {
       const ctx = canvas.getContext('2d');
       if (!ctx) {
-        console.warn('[OptionsManager] Failed to get canvas context');
         return;
       }
       
@@ -1855,10 +1762,8 @@ class OptionsManager {
       ctx.fillText(`${powerData.length} data points • Average: ${(powerData.reduce((a, b) => a + b, 0) / powerData.length).toFixed(1)}W`,
                    canvas.width / 2, 45);
       
-      console.log('[OptionsManager] Fallback chart rendered successfully');
       
     } catch (error) {
-      console.error('[OptionsManager] Error rendering fallback chart:', error);
       // Last resort: show error message
       const ctx = canvas.getContext('2d');
       if (ctx) {
@@ -1926,7 +1831,6 @@ class OptionsManager {
         this.displayInsights(response.history);
       }
     } catch (error) {
-      console.error('[OptionsManager] Insights request failed:', error);
     }
   }
   
@@ -2054,7 +1958,6 @@ class OptionsManager {
       this.showPowerDetailsModal(entryData);
       
     } catch (error) {
-      console.error('[OptionsManager] Failed to load entry details:', error);
       this.showError('Failed to load detailed power information');
     }
   }
@@ -2494,7 +2397,6 @@ class OptionsManager {
     try {
       // Check Chrome API availability first
       if (!this.isChromeApiAvailable()) {
-        console.log('[OptionsManager] Chrome APIs unavailable, using fallback data');
         // PHASE 5 STEP 5: Use real detected AI models for fallback data instead of dummy models
         const realFallbackEntries = await this.getRealDetectedModelsForBackendFallback();
         this.backendEnergyData = {
@@ -2506,7 +2408,6 @@ class OptionsManager {
 
       // Check if extension context is valid
       if (!chrome.runtime || !chrome.runtime.id) {
-        console.warn('[OptionsManager] Extension context invalid, using fallback data');
         this.backendEnergyData = { totalEnergy: 0, recentEntries: [] };
         return;
       }
@@ -2520,19 +2421,16 @@ class OptionsManager {
       if (response && response.success && response.history) {
         this.displayBackendEnergyLog(response.history || []);
       } else {
-        console.warn('[OptionsManager] Invalid response from backend:', response);
         this.displayBackendEnergyLog([]);
       }
       
     } catch (error) {
-      console.error('[OptionsManager] Backend energy request failed:', error.message || error);
       
       // Use fallback data instead of crashing
       this.displayBackendEnergyLog([]);
       
       // Show user-friendly message if this is a critical failure
       if (error.message && error.message.includes('Could not establish connection')) {
-        console.log('[OptionsManager] Service worker appears to be inactive');
         // Don't show error to user unless they're actively trying to use this feature
       }
     }
@@ -2595,7 +2493,6 @@ class OptionsManager {
       ];
       
     } catch (error) {
-      console.error('[OptionsManager] Error generating real model fallback data:', error);
       // Last resort: use one current real model instead of old dummy names
       return [{
         model: 'Claude-4 Sonnet Thinking',
@@ -2629,7 +2526,6 @@ class OptionsManager {
       return result.currentSessionAIModels || result.detectedAIModels || null;
       
     } catch (error) {
-      console.warn('[OptionsManager] Could not get current session AI models:', error);
       return null;
     }
   }
@@ -2766,7 +2662,6 @@ class OptionsManager {
         this.showError('Failed to log backend energy: ' + response.error);
       }
     } catch (error) {
-      console.error('[OptionsManager] Failed to log backend energy:', error);
       this.showError('Failed to log backend energy usage');
     }
   }
@@ -2789,7 +2684,6 @@ class OptionsManager {
       return this.calculateLegacyAIEnergyConsumption(model, tokens, requests);
       
     } catch (error) {
-      console.warn('[OptionsManager] Error calculating AI energy from enhanced database:', error);
       return this.calculateLegacyAIEnergyConsumption(model, tokens, requests);
     }
   }
@@ -2835,7 +2729,6 @@ class OptionsManager {
       
       return enhancedModels[enhancedModelKey];
     } catch (error) {
-      console.error('[OptionsManager] Error accessing enhanced AI model data:', error);
       return null;
     }
   }
@@ -2903,7 +2796,6 @@ class OptionsManager {
           this.showError('Failed to delete entry: ' + response.error);
         }
       } catch (error) {
-        console.error('[OptionsManager] Failed to delete entry:', error);
         this.showError('Failed to delete entry');
       }
     }
@@ -2913,7 +2805,6 @@ class OptionsManager {
   
   loadPricingData() {
     try {
-      console.log('[OptionsManager] Loading pricing data...');
       
       // Check and update pro status
       this.checkProStatus();
@@ -2924,9 +2815,7 @@ class OptionsManager {
       // Ensure FAQ functionality is working
       this.setupFAQToggles();
       
-      console.log('[OptionsManager] Pricing data loaded successfully');
     } catch (error) {
-      console.error('[OptionsManager] Failed to load pricing data:', error);
     }
   }
   
@@ -2948,7 +2837,6 @@ class OptionsManager {
         }
       });
     }).catch(error => {
-      console.error('[OptionsManager] Failed to update pricing metrics:', error);
     });
   }
   
@@ -2978,7 +2866,6 @@ class OptionsManager {
         };
       }
     } catch (error) {
-      console.error('[OptionsManager] Failed to get usage stats:', error);
       return {
         energyTracked: 0,
         sitesMonitored: 0,
@@ -2991,7 +2878,6 @@ class OptionsManager {
   
   async loadPromptGeneratorData() {
     try {
-      console.log('[OptionsManager] Loading prompt generator data...');
       
       // Load optimization analytics from popup.js or service worker
       const analyticsData = await this.getPromptGeneratorAnalytics();
@@ -3005,19 +2891,15 @@ class OptionsManager {
       // Update optimization insights
       this.updateOptimizationInsights(analyticsData);
       
-      console.log('[OptionsManager] Prompt generator data loaded successfully');
     } catch (error) {
-      console.error('[OptionsManager] Failed to load prompt generator data:', error);
       // Load with fallback data
       this.loadPromptGeneratorFallbackData();
     }
   }
   
   async getPromptGeneratorAnalytics() {
-    console.log('[OptionsManager] Getting prompt generator analytics...');
     try {
       if (!this.isChromeApiAvailable()) {
-        console.log('[OptionsManager] Chrome API unavailable, using fallback data');
         return this.getFallbackPromptAnalytics();
       }
       
@@ -3032,12 +2914,10 @@ class OptionsManager {
         'promptOptimizationData' // Another possible key
       ]);
       
-      console.log('[OptionsManager] Retrieved storage data:', result);
       
       // Check for data from popup.js first (generatorStats key)
       const popupStats = result.generatorStats;
       if (popupStats && (popupStats.promptsOptimized > 0 || popupStats.totalTokensSaved > 0)) {
-        console.log('[OptionsManager] Using real analytics data from popup.js generatorStats:', popupStats);
         
         // Calculate token reduction history from recent optimizations
         const recentHistory = this.generateHistoryFromStats(popupStats);
@@ -3057,7 +2937,6 @@ class OptionsManager {
       // Check for prompt optimization data
       const promptOptData = result.promptOptimizationData;
       if (promptOptData && promptOptData.totalOptimizations > 0) {
-        console.log('[OptionsManager] Using prompt optimization data:', promptOptData);
         
         return {
           totalPromptsOptimized: promptOptData.totalOptimizations || 0,
@@ -3074,7 +2953,6 @@ class OptionsManager {
       // Check alternative storage key for optimization stats
       const optimizationStats = result.optimizationStats;
       if (optimizationStats && optimizationStats.totalOptimizations > 0) {
-        console.log('[OptionsManager] Using optimization stats data:', optimizationStats);
         
         return {
           totalPromptsOptimized: optimizationStats.totalOptimizations || 0,
@@ -3090,23 +2968,19 @@ class OptionsManager {
       
       // Try to get data via service worker message as backup
       try {
-        console.log('[OptionsManager] Trying to get analytics via service worker...');
         const response = await this.sendMessageWithRetry({
           type: 'GET_PROMPT_GENERATOR_ANALYTICS',
           timeRange: '30d'
         }, 2);
         
         if (response && response.success && response.analytics) {
-          console.log('[OptionsManager] Using analytics from service worker:', response.analytics);
           return response.analytics;
         }
       } catch (messageError) {
-        console.log('[OptionsManager] Service worker analytics request failed:', messageError);
       }
       
       // Fallback to stored analytics data (legacy)
       if (result.promptGeneratorStats && result.promptGeneratorStats.totalPromptsOptimized > 0) {
-        console.log('[OptionsManager] Using legacy stored analytics data');
         return {
           totalPromptsOptimized: result.promptGeneratorStats.totalPromptsOptimized || 0,
           totalTokensSaved: result.promptGeneratorStats.totalTokensSaved || 0,
@@ -3120,11 +2994,9 @@ class OptionsManager {
       }
       
       // Use fallback data if no stored data exists
-      console.log('[OptionsManager] No real optimization data found, using fallback demo data');
       return this.getFallbackPromptAnalytics();
       
     } catch (error) {
-      console.error('[OptionsManager] Failed to get analytics:', error);
       return this.getFallbackPromptAnalytics();
     }
   }
@@ -3308,7 +3180,6 @@ class OptionsManager {
   renderTokenReductionChart(historyData) {
     const canvas = document.getElementById('tokenReductionChart');
     if (!canvas) {
-      console.warn('[OptionsManager] Token reduction chart canvas not found');
       return;
     }
     
@@ -3468,10 +3339,8 @@ class OptionsManager {
         }
       });
       
-      console.log('[OptionsManager] Token reduction Chart.js chart rendered successfully');
       
     } catch (error) {
-      console.error('[OptionsManager] Error creating token reduction Chart.js chart:', error);
       this.renderTokenReductionFallbackChart(canvas, historyData);
     }
   }
@@ -3480,7 +3349,6 @@ class OptionsManager {
     try {
       const ctx = canvas.getContext('2d');
       if (!ctx) {
-        console.warn('[OptionsManager] Failed to get token chart canvas context');
         return;
       }
       
@@ -3585,10 +3453,8 @@ class OptionsManager {
       ctx.fillText(`${reductionData.length} days • Average: ${avgReduction.toFixed(1)}% reduction`,
                    canvas.width / 2, 45);
       
-      console.log('[OptionsManager] Token reduction fallback chart rendered successfully');
       
     } catch (error) {
-      console.error('[OptionsManager] Error rendering token reduction fallback chart:', error);
     }
   }
   
@@ -3666,7 +3532,6 @@ class OptionsManager {
   }
   
   loadPromptGeneratorFallbackData() {
-    console.log('[OptionsManager] Loading prompt generator fallback data...');
     const fallbackData = this.getFallbackPromptAnalytics();
     this.updatePromptGeneratorAnalytics(fallbackData);
     this.renderTokenReductionChart(fallbackData.tokenReductionHistory);
@@ -3675,7 +3540,6 @@ class OptionsManager {
   
   // Prompt Generator Button Handlers
   async refreshPromptGeneratorAnalytics() {
-    console.log('[OptionsManager] Refreshing prompt generator analytics...');
     try {
       // Add visual feedback
       const refreshBtn = document.getElementById('refreshAnalyticsBtn');
@@ -3689,7 +3553,6 @@ class OptionsManager {
       
       this.showSuccess('Analytics refreshed successfully!');
     } catch (error) {
-      console.error('[OptionsManager] Failed to refresh analytics:', error);
       this.showError('Failed to refresh analytics');
     } finally {
       const refreshBtn = document.getElementById('refreshAnalyticsBtn');
@@ -3701,7 +3564,6 @@ class OptionsManager {
   }
   
   async exportOptimizationData() {
-    console.log('[OptionsManager] Exporting optimization data...');
     try {
       const exportBtn = document.getElementById('exportOptimizationData');
       if (exportBtn) {
@@ -3738,7 +3600,6 @@ class OptionsManager {
       this.showSuccess('Optimization data exported successfully!');
       
     } catch (error) {
-      console.error('[OptionsManager] Export failed:', error);
       this.showError('Failed to export optimization data');
     } finally {
       const exportBtn = document.getElementById('exportOptimizationData');
@@ -3750,7 +3611,6 @@ class OptionsManager {
   }
   
   async importOptimizationData() {
-    console.log('[OptionsManager] Importing optimization data...');
     try {
       // Create file input
       const input = document.createElement('input');
@@ -3790,7 +3650,6 @@ class OptionsManager {
           this.showSuccess(`Successfully imported optimization data from ${file.name}!`);
           
         } catch (error) {
-          console.error('[OptionsManager] Import failed:', error);
           this.showError('Failed to import data: ' + error.message);
         } finally {
           const importBtn = document.getElementById('importOptimizationData');
@@ -3804,13 +3663,11 @@ class OptionsManager {
       input.click();
       
     } catch (error) {
-      console.error('[OptionsManager] Import setup failed:', error);
       this.showError('Failed to set up import');
     }
   }
   
   async clearOptimizationData() {
-    console.log('[OptionsManager] Clearing optimization data...');
     
     const confirmed = confirm(
       'Clear all optimization data? This will delete:\n\n' +
@@ -3845,7 +3702,6 @@ class OptionsManager {
       this.showSuccess('All optimization data cleared successfully!');
       
     } catch (error) {
-      console.error('[OptionsManager] Clear data failed:', error);
       this.showError('Failed to clear optimization data');
     } finally {
       const clearBtn = document.getElementById('clearOptimizationData');
@@ -3875,7 +3731,6 @@ class OptionsManager {
         autoSaveOptimizations: true
       };
     } catch (error) {
-      console.error('[OptionsManager] Failed to get optimization settings:', error);
       return {
         defaultOptimizationLevel: 'balanced',
         defaultTargetModel: 'gpt-4',
@@ -3926,9 +3781,7 @@ class OptionsManager {
       const newTheme = currentTheme === 'light' ? 'dark' : 'light';
       
       await this.setTheme(newTheme);
-      console.log('[OptionsManager] Theme toggled to:', newTheme);
     } catch (error) {
-      console.error('[OptionsManager] Failed to toggle theme:', error);
       this.showError('Failed to toggle theme');
     }
   }
@@ -3939,7 +3792,6 @@ class OptionsManager {
       
       // Check if Chrome APIs are available
       if (!this.isChromeApiAvailable()) {
-        console.log('[OptionsManager] Chrome APIs not available, using default theme');
         this.setThemeUI(defaultTheme);
         return;
       }
@@ -3949,9 +3801,7 @@ class OptionsManager {
       const savedTheme = result.theme || defaultTheme;
       
       this.setThemeUI(savedTheme);
-      console.log('[OptionsManager] Theme loaded:', savedTheme);
     } catch (error) {
-      console.error('[OptionsManager] Failed to load theme:', error);
       this.setThemeUI('light');
     }
   }
@@ -3966,7 +3816,6 @@ class OptionsManager {
         await chrome.storage.sync.set({ theme });
       }
     } catch (error) {
-      console.error('[OptionsManager] Failed to set theme:', error);
     }
   }
 
@@ -3988,7 +3837,6 @@ class OptionsManager {
           theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
       }
     } catch (error) {
-      console.error('[OptionsManager] Failed to update theme UI:', error);
     }
   }
 
@@ -3996,7 +3844,6 @@ class OptionsManager {
   
   initializePricingSection() {
     try {
-      console.log('[OptionsManager] Initializing pricing section...');
       
       // Set up FAQ toggle functionality
       this.setupFAQToggles();
@@ -4010,9 +3857,7 @@ class OptionsManager {
       // Check pro status and update UI accordingly
       this.checkProStatus();
       
-      console.log('[OptionsManager] Pricing section initialized successfully');
     } catch (error) {
-      console.error('[OptionsManager] Error initializing pricing section:', error);
     }
   }
   
@@ -4090,7 +3935,6 @@ class OptionsManager {
         this.updateUIForFreeUser();
       }
     } catch (error) {
-      console.error('[OptionsManager] Failed to check pro status:', error);
     }
   }
   
@@ -4105,7 +3949,6 @@ class OptionsManager {
       const result = await chrome.storage.local.get(['proStatus']);
       return result.proStatus || false;
     } catch (error) {
-      console.error('[OptionsManager] Failed to get pro status:', error);
       return false;
     }
   }
@@ -4140,7 +3983,6 @@ class OptionsManager {
   }
   
   handlePlanSelection(planName, buttonElement) {
-    console.log('[OptionsManager] Plan selected:', planName);
     
     // Disable button temporarily
     const originalText = buttonElement.textContent;
@@ -4438,11 +4280,9 @@ class OptionsManager {
 
   showHelpModal() {
     try {
-      console.log('[OptionsManager] Opening help modal...');
       
       const helpModal = document.getElementById('helpModal');
       if (!helpModal) {
-        console.error('[OptionsManager] Help modal not found in DOM');
         this.showError('Help system not available');
         return;
       }
@@ -4465,20 +4305,16 @@ class OptionsManager {
       // Add click outside to close
       this.addHelpModalBackdropListener();
 
-      console.log('[OptionsManager] Help modal opened successfully');
     } catch (error) {
-      console.error('[OptionsManager] Error opening help modal:', error);
       this.showError('Failed to open help system');
     }
   }
 
   hideHelpModal() {
     try {
-      console.log('[OptionsManager] Closing help modal...');
       
       const helpModal = document.getElementById('helpModal');
       if (!helpModal) {
-        console.warn('[OptionsManager] Help modal not found when trying to close');
         return;
       }
 
@@ -4495,15 +4331,12 @@ class OptionsManager {
         helpButton.focus();
       }
 
-      console.log('[OptionsManager] Help modal closed successfully');
     } catch (error) {
-      console.error('[OptionsManager] Error closing help modal:', error);
     }
   }
 
   showHelpSection(sectionId) {
     try {
-      console.log('[OptionsManager] Showing help section:', sectionId);
 
       // Update navigation active state
       const navItems = document.querySelectorAll('.help-nav-item');
@@ -4535,9 +4368,7 @@ class OptionsManager {
         contentArea.scrollTop = 0;
       }
 
-      console.log('[OptionsManager] Help section updated successfully');
     } catch (error) {
-      console.error('[OptionsManager] Error showing help section:', error);
     }
   }
 
@@ -4588,7 +4419,6 @@ class OptionsManager {
   // ===== INSIGHTS ACTION HANDLERS =====
 
   handleInsightAction(action) {
-    console.log('[OptionsManager] Handling insight action:', action);
     
     try {
       switch (action) {
@@ -4605,11 +4435,9 @@ class OptionsManager {
           this.handleReduceBackgroundProcesses();
           break;
         default:
-          console.warn('[OptionsManager] Unknown insight action:', action);
           this.showError('Unknown action: ' + action);
       }
     } catch (error) {
-      console.error('[OptionsManager] Error handling insight action:', error);
       this.showError('Failed to execute action: ' + error.message);
     }
   }
@@ -4650,7 +4478,6 @@ class OptionsManager {
         this.showSuccess(`Closed ${unusedTabs.length} unused tabs! Estimated power savings: ${unusedTabs.length * 5}-${unusedTabs.length * 10}W`);
       }
     } catch (error) {
-      console.error('[OptionsManager] Failed to close unused tabs:', error);
       this.showError('Failed to close unused tabs: ' + error.message);
     }
   }
@@ -4755,7 +4582,6 @@ class OptionsManager {
         this.showSuccess('Dark mode enabled! Estimated power savings: 2-5W on OLED displays');
       }
     } catch (error) {
-      console.error('[OptionsManager] Failed to enable dark mode:', error);
       this.showError('Failed to enable dark mode: ' + error.message);
     }
   }

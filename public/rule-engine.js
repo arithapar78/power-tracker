@@ -119,7 +119,6 @@ class RuleEngine {
         }
       }
     } catch (error) {
-      console.warn('[RuleEngine] Could not load rule effectiveness:', error);
     }
   }
 
@@ -141,7 +140,6 @@ class RuleEngine {
           });
         }
       } catch (error) {
-        console.warn(`[RuleEngine] Rule evaluation failed for ${ruleId}:`, error);
       }
     }
     
@@ -448,7 +446,6 @@ class RuleEngine {
         });
       }
     } catch (error) {
-      console.warn('[RuleEngine] Could not save rule effectiveness:', error);
     }
   }
 

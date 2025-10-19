@@ -10,7 +10,6 @@ if (typeof importScripts !== 'undefined') {
     importScripts('enhanced-query-estimation.js');
     importScripts('ai-model-comparison.js');
   } catch (error) {
-    console.warn('[EnhancedIntegration] Could not load enhanced components:', error);
   }
 }
 
@@ -49,7 +48,6 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
 
   async initEnhancedComponents() {
     try {
-      console.log('[EnhancedIntegration] Initializing enhanced AI energy tracking...');
       
       // Wait for base initialization
       await this.initPromise;
@@ -57,15 +55,12 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
       // Initialize enhanced AI manager if available
       if (typeof EnhancedAIEnergyManager !== 'undefined') {
         this.enhancedAIManager = new EnhancedAIEnergyManager();
-        console.log('[EnhancedIntegration] Enhanced AI Energy Manager initialized');
         
         // Initialize comparison engine
         if (typeof AIModelComparisonEngine !== 'undefined') {
           this.comparisonEngine = new AIModelComparisonEngine(this.enhancedAIManager);
-          console.log('[EnhancedIntegration] AI Model Comparison Engine initialized');
         }
       } else {
-        console.warn('[EnhancedIntegration] Enhanced database not available, using fallback');
         // Fallback to original AIEnergyManager
         if (typeof AIEnergyManager !== 'undefined') {
           this.aiEnergyTracker = new AIEnergyManager();
@@ -78,10 +73,8 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
       // Start environmental tracking
       this.startEnvironmentalTracking();
       
-      console.log('[EnhancedIntegration] Enhanced integration initialized successfully');
       
     } catch (error) {
-      console.error('[EnhancedIntegration] Enhanced initialization failed:', error);
       this.enhancedTrackingEnabled = false;
     }
   }
@@ -165,7 +158,6 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
               return null;
           }
         } catch (error) {
-          console.error('[EnhancedIntegration] Enhanced message handling error:', error);
           return { success: false, error: error.message };
         }
       };
@@ -178,16 +170,13 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
               sendResponse(response);
             }
           } catch (responseError) {
-            console.error('[EnhancedIntegration] Send response error:', responseError);
           }
         }).catch(error => {
-          console.error('[EnhancedIntegration] Enhanced request error:', error);
           try {
             if (sendResponse) {
               sendResponse({ success: false, error: error.message });
             }
           } catch (responseError) {
-            console.error('[EnhancedIntegration] Error response failed:', responseError);
           }
         });
         return true;
@@ -205,7 +194,6 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
       await this.calculateEnvironmentalImpact();
     }, 60000); // Calculate every minute
 
-    console.log('[EnhancedIntegration] Environmental tracking started');
   }
 
   async calculateEnvironmentalImpact() {
@@ -241,7 +229,6 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
         }
       }
     } catch (error) {
-      console.error('[EnhancedIntegration] Environmental calculation failed:', error);
     }
   }
 
@@ -359,7 +346,6 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
 
       return analysis;
     } catch (error) {
-      console.error('[EnhancedIntegration] Enhanced AI analysis failed:', error);
       return { error: error.message };
     }
   }
@@ -442,7 +428,6 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
       
       return comparison;
     } catch (error) {
-      console.error('[EnhancedIntegration] Model comparison failed:', error);
       return { error: error.message };
     }
   }
@@ -455,7 +440,6 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
     try {
       return this.comparisonEngine.getBenchmarkComparison(metric);
     } catch (error) {
-      console.error('[EnhancedIntegration] Benchmark comparison failed:', error);
       return { error: error.message };
     }
   }
@@ -468,7 +452,6 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
     try {
       return this.comparisonEngine.getTrendingModels(timeframe);
     } catch (error) {
-      console.error('[EnhancedIntegration] Trending models failed:', error);
       return { error: error.message };
     }
   }
@@ -482,7 +465,6 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
       const comparison = this.comparisonEngine.compareModels(models);
       return this.comparisonEngine.exportComparisonData(comparison, format);
     } catch (error) {
-      console.error('[EnhancedIntegration] Export comparison failed:', error);
       return { error: error.message };
     }
   }
@@ -496,7 +478,6 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
       this.comparisonEngine.saveUsageToHistory(usage);
       return { saved: true, timestamp: Date.now() };
     } catch (error) {
-      console.error('[EnhancedIntegration] Save usage failed:', error);
       return { error: error.message };
     }
   }
@@ -513,9 +494,7 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
       };
       
       // Could store this for user behavior analysis
-      console.log('[EnhancedIntegration] Comparison activity tracked:', activity);
     } catch (error) {
-      console.warn('[EnhancedIntegration] Failed to track comparison activity:', error);
     }
   }
 
@@ -671,7 +650,6 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
       }
 
     } catch (error) {
-      console.error('[EnhancedIntegration] Sustainability optimization failed:', error);
       results.error = error.message;
     }
 
@@ -689,7 +667,6 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
         });
       }
     } catch (error) {
-      console.log('[EnhancedIntegration] Sustainability notification failed:', error);
     }
   }
 
@@ -725,7 +702,6 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
 
       return null;
     } catch (error) {
-      console.error('[EnhancedIntegration] Real-time AI detection failed:', error);
       return null;
     }
   }
@@ -752,7 +728,6 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
 
       return enhancedData;
     } catch (error) {
-      console.error('[EnhancedIntegration] Enhanced dashboard data failed:', error);
       return { error: error.message };
     }
   }
@@ -774,7 +749,6 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
           }
         }
       } catch (error) {
-        console.warn('[EnhancedIntegration] Enhanced processing failed:', error);
       }
     }
   }
@@ -801,7 +775,6 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
           this.enhancedAIManager.cleanup();
         }
       } catch (error) {
-        console.warn('[EnhancedIntegration] Enhanced cleanup failed:', error);
       }
     }
   }
@@ -815,7 +788,6 @@ class EnergyTrackerEnhancedIntegration extends EnergyTrackerWithAgent {
     }
 
     this.enhancedTrackingEnabled = false;
-    console.log('[EnhancedIntegration] Enhanced tracking disabled');
 
     // Call parent destroy
     super.destroy();

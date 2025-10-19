@@ -294,7 +294,6 @@ class AIEnergyManager {
       return null;
       
     } catch (error) {
-      console.warn('[AIEnergyManager] Error detecting AI model:', error);
       return null;
     }
   }

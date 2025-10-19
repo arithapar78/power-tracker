@@ -16,7 +16,6 @@ class PatternRecognitionSystem {
   }
 
   async analyzePatterns(dataStream, context = {}) {
-    console.log('[PatternRecognitionSystem] Starting pattern analysis');
 
     try {
       const analysis = {
@@ -44,7 +43,6 @@ class PatternRecognitionSystem {
       };
 
     } catch (error) {
-      console.error('[PatternRecognitionSystem] Pattern analysis failed:', error);
       return {
         success: false,
         error: error.message,
@@ -739,7 +737,6 @@ class TemporalAnalyzer {
 
       return { patterns };
     } catch (error) {
-      console.error('[TemporalAnalyzer] Analysis failed:', error);
       return { patterns: [] };
     }
   }
@@ -1231,7 +1228,6 @@ class BehavioralAnalyzer {
 
       return { patterns };
     } catch (error) {
-      console.error('[BehavioralAnalyzer] Analysis failed:', error);
       return { patterns: [] };
     }
   }
@@ -1492,7 +1488,6 @@ class EnergyPatternDetector {
 
       return { patterns };
     } catch (error) {
-      console.error('[EnergyPatternDetector] Analysis failed:', error);
       return { patterns: [] };
     }
   }
@@ -1693,7 +1688,6 @@ class AnomalyDetector {
 
       return { detected };
     } catch (error) {
-      console.error('[AnomalyDetector] Detection failed:', error);
       return { detected: [] };
     }
   }
@@ -1873,7 +1867,6 @@ class SequenceAnalyzer {
 
       return { patterns };
     } catch (error) {
-      console.error('[SequenceAnalyzer] Analysis failed:', error);
       return { patterns: [] };
     }
   }
@@ -2066,7 +2059,6 @@ class ClusteringEngine {
 
       return { patterns };
     } catch (error) {
-      console.error('[ClusteringEngine] Clustering failed:', error);
       return { patterns: [] };
     }
   }

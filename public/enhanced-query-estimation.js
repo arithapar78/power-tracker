@@ -29,9 +29,7 @@ class EnhancedQueryEstimationEngine {
       // Initialize behavior tracking
       this.setupBehaviorTracking();
       
-      console.log('[EnhancedQueryEstimation] Pattern learning initialized');
     } catch (error) {
-      console.warn('[EnhancedQueryEstimation] Pattern learning initialization failed:', error);
     }
   }
 
@@ -73,7 +71,6 @@ class EnhancedQueryEstimationEngine {
       };
       
     } catch (error) {
-      console.error('[EnhancedQueryEstimation] Estimation failed:', error);
       return this.getDefaultEstimate(tabData, context);
     }
   }
@@ -563,7 +560,6 @@ class EnhancedQueryEstimationEngine {
         });
       }
     } catch (error) {
-      console.warn('[EnhancedQueryEstimation] Failed to load historical patterns:', error);
     }
   }
 
@@ -621,7 +617,6 @@ class EnhancedQueryEstimationEngine {
       // Save to storage
       localStorage.setItem('query_estimation_patterns', JSON.stringify(patterns));
     } catch (error) {
-      console.warn('[EnhancedQueryEstimation] Failed to save estimation patterns:', error);
     }
   }
 

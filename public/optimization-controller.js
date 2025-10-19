@@ -79,7 +79,6 @@ class OptimizationController {
   }
 
   async optimize(context) {
-    console.log('[OptimizationController] Starting optimization cycle');
     
     try {
       // Analyze current state and determine optimal strategy
@@ -113,7 +112,6 @@ class OptimizationController {
       };
 
     } catch (error) {
-      console.error('[OptimizationController] Optimization failed:', error);
       return {
         success: false,
         error: error.message,
@@ -195,7 +193,6 @@ class OptimizationController {
         };
       }
     } catch (error) {
-      console.warn('[OptimizationController] Could not access battery API:', error);
     }
 
     // Fallback simulation
@@ -442,7 +439,6 @@ class OptimizationController {
   }
 
   async selectOptimalStrategy(currentState, context) {
-    console.log('[OptimizationController] Selecting optimal strategy');
     
     // Use dynamic programming to find optimal strategy combination
     const optimalCombination = await this.dynamicProgrammer.findOptimalCombination(
@@ -468,7 +464,6 @@ class OptimizationController {
   }
 
   async executeStrategy(strategy, currentState, context) {
-    console.log(`[OptimizationController] Executing strategy: ${strategy.name}`);
     
     try {
       // Update execution tracking
@@ -489,7 +484,6 @@ class OptimizationController {
       return executionResult;
 
     } catch (error) {
-      console.error(`[OptimizationController] Strategy execution failed:`, error);
       throw error;
     }
   }
@@ -514,7 +508,6 @@ class OptimizationController {
       strategy.adaptiveWeight = Math.max(strategy.adaptiveWeight * 0.9, 0.5);
     }
 
-    console.log(`[OptimizationController] Updated effectiveness for ${strategyName}: ${strategy.effectiveness.toFixed(3)}`);
   }
 
   calculateExecutionEffectiveness(executionResult) {
@@ -892,7 +885,6 @@ class StrategyOrchestrator {
   }
 
   async execute(strategy, currentState, context) {
-    console.log(`[StrategyOrchestrator] Orchestrating execution of ${strategy.name}`);
     
     const results = {
       strategy: strategy.name,
@@ -934,7 +926,6 @@ class StrategyOrchestrator {
       return results;
 
     } catch (error) {
-      console.error('[StrategyOrchestrator] Execution failed:', error);
       results.success = false;
       results.error = error.message;
       results.executionTime = Date.now() - results.startTime;

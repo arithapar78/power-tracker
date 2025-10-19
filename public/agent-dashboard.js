@@ -23,7 +23,6 @@ class AgentDashboard {
   createDashboardStructure() {
     const container = document.getElementById(this.containerId);
     if (!container) {
-      console.error(`[AgentDashboard] Container ${this.containerId} not found`);
       return;
     }
 
@@ -869,7 +868,6 @@ class AgentDashboard {
       this.updateAgentStatus(metrics.agentStatus);
 
     } catch (error) {
-      console.error('[AgentDashboard] Failed to update overview metrics:', error);
     }
   }
 
@@ -963,11 +961,9 @@ class AgentDashboard {
         };
         
       } else {
-        console.warn('[AgentDashboard] No current energy data available, using fallback');
       }
       
     } catch (error) {
-      console.error('[AgentDashboard] Failed to get real metrics:', error);
     }
     
     // Fallback to more realistic mock data
@@ -1093,7 +1089,6 @@ class AgentDashboard {
       `).join('');
 
     } catch (error) {
-      console.error('[AgentDashboard] Failed to update pattern analysis:', error);
     }
   }
 
@@ -1166,7 +1161,6 @@ class AgentDashboard {
       `).join('');
 
     } catch (error) {
-      console.error('[AgentDashboard] Failed to update optimization status:', error);
     }
   }
 
@@ -1258,7 +1252,6 @@ class AgentDashboard {
       `;
 
     } catch (error) {
-      console.error('[AgentDashboard] Failed to update learning insights:', error);
     }
   }
 
@@ -1306,7 +1299,6 @@ class AgentDashboard {
       });
 
     } catch (error) {
-      console.error('[AgentDashboard] Failed to update recommendations:', error);
     }
   }
 
@@ -1335,7 +1327,6 @@ class AgentDashboard {
 
   async executeQuickAction(actionType) {
     try {
-      console.log(`[AgentDashboard] Executing quick action: ${actionType}`);
       
       if (this.energyAgent && this.energyAgent.executeAction) {
         const result = await this.energyAgent.executeAction(actionType);
@@ -1349,14 +1340,12 @@ class AgentDashboard {
       setTimeout(() => this.updateOverviewMetrics(), 1000);
       
     } catch (error) {
-      console.error('[AgentDashboard] Quick action failed:', error);
       this.showNotification(`Failed to execute: ${actionType}`, 'error');
     }
   }
 
   async executeRecommendation(action) {
     try {
-      console.log(`[AgentDashboard] Executing recommendation: ${action}`);
       
       // Mock recommendation execution
       this.showNotification(`Applied recommendation: ${action}`, 'success');
@@ -1365,7 +1354,6 @@ class AgentDashboard {
       setTimeout(() => this.updateRecommendations(), 1000);
       
     } catch (error) {
-      console.error('[AgentDashboard] Recommendation execution failed:', error);
       this.showNotification(`Failed to apply recommendation: ${action}`, 'error');
     }
   }
@@ -1444,7 +1432,6 @@ class AgentDashboard {
     try {
       localStorage.setItem('energyAgentSettings', JSON.stringify(settings));
     } catch (error) {
-      console.warn('[AgentDashboard] Failed to store settings:', error);
     }
   }
 
@@ -1598,7 +1585,6 @@ class AgentDashboard {
           });
         }
         
-        console.log('[AgentDashboard] Generated real energy chart data with', response.history.length, 'data points');
         return chartData.sort((a, b) => a.timestamp - b.timestamp);
       }
       
@@ -1626,13 +1612,11 @@ class AgentDashboard {
             });
           }
           
-          console.log('[AgentDashboard] Generated estimated energy data based on current tabs');
           return data;
         }
       }
       
     } catch (error) {
-      console.error('[AgentDashboard] Failed to get real energy data:', error);
     }
     
     // Ultimate fallback to more realistic dummy data

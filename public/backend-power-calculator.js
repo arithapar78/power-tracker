@@ -26,7 +26,6 @@ class BackendPowerCalculator {
       'ultra-efficient': { multiplier: 0.5, burstDuration: 15 }       // Llama-4 Maverick
     };
     
-    console.log('[BackendPowerCalculator] Initialized with', Object.keys(this.modelDatabase || {}).length, 'AI models');
   }
 
   /**
@@ -58,15 +57,6 @@ class BackendPowerCalculator {
     
     // Log calculation for debugging
     if (adjustedPower > 0.1) {
-      console.log('[BackendPowerCalculator] Power calculation:', {
-        model: model.name,
-        energyPerQuery: energyPerQuery.toFixed(3) + ' Wh',
-        queryRate: queryRate.toFixed(4) + ' queries/hour',
-        rawPower: backendPowerW.toFixed(2) + 'W',
-        confidence: confidence,
-        adjustment: modelAdjustment,
-        finalPower: adjustedPower.toFixed(2) + 'W'
-      });
     }
     
     return Math.max(0, adjustedPower);
@@ -291,7 +281,6 @@ class BackendPowerCalculator {
   cleanup() {
     this.queryEstimationCache.clear();
     this.lastCalculationTime = 0;
-    console.log('[BackendPowerCalculator] Cache cleaned up');
   }
 }
 

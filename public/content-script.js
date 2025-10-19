@@ -4,7 +4,6 @@
 (() => {
   // Better protection against multiple execution
   if (window.__energyTrackerContentLoaded) {
-    console.log('[EnergyTracker] Content script already loaded, cleaning up...');
     // Clean up existing instances
     if (window.__energyTrackerInstance) {
       window.__energyTrackerInstance.cleanup();
@@ -33,7 +32,6 @@
       reset() {
         this.currentDelayMs = this.initialDelayMs;
         this.retryCount = 0;
-        console.log('[BACKOFF-DEBUG] BackoffManager reset to', this.initialDelayMs, 'ms');
       }
 
       /**
@@ -41,7 +39,6 @@
        */
       getNextDelay() {
         if (this.retryCount >= this.maxRetries) {
-          console.log('[BACKOFF-DEBUG] Max retries exceeded:', this.maxRetries);
           return null; // No more retries
         }
 
@@ -52,8 +49,6 @@
         const jitter = (Math.random() * 2 - 1) * jitterRange; // -jitterRange to +jitterRange
         const delayWithJitter = Math.max(0, baseDelay + jitter);
 
-        console.log('[BACKOFF-DEBUG] Retry', this.retryCount + 1, '/', this.maxRetries,
-                    'delay:', Math.round(delayWithJitter), 'ms (base:', baseDelay, 'jitter:', Math.round(jitter), ')');
 
         // Update state for next retry
         this.retryCount++;
@@ -141,7 +136,6 @@
     window.safeSendMessage = async function safeSendMessage(msg) {
       // Enhanced extension context validation
       if (!window.isExtensionContextValid()) {
-        console.log('[BACKOFF-DEBUG] Extension context invalid, returning null');
         return null;
       }
 
@@ -149,13 +143,10 @@
       try {
         const pingResult = await chrome.runtime.sendMessage({ type: 'PING' });
         if (!pingResult?.success) {
-          console.log('[BACKOFF-DEBUG] Service worker not responding properly');
         }
       } catch (pingError) {
-        console.log('[BACKOFF-DEBUG] Liveness ping failed:', pingError.message);
         // Check if this indicates context invalidation
         if (window.classifyError(pingError) === window.ErrorClassification.EXTENSION_INVALIDATED) {
-          console.log('[BACKOFF-DEBUG] Extension context invalidated during ping');
           return null;
         }
       }
@@ -163,22 +154,18 @@
       // Initial attempt with enhanced error handling
       try {
         const result = await chrome.runtime.sendMessage(msg);
-        console.log('[BACKOFF-DEBUG] Message sent successfully on first attempt');
         window.__energyBackoffManager.reset(); // Reset backoff on success
         return result;
       } catch (initialError) {
         const errorType = window.classifyError(initialError);
-        console.log('[BACKOFF-DEBUG] Initial send failed, error type:', errorType, 'message:', initialError?.message);
         
         // Return null for invalidated context instead of retrying
         if (errorType === window.ErrorClassification.EXTENSION_INVALIDATED) {
-          console.log('[BACKOFF-DEBUG] Extension invalidated, returning null');
           return null;
         }
         
         // Don't retry permanent errors
         if (errorType === window.ErrorClassification.PERMANENT_ERROR) {
-          console.log('[BACKOFF-DEBUG] Permanent error detected, not retrying');
           return null; // Return null instead of throwing
         }
 
@@ -186,44 +173,36 @@
         while (window.__energyBackoffManager.canRetry()) {
           const delay = window.__energyBackoffManager.getNextDelay();
           if (delay === null) {
-            console.log('[BACKOFF-DEBUG] No more retries available');
             break;
           }
 
-          console.log('[BACKOFF-DEBUG] Retrying after', Math.round(delay), 'ms delay');
           await window.sleep(delay);
 
           // Check context validity before retry
           if (!window.isExtensionContextValid()) {
-            console.log('[BACKOFF-DEBUG] Extension context invalidated during retry');
             return null;
           }
 
           try {
             const result = await chrome.runtime.sendMessage(msg);
-            console.log('[BACKOFF-DEBUG] Retry successful');
             window.__energyBackoffManager.reset(); // Reset backoff on success
             return result;
           } catch (retryError) {
             const retryErrorType = window.classifyError(retryError);
-            console.log('[BACKOFF-DEBUG] Retry failed, error type:', retryErrorType, 'message:', retryError?.message);
             
             // Return null for any context invalidation
             if (retryErrorType === window.ErrorClassification.EXTENSION_INVALIDATED) {
-              console.log('[BACKOFF-DEBUG] Extension invalidated during retry, stopping');
               return null;
             }
             
             // If error type changed to permanent, stop retrying
             if (retryErrorType === window.ErrorClassification.PERMANENT_ERROR) {
-              console.log('[BACKOFF-DEBUG] Error type changed to permanent, stopping retries');
               return null; // Return null instead of throwing
             }
           }
         }
 
         // All retries exhausted
-        console.log('[BACKOFF-DEBUG] All retries exhausted, returning null');
         return null; // Return null instead of throwing
       }
     };
@@ -241,7 +220,6 @@
           !chrome.runtime.lastError
         );
       } catch (error) {
-        console.log('[BACKOFF-DEBUG] Extension context check failed:', error.message);
         return false;
       }
     };
@@ -299,7 +277,6 @@
       await new Promise((r) => document.addEventListener('DOMContentLoaded', r, { once: true }));
     }
 
-    console.log('[PageEnergyMonitor] Initializing on:', window.location.href);
 
     // Load settings from background (if available)
     const settings = await window.getSettingsOrDefault();
@@ -307,7 +284,6 @@
 
     // If tracking is disabled, still initialize but with reduced functionality
     if (!settings.trackingEnabled) {
-      console.log('[PageEnergyMonitor] Tracking disabled in settings; starting with minimal monitoring.');
       // Still start monitoring but with longer intervals and basic metrics only
       this.samplingInterval = Math.max(this.samplingInterval, 15000); // At least 15 seconds
     }
@@ -322,16 +298,13 @@
       window.addEventListener('beforeunload', this.handlePageUnload);
 
       this.isInitialized = true;
-      console.log('[PageEnergyMonitor] Monitoring setup complete');
     } catch (error) {
-      console.error('[PageEnergyMonitor] Initialization failed:', error);
     }
   }
 
   // ---- Observers ----
   setupPerformanceObserver() {
     if (!('PerformanceObserver' in window)) {
-      console.warn('[PageEnergyMonitor] PerformanceObserver not supported');
       return;
     }
 
@@ -350,13 +323,11 @@
         }
       });
     } catch (error) {
-      console.error('[PageEnergyMonitor] PerformanceObserver setup failed:', error);
     }
   }
 
   setupMutationObserver() {
     if (!('MutationObserver' in window) || !document.body) {
-      console.warn('[PageEnergyMonitor] MutationObserver not supported or no body');
       return;
     }
 
@@ -487,7 +458,6 @@
       const metrics = this.gatherAllMetrics();
       if (isImmediate) {
         metrics.isImmediate = true;
-        console.log('[PageEnergyMonitor] Immediate metrics collection triggered');
       }
       
       const success = this.sendMetricsToBackground(metrics);
@@ -496,7 +466,6 @@
       }
       return success;
     } catch (error) {
-      console.error('[PageEnergyMonitor] Metrics collection failed:', error);
       return false;
     }
   }
@@ -531,7 +500,6 @@
   async sendMetricsToBackground(metrics) {
     // Enhanced context validation before sending
     if (!window.isExtensionContextValid()) {
-      console.log('[PageEnergyMonitor] Extension context invalid, cannot send metrics');
       return false;
     }
 
@@ -539,38 +507,26 @@
     if (document.hidden && !metrics.isImmediate) {
       const hiddenSendChance = Math.random();
       if (hiddenSendChance > 0.2) { // Only send 20% of the time when hidden
-        console.log('[PageEnergyMonitor] Skipping metrics send while hidden');
         return false;
       }
     }
 
     try {
       const backoffInfo = window.__energyBackoffManager.getRetryInfo();
-      console.log('[BACKOFF-DEBUG] Sending energy data, backoff state:', backoffInfo);
-      console.log('[PageEnergyMonitor] Sending metrics:', {
-        url: metrics?.url || 'unknown',
-        domNodes: metrics?.domNodes || 0,
-        cpuIntensiveElements: metrics?.cpuIntensiveElements?.count || 0,
-        timestamp: metrics?.timestamp || Date.now(),
-        isImmediate: metrics?.isImmediate || false
-      });
       
       const res = await window.safeSendMessage({ type: 'ENERGY_DATA', data: metrics });
       if (res !== null && res !== undefined) {
-        console.log('[BACKOFF-DEBUG] Energy data sent successfully, response:', res);
         // Reset backoff only on successful communication
         if (res.success) {
           window.resetBackoff();
           return true;
         }
       } else {
-        console.log('[BACKOFF-DEBUG] Energy data send returned null (extension context invalid)');
         // Don't reset backoff here - context might be invalidated
       }
       return false;
     } catch (error) {
       // Enhanced error handling - don't throw, just log
-      console.warn('[EnergyTracker] sendMetricsToBackground failed:', error?.message || 'Unknown error');
       // Don't reset backoff on error
       return false;
     }
@@ -579,16 +535,13 @@
   // ---- Visibility / Unload ----
   handleVisibilityChange() {
     if (document.hidden) {
-      console.log('[PageEnergyMonitor] Page hidden, slowing down sampling');
     } else {
-      console.log('[PageEnergyMonitor] Page visible, resuming normal sampling');
     }
     this.startPeriodicMonitoring(); // restarts timer with correct interval
   }
 
   handlePageUnload() {
     try {
-      console.log('[PageEnergyMonitor] Page unloading, sending final metrics & cleanup');
       this.collectAndSendMetrics();
     } catch (_) {}
 
@@ -694,7 +647,6 @@
   }
 
   cleanup() {
-    console.log('[PageEnergyMonitor] Cleaning up...');
     if (this.mutationObserver) {
       this.mutationObserver.disconnect();
       this.mutationObserver = null;
@@ -745,7 +697,6 @@
           } else if (message.type === 'COLLECT_IMMEDIATE_METRICS') {
             // Force immediate metrics collection
             if (window.__energyTrackerInstance) {
-              console.log('[EnergyTipNotifications] Forcing immediate metrics collection');
               window.__energyTrackerInstance.collectAndSendMetrics();
               sendResponse({ success: true, message: 'Immediate collection triggered' });
             } else {
@@ -757,7 +708,6 @@
 
         this.injectTipStyles();
         this.isInitialized = true;
-        console.log('[EnergyTipNotifications] Initialized');
       }
 
       showTip(tipData) {
@@ -790,7 +740,6 @@
         // Track this tip
         this.recordTipShown(tipData);
 
-        console.log('[EnergyTipNotifications] Tip shown:', tipData.type);
       }
 
       hideTip() {
@@ -812,7 +761,6 @@
         
         // Check minimum time between tips
         if (now - this.lastTipTime < this.minimumTipInterval) {
-          console.log('[EnergyTipNotifications] Skipping tip - too soon since last tip');
           return false;
         }
 
@@ -822,14 +770,12 @@
         const tipCooldown = tipData.cooldown || (30 * 60 * 1000); // 30 minutes default cooldown
 
         if (now - lastShown < tipCooldown) {
-          console.log('[EnergyTipNotifications] Skipping tip - cooldown active for type:', tipData.type);
           return false;
         }
 
         // Check if user has dismissed this tip permanently
         const dismissKey = `tip_dismissed_${tipData.type}`;
         if (localStorage.getItem(dismissKey) === 'true') {
-          console.log('[EnergyTipNotifications] Skipping tip - permanently dismissed:', tipData.type);
           return false;
         }
 
@@ -962,7 +908,6 @@
       dismissTipPermanently(tipType) {
         const dismissKey = `tip_dismissed_${tipType}`;
         localStorage.setItem(dismissKey, 'true');
-        console.log('[EnergyTipNotifications] Tip permanently dismissed:', tipType);
       }
 
       async executeTipAction(action, tipData) {
@@ -1042,11 +987,9 @@
               break;
               
             default:
-              console.warn('[EnergyTipNotifications] Unknown action:', action);
               this.hideTip();
           }
         } catch (error) {
-          console.error('[EnergyTipNotifications] Action execution failed:', error);
           this.hideTip();
         }
       }
@@ -1290,7 +1233,6 @@
       }
 
       cleanup() {
-        console.log('[EnergyTipNotifications] Cleaning up...');
         this.hideTip();
         this.isInitialized = false;
         
@@ -1526,31 +1468,25 @@
         `;
 
         document.head.appendChild(styles);
-        console.log('[EnergyTipNotifications] Styles injected');
       }
     };
   }
 
   // Add global message listener for service worker communication
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log('[ContentScript] Received message:', message.type);
     
     if (message.type === 'PING') {
-      console.log('[ContentScript] Responding to PING from service worker');
       sendResponse({ success: true, message: 'Content script alive' });
       return true;
     } else if (message.type === 'COLLECT_IMMEDIATE_METRICS') {
-      console.log('[ContentScript] Forcing immediate metrics collection');
       if (window.__energyTrackerInstance && typeof window.__energyTrackerInstance.collectAndSendMetrics === 'function') {
         try {
           window.__energyTrackerInstance.collectAndSendMetrics();
           sendResponse({ success: true, message: 'Immediate collection triggered' });
         } catch (error) {
-          console.error('[ContentScript] Immediate collection failed:', error);
           sendResponse({ success: false, error: error.message });
         }
       } else {
-        console.warn('[ContentScript] Energy tracker instance not available');
         sendResponse({ success: false, error: 'Energy tracker not available' });
       }
       return true;
@@ -1568,7 +1504,6 @@
   const script = document.createElement('script');
   script.src = chrome.runtime.getURL('content-script-notifications.js');
   script.onload = () => {
-    console.log('[ContentScript] Enhanced notification system loaded');
     // Replace the old notification system with the new one
     if (window.__powerAINotificationManager) {
       window.__energyTipInstance.cleanup();
@@ -1580,6 +1515,5 @@
   // Mark as loaded to prevent redeclaration
   window.__energyTrackerContentLoaded = true;
 
-  console.log('[ContentScript] Energy tracking initialized for:', window.location.href);
 
 })();

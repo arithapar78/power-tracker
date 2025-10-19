@@ -29,7 +29,6 @@ class PopupManager {
   }
   
   async init() {
-    console.log('[PopupManager] Initializing popup...');
     
     try {
       // Set up event listeners
@@ -48,7 +47,6 @@ class PopupManager {
       this.hideLoadingOverlay();
       
     } catch (error) {
-      console.error('[PopupManager] Initialization failed:', error);
       this.showError('Failed to initialize. Please try again.');
     }
   }
@@ -98,7 +96,6 @@ class PopupManager {
         try {
           popupLogo.style.display = 'none';
         } catch (error) {
-          console.warn('[PopupManager] Failed to hide logo:', error);
         }
       });
     }
@@ -169,9 +166,7 @@ class PopupManager {
       // Focus management for better accessibility
       this.setupFocusManagement();
       
-      console.log('[PopupManager] Keyboard navigation set up successfully');
     } catch (error) {
-      console.error('[PopupManager] Failed to setup keyboard navigation:', error);
     }
   }
 
@@ -200,7 +195,6 @@ class PopupManager {
         });
       });
     } catch (error) {
-      console.error('[PopupManager] Failed to setup focus management:', error);
     }
   }
 
@@ -212,12 +206,9 @@ class PopupManager {
       const element = document.getElementById(elementId);
       if (element && typeof handler === 'function') {
         element.addEventListener(eventType, handler);
-        console.log(`[PopupManager] Event listener added for ${elementId}`);
       } else {
-        console.warn(`[PopupManager] Element not found or invalid handler: ${elementId}`);
       }
     } catch (error) {
-      console.error(`[PopupManager] Failed to add event listener for ${elementId}:`, error);
     }
   }
   
@@ -253,12 +244,10 @@ class PopupManager {
   async loadCompareTabsData() {
     try {
       if (!this.isChromeApiAvailable()) {
-        console.log('[PopupManager] Chrome APIs not available for Compare Tabs Strip');
         this.loadDemoCompareTabsData();
         return;
       }
 
-      console.log('[PopupManager] Loading Compare Tabs Strip data...');
       
       const response = await this.sendMessageWithRetry({
         type: 'GET_TOP_TABS',
@@ -267,13 +256,10 @@ class PopupManager {
       
       if (response && response.success && response.topTabs) {
         this.compareTabsData = response.topTabs;
-        console.log('[PopupManager] Compare Tabs data loaded:', this.compareTabsData);
       } else {
-        console.warn('[PopupManager] Failed to load Compare Tabs data:', response?.error);
         this.compareTabsData = [];
       }
     } catch (error) {
-      console.error('[PopupManager] Compare Tabs data request failed:', error);
       this.compareTabsData = [];
     }
   }
@@ -349,10 +335,8 @@ class PopupManager {
    */
   async handleCompareTabClose(tabId) {
     try {
-      console.log('[PopupManager] Closing tab from Compare Strip:', tabId);
       
       if (!this.isChromeApiAvailable()) {
-        console.log('[PopupManager] Chrome APIs not available for tab close');
         return;
       }
 
@@ -370,11 +354,9 @@ class PopupManager {
           this.loadCompareTabsData();
         }, 500);
       } else {
-        console.error('[PopupManager] Failed to close tab:', response?.error);
         this.showToast('Failed to close tab', 'error');
       }
     } catch (error) {
-      console.error('[PopupManager] Error closing tab:', error);
       this.showToast('Error closing tab', 'error');
     }
   }
@@ -384,10 +366,8 @@ class PopupManager {
    */
   async handleCompareTabMute(tabId) {
     try {
-      console.log('[PopupManager] Toggling mute for tab:', tabId);
       
       if (!this.isChromeApiAvailable()) {
-        console.log('[PopupManager] Chrome APIs not available for tab mute');
         return;
       }
 
@@ -404,11 +384,9 @@ class PopupManager {
         // Update the UI immediately to show the change
         this.updateTabMuteState(tabId, response.isMuted);
       } else {
-        console.error('[PopupManager] Failed to mute/unmute tab:', response?.error);
         this.showToast('Failed to mute tab', 'error');
       }
     } catch (error) {
-      console.error('[PopupManager] Error muting tab:', error);
       this.showToast('Error muting tab', 'error');
     }
   }
@@ -418,10 +396,8 @@ class PopupManager {
    */
   async handleCompareTabSwitch(tabId) {
     try {
-      console.log('[PopupManager] Switching to tab:', tabId);
       
       if (!this.isChromeApiAvailable()) {
-        console.log('[PopupManager] Chrome APIs not available for tab switch');
         return;
       }
 
@@ -433,7 +409,6 @@ class PopupManager {
         window.close();
       }, 500);
     } catch (error) {
-      console.error('[PopupManager] Error switching to tab:', error);
       this.showToast('Error switching to tab', 'error');
     }
   }
@@ -462,7 +437,6 @@ class PopupManager {
       
       // Check if Chrome APIs are available
       if (!this.isChromeApiAvailable()) {
-        console.log('[PopupManager] Chrome APIs not available, using default energy mode');
         this.energyDisplayMode = defaultMode;
         return;
       }
@@ -472,9 +446,7 @@ class PopupManager {
       const savedMode = result.energyDisplayMode || defaultMode;
       
       this.energyDisplayMode = savedMode;
-      console.log('[PopupManager] Energy mode loaded:', savedMode);
     } catch (error) {
-      console.error('[PopupManager] Failed to load energy mode:', error);
       this.energyDisplayMode = 'frontend';
     }
   }
@@ -483,7 +455,6 @@ class PopupManager {
    * Handles energy mode toggle button clicks
    */
   handleEnergyModeToggle(mode) {
-    console.log('[PopupManager] Energy mode toggle:', mode);
     this.setEnergyMode(mode);
   }
   
@@ -530,7 +501,6 @@ class PopupManager {
     try {
       // Enhanced Chrome API availability check with timeout
       if (!this.isChromeApiAvailable()) {
-        console.log('[PopupManager] Chrome APIs not available, using default settings');
         this.settings = defaultSettings;
         return;
       }
@@ -541,18 +511,14 @@ class PopupManager {
       if (response && response.success && response.settings) {
         // Merge with defaults to ensure all properties exist
         this.settings = { ...defaultSettings, ...response.settings };
-        console.log('[PopupManager] Settings loaded successfully:', this.settings);
       } else {
-        console.warn('[PopupManager] Failed to load settings:', response?.error || 'Invalid response');
         this.settings = defaultSettings;
       }
     } catch (error) {
-      console.error('[PopupManager] Settings request failed:', error.message || error);
       this.settings = defaultSettings;
       
       // Show user-friendly error if it's a critical failure
       if (error.message && error.message.includes('Could not establish connection')) {
-        console.log('[PopupManager] Service worker not available, using defaults');
       } else if (error.message === 'Settings request timeout') {
         this.showToast('Settings loading timeout - using defaults');
       }
@@ -563,7 +529,6 @@ class PopupManager {
   async sendMessageWithRetry(message, maxRetries = 3, timeout = 5000) {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`[PopupManager] Sending message (attempt ${attempt}/${maxRetries}):`, message.type);
         
         // Create a promise that rejects after timeout
         const timeoutPromise = new Promise((_, reject) => {
@@ -577,13 +542,11 @@ class PopupManager {
         ]);
         
         if (response) {
-          console.log(`[PopupManager] Message successful on attempt ${attempt}`);
           return response;
         }
         
         throw new Error('Empty response');
       } catch (error) {
-        console.warn(`[PopupManager] Message attempt ${attempt} failed:`, error.message);
         
         if (attempt === maxRetries) {
           throw error;
@@ -608,7 +571,6 @@ class PopupManager {
         chrome.runtime.sendMessage
       );
     } catch (error) {
-      console.warn('[PopupManager] Chrome API check failed:', error.message);
       return false;
     }
   }
@@ -619,12 +581,9 @@ class PopupManager {
     const retryDelay = baseRetryDelay * Math.pow(1.4, retryCount); // Gentler exponential backoff
     
     try {
-      console.log('=== POPUP: Loading Energy Data ===');
-      console.log('Attempt:', retryCount + 1, '/', maxRetries + 1);
       
       // Enhanced Chrome API availability check
       if (!this.isChromeApiAvailable()) {
-        console.log('Chrome APIs not available, using demo data');
         this.loadDemoData();
         return;
       }
@@ -635,22 +594,16 @@ class PopupManager {
         const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
         if (tabs && tabs.length > 0) {
           currentTab = tabs[0];
-          console.log('=== CURRENT TAB INFO ===');
-          console.log('Tab ID:', currentTab?.id);
-          console.log('Tab URL:', this.safeSubstring(currentTab?.url, 0, 50));
-          console.log('Tab Title:', this.safeSubstring(currentTab?.title, 0, 50));
         } else {
           throw new Error('No active tab found');
         }
       } catch (tabQueryError) {
-        console.error('[PopupManager] Failed to query active tab:', tabQueryError);
         await this.handleNoEnergyDataAvailable();
         return;
       }
 
       // CRITICAL FIX: Wake up service worker and ensure tab is being tracked
       try {
-        console.log('[PopupManager] Ensuring tab is tracked...');
         await this.sendMessageWithRetry({
           type: 'ENSURE_TAB_TRACKING',
           tabId: currentTab.id,
@@ -660,7 +613,6 @@ class PopupManager {
           }
         }, 2);
       } catch (trackingError) {
-        console.warn('[PopupManager] Failed to ensure tab tracking:', trackingError);
       }
 
       // ENHANCED FIX: Multiple data retrieval strategies
@@ -673,23 +625,19 @@ class PopupManager {
         if (response?.success && response?.data) {
           this.energyData = response.data || {};
           energyDataFound = Object.keys(this.energyData).length > 0;
-          console.log('[PopupManager] Strategy 1 - Current snapshot:', energyDataFound ? 'SUCCESS' : 'NO DATA');
         }
       } catch (error) {
-        console.warn('[PopupManager] Strategy 1 failed:', error.message);
       }
 
       // Strategy 2: If no current data, try to get recent historical data
       if (!energyDataFound) {
         try {
-          console.log('[PopupManager] Strategy 2 - Checking recent history...');
           const historyResponse = await chrome.runtime.sendMessage({
             type: 'GET_HISTORY',
             timeRange: '1h'
           });
           
           if (historyResponse?.success && historyResponse?.history?.length > 0) {
-            console.log('[PopupManager] Found recent history entries:', historyResponse.history.length);
             const recentEntry = this.findMostRecentTabData(historyResponse.history, currentTab);
             if (recentEntry) {
               // Create current tab data from recent history
@@ -703,31 +651,25 @@ class PopupManager {
                 }
               };
               energyDataFound = true;
-              console.log('[PopupManager] Strategy 2 - Recent history: SUCCESS');
             }
           }
         } catch (historyError) {
-          console.warn('[PopupManager] Strategy 2 failed:', historyError.message);
         }
       }
 
       // Strategy 3: Force content script data collection with enhanced safety
       if (!energyDataFound) {
         try {
-          console.log('[PopupManager] Strategy 3 - Checking content script availability...');
           
           // First, check if content script is available with a ping
           let contentScriptAvailable = false;
           try {
             const pingResponse = await chrome.tabs.sendMessage(currentTab.id, { type: 'PING' });
             contentScriptAvailable = pingResponse?.success;
-            console.log('[PopupManager] Content script ping result:', contentScriptAvailable);
           } catch (pingError) {
-            console.log('[PopupManager] Content script not available:', pingError.message);
             
             // Try to inject content script if it's missing
             try {
-              console.log('[PopupManager] Attempting to inject content script...');
               await chrome.scripting.executeScript({
                 target: { tabId: currentTab.id },
                 files: ['content-script.js']
@@ -740,18 +682,14 @@ class PopupManager {
               try {
                 const retryPingResponse = await chrome.tabs.sendMessage(currentTab.id, { type: 'PING' });
                 contentScriptAvailable = retryPingResponse?.success;
-                console.log('[PopupManager] Post-injection ping result:', contentScriptAvailable);
               } catch (retryPingError) {
-                console.log('[PopupManager] Content script still not responding after injection');
               }
             } catch (injectionError) {
-              console.log('[PopupManager] Content script injection failed:', injectionError.message);
             }
           }
           
           // Only proceed with metrics collection if content script is available
           if (contentScriptAvailable) {
-            console.log('[PopupManager] Strategy 3 - Triggering content script metrics...');
             try {
               await chrome.tabs.sendMessage(currentTab.id, {
                 type: 'COLLECT_IMMEDIATE_METRICS'
@@ -765,59 +703,28 @@ class PopupManager {
               if (response?.success && response?.data) {
                 this.energyData = response.data || {};
                 energyDataFound = Object.keys(this.energyData).length > 0;
-                console.log('[PopupManager] Strategy 3 - Force collection:', energyDataFound ? 'SUCCESS' : 'NO DATA');
               }
             } catch (metricsError) {
-              console.warn('[PopupManager] Strategy 3 metrics collection failed:', metricsError.message);
             }
           } else {
-            console.log('[PopupManager] Strategy 3 skipped - content script not available');
           }
         } catch (contentError) {
-          console.warn('[PopupManager] Strategy 3 failed:', contentError.message);
         }
       }
 
       // Process the retrieved data
       if (energyDataFound) {
         const energyDataKeys = Object.keys(this.energyData);
-        console.log('=== DATA PROCESSING DIAGNOSTIC ===');
-        console.log('Available tab IDs:', energyDataKeys);
-        console.log('Energy data details:', energyDataKeys.map(tabId => {
-          const tabData = this.energyData[tabId] || {};
-          return {
-            tabId,
-            url: this.safeSubstring(tabData.url, 0, 50),
-            energyScore: tabData.energyScore ?? 0,
-            powerWatts: tabData.powerWatts ?? 0,
-            domNodes: tabData.domNodes ?? 0,
-            timestamp: tabData.timestamp ? new Date(tabData.timestamp).toLocaleTimeString() : null,
-            dataSource: tabData.dataSource || 'live'
-          };
-        }));
 
         const tabId = currentTab?.id;
-        console.log('Current tab ID:', tabId, 'looking for matching data...');
         this.currentTabData = (tabId && this.energyData[tabId]) ? this.energyData[tabId] : null;
         
         if (this.currentTabData) {
-          console.log('✅ Energy data found for current tab:', {
-            energyScore: this.currentTabData.energyScore ?? 0,
-            powerWatts: this.currentTabData.powerWatts ?? 0,
-            domNodes: this.currentTabData.domNodes ?? 0,
-            age: this.currentTabData.timestamp ? (Date.now() - this.currentTabData.timestamp) + 'ms ago' : 'unknown',
-            source: this.currentTabData.dataSource || 'live'
-          });
-          console.log('Raw currentTabData object:', this.currentTabData);
           return; // SUCCESS - exit early
         } else {
-          console.log('❌ No energy data found for current tab ID, checking similar URLs...');
-          console.log('Energy data keys vs current tab ID:', { energyDataKeys, currentTabId: tabId });
           const similarTabData = this.findSimilarTabData(currentTab?.url);
           if (similarTabData) {
-            console.log('Found similar URL data:', this.safeSubstring(similarTabData.url, 0, 50));
             this.currentTabData = similarTabData;
-            console.log('Using similar tab data:', this.currentTabData);
             return; // SUCCESS with similar data
           }
         }
@@ -825,25 +732,19 @@ class PopupManager {
 
       // RETRY LOGIC: Only retry if we haven't found any data
       if (retryCount < maxRetries) {
-        console.log(`No data found, retrying in ${Math.round(retryDelay)}ms... (attempt ${retryCount + 1}/${maxRetries + 1})`);
         setTimeout(() => {
           this.loadCurrentEnergyData(retryCount + 1).then(() => {
             this.updateUI(); // Update UI after retry
           }).catch(error => {
-            console.error('[PopupManager] Retry failed:', error);
           });
         }, retryDelay);
         return;
       } else {
-        console.warn(`❌ No energy data found for current tab after ${maxRetries + 1} attempts`);
-        console.log('Creating fallback tab data...');
         await this.createFallbackTabData(currentTab);
       }
 
     } catch (error) {
-      console.error('❌ Energy data request failed:', error);
       if (retryCount < maxRetries) {
-        console.log(`Retrying energy data load after error in ${Math.round(retryDelay)}ms...`);
         setTimeout(() => {
           this.loadCurrentEnergyData(retryCount + 1).then(() => {
             this.updateUI();
@@ -869,7 +770,6 @@ class PopupManager {
           try {
             const dataDomain = new URL(data.url).hostname;
             if (dataDomain === currentDomain) {
-              console.log('Found matching domain data:', data.url?.substring(0, 50));
               return { ...data, tabId: parseInt(tabId) };
             }
           } catch (e) {
@@ -906,11 +806,6 @@ class PopupManager {
     }
     
     if (match) {
-      console.log('[PopupManager] Found recent tab data:', {
-        url: this.safeSubstring(match.url, 0, 50),
-        age: match.timestamp ? `${Math.round((Date.now() - match.timestamp) / 1000)}s ago` : 'unknown',
-        powerWatts: match.powerWatts || 'legacy'
-      });
       
       return {
         url: currentTab.url, // Use current URL
@@ -928,8 +823,6 @@ class PopupManager {
   
   // Helper method to create fallback tab data and search history
   async createFallbackTabData(currentTab) {
-    console.log('=== FALLBACK DATA CREATION ===');
-    console.log('Creating fallback tab data for:', currentTab.url?.substring(0, 50));
     
     // Try to find historical data for this tab/URL
     const historicalData = await this.findHistoricalData(currentTab.url);
@@ -949,26 +842,13 @@ class PopupManager {
     };
     
     if (historicalData) {
-      console.log('✅ Using historical data for estimates:', {
-        averageEnergyScore: historicalData.averageEnergyScore,
-        averageDomNodes: historicalData.averageDomNodes,
-        estimatedPowerWatts: this.currentTabData.powerWatts,
-        visits: historicalData.visits
-      });
     } else {
-      console.log('⚠️ Using basic fallback data (no history available)');
       // Generate reasonable estimates for completely unknown URLs
       this.currentTabData.domNodes = 1500; // Reasonable estimate
       this.currentTabData.energyScore = 25; // Medium energy score
       this.currentTabData.powerWatts = this.estimatePowerFromURL(currentTab.url);
-      console.log('Generated fallback estimates:', {
-        domNodes: this.currentTabData.domNodes,
-        energyScore: this.currentTabData.energyScore,
-        powerWatts: this.currentTabData.powerWatts
-      });
     }
     
-    console.log('Final fallback currentTabData:', this.currentTabData);
   }
   
   // Helper method to find historical data for a URL with enhanced safety
@@ -976,13 +856,11 @@ class PopupManager {
     try {
       // Enhanced URL validation
       if (!url || typeof url !== 'string') {
-        console.warn('[PopupManager] Invalid URL provided for historical data lookup');
         return null;
       }
 
       // Enhanced Chrome API check
       if (!this.isChromeApiAvailable()) {
-        console.log('[PopupManager] Chrome APIs not available for historical data');
         return null;
       }
 
@@ -1022,10 +900,8 @@ class PopupManager {
           };
         }
       } else {
-        console.warn('[PopupManager] Invalid history response:', response);
       }
     } catch (error) {
-      console.error('[PopupManager] Error fetching historical data:', error.message || error);
     }
     
     return null;
@@ -1040,7 +916,6 @@ class PopupManager {
       const urlObj = new URL(url);
       return urlObj.hostname || null;
     } catch (error) {
-      console.warn('[PopupManager] Failed to extract domain from URL:', url, error.message);
       return null;
     }
   }
@@ -1066,12 +941,10 @@ class PopupManager {
       this.currentTabData = null;
     }
     
-    console.log('⚠️ No energy data available, using unavailable state');
   }
   
   async loadBackendEnergyData() {
     try {
-      console.log('[PopupManager] Loading real AI model usage data...');
       
       // Check if Chrome APIs are available
       if (typeof chrome === 'undefined' || !chrome.runtime) {
@@ -1093,16 +966,13 @@ class PopupManager {
       if (response.success && response.data) {
         // Use real AI model data from service worker
         this.backendEnergyData = response.data;
-        console.log('[PopupManager] Real AI model usage data loaded:', this.backendEnergyData);
       } else {
-        console.warn('[PopupManager] Failed to load AI model usage data, falling back to detected models');
         
         // Fallback: Use currently detected models and estimated usage
         const fallbackData = this.generateFallbackAIUsageData();
         this.backendEnergyData = fallbackData;
       }
     } catch (error) {
-      console.error('[PopupManager] AI model usage request failed:', error);
       
       // Final fallback: Generate basic data from detected models
       const fallbackData = this.generateFallbackAIUsageData();
@@ -1252,7 +1122,6 @@ class PopupManager {
    */
   generateRealQueryPatterns() {
     try {
-      console.log('[PopupManager] Generating real query patterns...');
       
       const patterns = {
         queryTiming: this.analyzeQueryTimingPatterns(),
@@ -1263,10 +1132,8 @@ class PopupManager {
         sessionDuration: this.analyzeSessionDuration()
       };
       
-      console.log('[PopupManager] Real query patterns generated:', patterns);
       return patterns;
     } catch (error) {
-      console.error('[PopupManager] Error generating real query patterns:', error);
       return {
         queryTiming: { morning: 0, afternoon: 0, evening: 0, night: 0 },
         queryFrequency: { hourly: 0, daily: 0, weekly: 0 },
@@ -1303,10 +1170,8 @@ class PopupManager {
         timing = { morning: 15, afternoon: 35, evening: 35, night: 15 };
       }
       
-      console.log('[PopupManager] Query timing patterns:', timing);
       return timing;
     } catch (error) {
-      console.error('[PopupManager] Error analyzing query timing patterns:', error);
       return { morning: 0, afternoon: 0, evening: 0, night: 0 };
     }
   }
@@ -1337,10 +1202,8 @@ class PopupManager {
         }
       }
       
-      console.log('[PopupManager] Query frequency analysis:', frequency);
       return frequency;
     } catch (error) {
-      console.error('[PopupManager] Error analyzing query frequency:', error);
       return { hourly: 0, daily: 0, weekly: 0 };
     }
   }
@@ -1374,10 +1237,8 @@ class PopupManager {
         length = { short: 40, medium: 45, long: 15 };
       }
       
-      console.log('[PopupManager] Query length analysis:', length);
       return length;
     } catch (error) {
-      console.error('[PopupManager] Error analyzing query length:', error);
       return { short: 0, medium: 0, long: 0 };
     }
   }
@@ -1412,10 +1273,8 @@ class PopupManager {
         types = { general: 60, technical: 25, creative: 15 };
       }
       
-      console.log('[PopupManager] Query types analysis:', types);
       return types;
     } catch (error) {
-      console.error('[PopupManager] Error analyzing query types:', error);
       return { general: 0, technical: 0, creative: 0 };
     }
   }
@@ -1457,10 +1316,8 @@ class PopupManager {
         };
       }
       
-      console.log('[PopupManager] Peak usage times:', peakTimes);
       return peakTimes;
     } catch (error) {
-      console.error('[PopupManager] Error identifying peak usage times:', error);
       return { hour: 14, day: 'Tuesday', frequency: 0 };
     }
   }
@@ -1509,10 +1366,8 @@ class PopupManager {
         }
       }
       
-      console.log('[PopupManager] Session duration analysis:', sessionData);
       return sessionData;
     } catch (error) {
-      console.error('[PopupManager] Error analyzing session duration:', error);
       return { average: 0, total: 0, sessions: 0 };
     }
   }
@@ -1544,10 +1399,8 @@ class PopupManager {
   
   async loadEnhancedAIEnergyData() {
     try {
-      console.log('[PopupManager] Loading enhanced AI energy data...');
       
       if (!this.aiEnergyManager) {
-        console.log('[PopupManager] No AI energy manager available');
         this.enhancedAIData = null;
         return;
       }
@@ -1560,12 +1413,10 @@ class PopupManager {
       }
       
       if (!currentTab) {
-        console.log('[PopupManager] No current tab found for AI detection');
         this.enhancedAIData = null;
         return;
       }
       
-      console.log('[PopupManager] Detecting AI model for:', currentTab.url);
       
       // Enhanced context for AI detection
       const context = {
@@ -1584,7 +1435,6 @@ class PopupManager {
       );
       
       if (this.detectedAIModel) {
-        console.log('[PopupManager] AI model detected:', this.detectedAIModel.model.name);
         
         // Estimate AI usage with enhanced calculations
         this.currentAIUsage = this.aiEnergyManager.estimateAIUsage(
@@ -1601,9 +1451,7 @@ class PopupManager {
           this.aiEnergyManager.updateTabUsage(currentTab.id, this.currentAIUsage);
         }
         
-        console.log('[PopupManager] Enhanced AI usage estimated:', this.currentAIUsage);
       } else {
-        console.log('[PopupManager] No AI model detected for current tab');
         this.currentAIUsage = null;
       }
       
@@ -1633,10 +1481,8 @@ class PopupManager {
         sessionData: sessionStats
       };
       
-      console.log('[PopupManager] Enhanced AI energy data loaded:', this.enhancedAIData);
       
     } catch (error) {
-      console.error('[PopupManager] Failed to load enhanced AI energy data:', error);
       this.enhancedAIData = null;
       this.aiEnergyData = { totalEnergy: 0, detectedModel: null, usage: null };
     }
@@ -1730,19 +1576,11 @@ class PopupManager {
         this.todayHistory = response.history;
       }
     } catch (error) {
-      console.error('[PopupManager] Failed to load today\'s summary:', error);
     }
   }
   
   updateUI() {
     try {
-      console.log('[PopupManager] Updating UI with current tab data:', {
-        hasCurrentTabData: !!this.currentTabData,
-        dataSource: this.currentTabData?.dataSource,
-        powerWatts: this.currentTabData?.powerWatts,
-        isEstimated: this.currentTabData?.isEstimated,
-        isUnavailable: this.currentTabData?.isUnavailable
-      });
       
       this.updateStatusIndicator();
       this.updatePowerDisplay();
@@ -1755,9 +1593,7 @@ class PopupManager {
       this.updateTabEnergyRecommendations();
       this.updateCompareTabsStrip();
       
-      console.log('[PopupManager] UI update completed successfully');
     } catch (error) {
-      console.error('[PopupManager] UI update failed:', error);
       this.showError('Display update failed');
     }
   }
@@ -1767,7 +1603,6 @@ class PopupManager {
     const statusText = this.safeGetElement('statusText');
     
     if (!statusDot || !statusText) {
-      console.warn('[PopupManager] Status indicator elements not found');
       return;
     }
     
@@ -1800,7 +1635,6 @@ class PopupManager {
         this.safeSetTextContent(statusText, 'Waiting for data...');
       }
     } catch (error) {
-      console.error('[PopupManager] Error updating status indicator:', error);
     }
   }
   
@@ -1811,12 +1645,10 @@ class PopupManager {
     const efficiencyBadge = this.safeGetElement('efficiencyBadge');
     
     if (!powerValue || !powerDisplay || !powerDescription || !efficiencyBadge) {
-      console.warn('[PopupManager] Power display elements not found');
       return;
     }
 
     try {
-      console.log('[PopupManager] Updating power display. Current tab data:', this.currentTabData);
       
       // Cascading fallback logic for different data states
       const displayData = this.determinePowerDisplayData();
@@ -1841,14 +1673,7 @@ class PopupManager {
         }
       }
       
-      console.log('[PopupManager] Power display updated:', {
-        powerValue: displayData.powerValue,
-        watts: displayData.watts,
-        dataState: displayData.dataState,
-        dataSource: displayData.dataSource
-      });
     } catch (error) {
-      console.error('[PopupManager] Error updating power display:', error);
     }
   }
   
@@ -1864,7 +1689,6 @@ class PopupManager {
     const waterCard = document.querySelector('.water-comparison');
     
     if (!bulbsCount || !carbonEmissions || !waterUsage) {
-      console.warn('[PopupManager] Environmental impact elements not found');
       return;
     }
 
@@ -1895,14 +1719,7 @@ class PopupManager {
       this.updateEnvironmentalVisualState(carbonCard, impacts.carbon);
       this.updateEnvironmentalVisualState(waterCard, impacts.water);
       
-      console.log('[PopupManager] Environmental impacts updated:', {
-        powerWatts: tabPowerWatts,
-        bulbs: impacts.bulbs,
-        carbon: impacts.carbon,
-        water: impacts.water
-      });
     } catch (error) {
-      console.error('[PopupManager] Error updating environmental impacts:', error);
       this.safeSetTextContent(bulbsCount, '--');
       this.safeSetTextContent(carbonEmissions, '--');
       this.safeSetTextContent(waterUsage, '--');
@@ -2074,26 +1891,12 @@ class PopupManager {
       const backendPower = this.calculateBackendPowerForTotal();
       const totalPower = frontendPower + backendPower;
       
-      console.log('[PopupManager] Total energy mode calculation:', {
-        frontendPower: frontendPower.toFixed(2) + 'W',
-        backendPower: backendPower.toFixed(2) + 'W',
-        totalPower: totalPower.toFixed(2) + 'W',
-        model: this.detectedAIModel.model.name,
-        modelCategory: this.detectedAIModel.model.category,
-        url: this.currentTabData?.url?.substring(0, 50)
-      });
       
       // Total mode caps: 5W minimum, 150W maximum (to handle intensive AI models)
       return Math.max(5, Math.min(150, totalPower));
     }
     
     // Frontend only mode (original behavior)
-    console.log('[PopupManager] Frontend only mode calculation:', {
-      frontendPower: frontendPower.toFixed(2) + 'W',
-      displayMode: currentMode,
-      isAISite: !!this.detectedAIModel,
-      url: this.currentTabData?.url?.substring(0, 50)
-    });
     
     // Frontend caps: 5W minimum, 65W maximum
     return Math.max(5, Math.min(65, frontendPower));
@@ -2181,18 +1984,6 @@ class PopupManager {
       context
     );
     
-    console.log('[PopupManager] Backend power calculated:', {
-      model: this.detectedAIModel.model.name,
-      category: this.detectedAIModel.model.category,
-      energyPerQuery: this.detectedAIModel.model.energy.meanCombined + ' Wh',
-      backendPowerW: backendPower.toFixed(2) + 'W',
-      confidence: this.detectedAIModel.confidence,
-      context: {
-        userEngagement: context.userEngagement,
-        batteryLevel: context.batteryLevel,
-        userActivity: context.userActivity
-      }
-    });
     
     // Cap backend power at reasonable limits based on model category
     const modelCategory = this.detectedAIModel.model.category || 'balanced-performance';
@@ -2209,18 +2000,14 @@ class PopupManager {
    * Calculates base browser power consumption (original logic)
    */
   calculateBaseBrowserPower() {
-    console.log('=== POWER CALCULATION DIAGNOSTIC ===');
-    console.log('Current tab data:', this.currentTabData);
     
     // Priority 1: Direct power measurement
     if (this.currentTabData?.powerWatts &&
         !isNaN(this.currentTabData.powerWatts) &&
         this.currentTabData.powerWatts > 0) {
       const power = Math.max(5, Math.min(65, this.currentTabData.powerWatts));
-      console.log('✅ Priority 1: Using direct power measurement:', power + 'W');
       return power;
     } else {
-      console.log('❌ Priority 1 failed: powerWatts =', this.currentTabData?.powerWatts);
     }
     
     // Priority 2: Legacy energy score migration
@@ -2228,10 +2015,8 @@ class PopupManager {
         !isNaN(this.currentTabData.energyScore) &&
         this.currentTabData.energyScore >= 0) {
       const power = this.migrateLegacyScore(this.currentTabData.energyScore);
-      console.log('✅ Priority 2: Using legacy energy score migration:', power + 'W (from score:', this.currentTabData.energyScore + ')');
       return power;
     } else {
-      console.log('❌ Priority 2 failed: energyScore =', this.currentTabData?.energyScore);
     }
     
     // Priority 3: Estimate based on DOM complexity
@@ -2239,33 +2024,18 @@ class PopupManager {
         !isNaN(this.currentTabData.domNodes) &&
         this.currentTabData.domNodes > 0) {
       const power = this.estimatePowerFromDOMNodes(this.currentTabData.domNodes);
-      console.log('✅ Priority 3: Using DOM complexity estimation:', power + 'W (from', this.currentTabData.domNodes, 'nodes)');
       return power;
     } else {
-      console.log('❌ Priority 3 failed: domNodes =', this.currentTabData?.domNodes);
     }
     
     // Priority 4: URL-based estimation (includes AI site detection)
     if (this.currentTabData?.url) {
       const power = this.estimatePowerFromURL(this.currentTabData.url);
-      console.log('✅ Priority 4: Using URL-based estimation:', power + 'W (from URL:', this.currentTabData.url.substring(0, 50) + ')');
       return power;
     } else {
-      console.log('❌ Priority 4 failed: url =', this.currentTabData?.url);
     }
     
     // Priority 5: Fallback default
-    console.log('⚠️ Priority 5: Using fallback default: 8.0W');
-    console.log('Current tab data state:', {
-      hasCurrentTabData: !!this.currentTabData,
-      powerWatts: this.currentTabData?.powerWatts,
-      energyScore: this.currentTabData?.energyScore,
-      domNodes: this.currentTabData?.domNodes,
-      url: this.currentTabData?.url?.substring(0, 50),
-      isEstimated: this.currentTabData?.isEstimated,
-      isUnavailable: this.currentTabData?.isUnavailable,
-      dataSource: this.currentTabData?.dataSource
-    });
     return 8.0; // Conservative default for light browsing
   }
   
@@ -2289,7 +2059,6 @@ class PopupManager {
       
       return Math.max(0, aiPowerWatts + aiOverhead);
     } catch (error) {
-      console.warn('[PopupManager] Error calculating AI power:', error);
       return 0;
     }
   }
@@ -2677,7 +2446,6 @@ class PopupManager {
           break;
       }
     } catch (error) {
-      console.error('[PopupManager] Failed to apply tip:', error);
       this.showToast('Failed to apply tip');
     }
   }
@@ -2744,7 +2512,6 @@ class PopupManager {
     const tabsContainer = compareTabsStrip?.querySelector('.tabs-container');
     
     if (!compareTabsStrip || !tabsContainer) {
-      console.warn('[PopupManager] Compare Tabs Strip elements not found');
       return;
     }
 
@@ -2768,9 +2535,7 @@ class PopupManager {
         }
       });
       
-      console.log('[PopupManager] Compare Tabs Strip updated with', this.compareTabsData.length, 'tabs');
     } catch (error) {
-      console.error('[PopupManager] Error updating Compare Tabs Strip:', error);
     }
   }
   
@@ -2828,7 +2593,6 @@ class PopupManager {
       const aiModelInfoSection = document.querySelector('.ai-model-info-section');
       
       if (!aiModelInfoSection) {
-        console.warn('[PopupManager] AI Model Info section not found');
         return;
       }
       
@@ -2901,15 +2665,8 @@ class PopupManager {
         modelEfficiency.className = `energy-value ${efficiencyClass}`;
       }
       
-      console.log('[PopupManager] AI Model Info section updated:', {
-        sessionWh: sessionWh.toFixed(1),
-        sessionCarbon: sessionCarbon.toFixed(1),
-        efficiency: efficiency,
-        totalPower: totalPower
-      });
       
     } catch (error) {
-      console.error('[PopupManager] Error updating AI Model Info section:', error);
     }
   }
   
@@ -2936,9 +2693,7 @@ class PopupManager {
       const newTheme = currentTheme === 'light' ? 'dark' : 'light';
       
       await this.setTheme(newTheme);
-      console.log('[PopupManager] Theme toggled to:', newTheme);
     } catch (error) {
-      console.error('[PopupManager] Failed to toggle theme:', error);
     }
   }
 
@@ -2948,7 +2703,6 @@ class PopupManager {
       
       // Check if Chrome APIs are available
       if (!this.isChromeApiAvailable()) {
-        console.log('[PopupManager] Chrome APIs not available, using default theme');
         this.setThemeUI(defaultTheme);
         return;
       }
@@ -2958,9 +2712,7 @@ class PopupManager {
       const savedTheme = result.theme || defaultTheme;
       
       this.setThemeUI(savedTheme);
-      console.log('[PopupManager] Theme loaded:', savedTheme);
     } catch (error) {
-      console.error('[PopupManager] Failed to load theme:', error);
       this.setThemeUI('light');
     }
   }
@@ -2975,7 +2727,6 @@ class PopupManager {
         await chrome.storage.sync.set({ theme });
       }
     } catch (error) {
-      console.error('[PopupManager] Failed to set theme:', error);
     }
   }
 
@@ -3000,7 +2751,6 @@ class PopupManager {
           theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
       }
     } catch (error) {
-      console.error('[PopupManager] Failed to update theme UI:', error);
     }
   }
   
@@ -3033,7 +2783,6 @@ class PopupManager {
   }
   
   showError(message) {
-    console.error('[PopupManager] Showing error:', message);
     
     // Show error in multiple places for better UX
     const statusText = this.safeGetElement('statusText');
@@ -3054,7 +2803,6 @@ class PopupManager {
   }
   
   showToast(message, type = 'info') {
-    console.log('[PopupManager] Showing toast:', message, type);
     
     // Simple toast notification with type support
     const toast = document.createElement('div');
@@ -3143,7 +2891,6 @@ class PopupManager {
   
   // Load demo data when Chrome APIs are not available
   loadDemoData() {
-    console.log('Loading demo data for standalone viewing');
     
     this.energyData = {
       12345: {
@@ -3247,7 +2994,6 @@ class PopupManager {
       if (!elementId || typeof elementId !== 'string') return null;
       return document.getElementById(elementId);
     } catch (error) {
-      console.warn(`[PopupManager] Failed to get element ${elementId}:`, error);
       return null;
     }
   }
@@ -3262,7 +3008,6 @@ class PopupManager {
         return true;
       }
     } catch (error) {
-      console.warn('[PopupManager] Failed to set text content:', error);
     }
     return false;
   }
@@ -3277,7 +3022,6 @@ class PopupManager {
         return true;
       }
     } catch (error) {
-      console.warn('[PopupManager] Failed to set innerHTML:', error);
     }
     return false;
   }
@@ -3286,12 +3030,10 @@ class PopupManager {
   
   handlePromptGenerator() {
     try {
-      console.log('[PopupManager] Prompt Generator clicked - showing prompt generator directly');
       this.showPromptGenerator();
       this.loadPromptGeneratorData();
       this.showToast('Prompt generator opened!', 'success');
     } catch (error) {
-      console.error('[PopupManager] Error showing prompt generator:', error);
       this.showToast('Error opening prompt generator', 'error');
     }
   }
@@ -3305,7 +3047,6 @@ class PopupManager {
       try {
         input.focus();
       } catch (error) {
-        console.warn('[PopupManager] Failed to focus input:', error);
       }
       this.hideCodeError();
 
@@ -3327,34 +3068,27 @@ class PopupManager {
   handleCodeSubmit() {
     const input = document.getElementById('accessCodeInput');
     if (!input) {
-      console.error('[PopupManager] Access code input not found');
       return;
     }
     
     const code = input.value.trim();
-    console.log('[PopupManager] Attempting code validation for:', code ? `"${code}"` : 'empty code');
     
     if (this.validateAccessCode(code)) {
-      console.log('[PopupManager] ✅ Access code validated successfully');
       try {
         this.hideCodeEntryModal();
-        console.log('[PopupManager] Modal hidden, now showing prompt generator...');
         this.showPromptGenerator();
         this.loadPromptGeneratorData();
         this.showToast('Access granted! Prompt generator unlocked.', 'success');
       } catch (error) {
-        console.error('[PopupManager] Error showing prompt generator:', error);
         this.showToast('Error opening prompt generator', 'error');
       }
     } else {
-      console.log('[PopupManager] ❌ Invalid access code entered:', code);
       this.showCodeError();
       // Clear the input and refocus for retry
       input.value = '';
       try {
         input.focus();
       } catch (error) {
-        console.warn('[PopupManager] Failed to focus input:', error);
       }
     }
   }
@@ -3379,19 +3113,15 @@ class PopupManager {
   }
   
   showPromptGenerator() {
-    console.log('[PopupManager] 🔍 Looking for promptGeneratorSection element...');
     const generator = document.getElementById('promptGeneratorSection');
     
     if (generator) {
-      console.log('[PopupManager] ✅ Found promptGeneratorSection, making it visible...');
       generator.style.display = 'block';
-      console.log('[PopupManager] ✅ Prompt generator should now be visible');
       
       // Scroll to the generator section for better UX
       try {
         generator.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } catch (scrollError) {
-        console.warn('[PopupManager] Failed to scroll to generator:', scrollError);
       }
       
       // Focus on the prompt input for immediate use
@@ -3404,7 +3134,6 @@ class PopupManager {
       
       // Events are already set up in setupEventListeners
     } else {
-      console.error('[PopupManager] ❌ promptGeneratorSection element not found in DOM!');
       this.showToast('Error: Prompt generator element not found', 'error');
     }
   }
@@ -3455,7 +3184,6 @@ class PopupManager {
   
   async loadPromptGeneratorData() {
     try {
-      console.log('[PopupManager] Loading real prompt generator data...');
       
       // PHASE 5 STEP 7: Use new comprehensive data flow system
       const realData = await this.fetchRealPromptGeneratorData();
@@ -3474,14 +3202,11 @@ class PopupManager {
         // Store the real data for use in other parts of the UI
         this.promptGeneratorData = realData;
         
-        console.log('[PopupManager] Comprehensive prompt generator data loaded:', realData);
       } else {
-        console.warn('[PopupManager] Failed to load comprehensive data, using fallback');
         this.loadPromptGeneratorDataFallback();
       }
       
     } catch (error) {
-      console.error('[PopupManager] Error loading prompt generator data:', error);
       this.loadPromptGeneratorDataFallback();
     }
   }
@@ -3491,7 +3216,6 @@ class PopupManager {
    */
   async loadPromptGeneratorDataFallback() {
     try {
-      console.log('[PopupManager] Loading fallback prompt generator data...');
       
       // Initialize default stats
       let stats = {
@@ -3517,7 +3241,6 @@ class PopupManager {
             stats.energySavings = Math.round(storedStats.averageEnergyPercent || 0);
             stats.avgTokenReduction = Math.round(storedStats.averageTokenReduction || 0);
             
-            console.log('[PopupManager] Loaded stored prompt stats (fallback):', stats);
           }
           
           // Also use cumulative data if available (more comprehensive)
@@ -3537,20 +3260,16 @@ class PopupManager {
             stats.energySavings = Math.min(energyPercent, 50); // Cap at 50%
           }
           
-          console.log('[PopupManager] Final computed stats (fallback):', stats);
           
         } catch (error) {
-          console.warn('[PopupManager] Failed to load stored prompt generator data (fallback):', error);
         }
       } else {
-        console.log('[PopupManager] Chrome APIs not available, using default stats (fallback)');
       }
       
       // Update UI with real or default stats
       this.updateGeneratorStats(stats);
       
     } catch (error) {
-      console.error('[PopupManager] Error loading fallback prompt generator data:', error);
       // Final fallback to default stats on error
       const fallbackStats = { totalPrompts: 0, energySavings: 0, avgTokenReduction: 0 };
       this.updateGeneratorStats(fallbackStats);
@@ -3567,7 +3286,6 @@ class PopupManager {
    */
   async fetchRealPromptGeneratorData() {
     try {
-      console.log('[PopupManager] Fetching real Prompt Generator data...');
       
       if (!this.isChromeApiAvailable()) {
         return this.getPromptGeneratorFallbackData();
@@ -3593,11 +3311,9 @@ class PopupManager {
         energyHistory: energyHistory?.data
       });
 
-      console.log('[PopupManager] Real Prompt Generator data fetched:', aggregatedData);
       return aggregatedData;
 
     } catch (error) {
-      console.error('[PopupManager] Error fetching real Prompt Generator data:', error);
       return this.getPromptGeneratorFallbackData();
     }
   }
@@ -3623,7 +3339,6 @@ class PopupManager {
 
       throw new Error(response?.error || 'Failed to fetch historical AI usage');
     } catch (error) {
-      console.error('[PopupManager] Error fetching historical AI usage:', error);
       return { success: false, error: error.message };
     }
   }
@@ -3650,7 +3365,6 @@ class PopupManager {
         data: queryData
       };
     } catch (error) {
-      console.error('[PopupManager] Error fetching query pattern history:', error);
       return { success: false, error: error.message };
     }
   }
@@ -3681,7 +3395,6 @@ class PopupManager {
         data: optimizationData
       };
     } catch (error) {
-      console.error('[PopupManager] Error fetching optimization statistics:', error);
       return { success: false, error: error.message };
     }
   }
@@ -3707,7 +3420,6 @@ class PopupManager {
 
       throw new Error(response?.error || 'Failed to fetch energy usage history');
     } catch (error) {
-      console.error('[PopupManager] Error fetching energy usage history:', error);
       return { success: false, error: error.message };
     }
   }
@@ -3743,10 +3455,8 @@ class PopupManager {
         };
       }
 
-      console.log('[PopupManager] Aggregated Prompt Generator data:', aggregated);
       return aggregated;
     } catch (error) {
-      console.error('[PopupManager] Error aggregating Prompt Generator data:', error);
       return this.getPromptGeneratorFallbackData();
     }
   }
@@ -3814,10 +3524,8 @@ class PopupManager {
         });
       }
 
-      console.log('[PopupManager] Formatted graph data:', graphData);
       return graphData;
     } catch (error) {
-      console.error('[PopupManager] Error formatting data for graphs:', error);
       return { energyOverTime: [], queryFrequency: [], modelUsage: [], optimizationTrends: [] };
     }
   }
@@ -3858,10 +3566,8 @@ class PopupManager {
         }
       });
 
-      console.log('[PopupManager] Model usage aggregated:', modelBreakdown);
       return modelBreakdown;
     } catch (error) {
-      console.error('[PopupManager] Error aggregating model usage:', error);
       return {};
     }
   }
@@ -3919,10 +3625,8 @@ class PopupManager {
         });
       });
 
-      console.log('[PopupManager] Optimization trends calculated:', trends);
       return trends;
     } catch (error) {
-      console.error('[PopupManager] Error calculating optimization trends:', error);
       return { trend: 'stable', improvement: 0, periods: [] };
     }
   }
@@ -3940,14 +3644,9 @@ class PopupManager {
       // Assume average query uses ~45mWh, so 1mWh = ~2.2% improvement
       const percentageSaved = Math.min(50, Math.round(energySavedMwh * 2.2));
       
-      console.log('[PopupManager] Real energy savings calculated:', {
-        inputMwh: energySavedMwh,
-        outputPercentage: percentageSaved
-      });
       
       return percentageSaved;
     } catch (error) {
-      console.error('[PopupManager] Error calculating real energy savings:', error);
       return 0;
     }
   }
@@ -3976,7 +3675,6 @@ class PopupManager {
         return; // Don't update if Prompt Generator is not visible
       }
 
-      console.log('[PopupManager] Updating Prompt Generator with real-time data...');
       
       // Fetch latest data
       const realTimeData = await this.fetchRealPromptGeneratorData();
@@ -3993,9 +3691,7 @@ class PopupManager {
         this.updatePromptGeneratorGraphs(realTimeData.graphData);
       }
 
-      console.log('[PopupManager] Prompt Generator real-time update completed');
     } catch (error) {
-      console.error('[PopupManager] Error updating Prompt Generator real-time:', error);
     }
   }
 
@@ -4015,9 +3711,7 @@ class PopupManager {
       // Update model usage distribution
       this.updateModelUsageGraph(graphData.modelUsage);
 
-      console.log('[PopupManager] Prompt Generator graphs updated');
     } catch (error) {
-      console.error('[PopupManager] Error updating Prompt Generator graphs:', error);
     }
   }
 
@@ -4027,7 +3721,6 @@ class PopupManager {
   updateEnergyTimeGraph(energyData) {
     // Implementation would depend on the specific charting library used
     // This is a placeholder for the graph update logic
-    console.log('[PopupManager] Energy over time graph data:', energyData);
   }
 
   /**
@@ -4036,7 +3729,6 @@ class PopupManager {
   updateQueryFrequencyGraph(frequencyData) {
     // Implementation would depend on the specific charting library used
     // This is a placeholder for the graph update logic
-    console.log('[PopupManager] Query frequency graph data:', frequencyData);
   }
 
   /**
@@ -4045,7 +3737,6 @@ class PopupManager {
   updateModelUsageGraph(modelData) {
     // Implementation would depend on the specific charting library used
     // This is a placeholder for the graph update logic
-    console.log('[PopupManager] Model usage graph data:', modelData);
   }
   
   updateGeneratorStats(stats) {
@@ -4202,7 +3893,6 @@ class PopupManager {
    * Implements comprehensive prompt optimization with advanced token reduction techniques
    */
   optimizePrompt(prompt, level, model) {
-    console.log('[OptimizationEngine] Starting optimization:', { level, model, promptLength: prompt.length });
     
     let optimized = prompt;
     let originalTokens = this.estimateTokenCount(prompt, model);
@@ -4240,13 +3930,6 @@ class PopupManager {
       energySavings
     });
     
-    console.log('[OptimizationEngine] Optimization complete:', {
-      originalTokens,
-      optimizedTokens: this.estimateTokenCount(cappedResults.optimized, model),
-      tokensSaved: cappedResults.tokensSaved,
-      percentageSaved: cappedResults.percentageSaved,
-      energySavings: cappedResults.energySavings
-    });
     
     return {
       original: prompt,
@@ -4908,14 +4591,12 @@ class PopupManager {
     
     // If reduction is too low, try more aggressive techniques
     if (metrics.percentageSaved < cap.min) {
-      console.log('[OptimizationEngine] Applying additional optimization to meet minimum threshold');
       // Apply additional compression
       optimized = this.applyAdditionalCompression(optimized, cap.min - metrics.percentageSaved);
     }
     
     // If reduction is too high, restore some content
     if (metrics.percentageSaved > cap.max) {
-      console.log('[OptimizationEngine] Reduction too aggressive, restoring content');
       optimized = this.restoreEssentialContent(original, optimized, metrics.percentageSaved - cap.max);
     }
     
@@ -5078,16 +4759,8 @@ class PopupManager {
             cumulativeEnergySaved: newCumulativeEnergy
           });
           
-          console.log('[PopupManager] Real optimization statistics saved to Chrome storage:', {
-            totalOptimizations: newTotal,
-            averageEnergyPercent: newAvgSavings,
-            averageTokenReduction: newAvgReduction,
-            cumulativeTokensSaved: newCumulativeTokens,
-            cumulativeEnergySaved: newCumulativeEnergy
-          });
           
         } catch (error) {
-          console.warn('[PopupManager] Failed to save optimization statistics:', error);
         }
       }
     }
@@ -5151,7 +4824,6 @@ class PopupManager {
       );
     }
 
-    console.log('[OptimizationEngine] Analytics updated:', analytics);
   }
 
   /**
@@ -5293,14 +4965,12 @@ class PopupManager {
       try {
         promptInput.value = '';
       } catch (error) {
-        console.warn('[PopupManager] Failed to clear prompt input:', error);
       }
     }
     if (optimizedPrompt) {
       try {
         optimizedPrompt.value = '';
       } catch (error) {
-        console.warn('[PopupManager] Failed to clear optimized prompt:', error);
       }
     }
     if (resultsArea) resultsArea.style.display = 'none';
@@ -5417,7 +5087,6 @@ class PopupManager {
   
   async loadComparisonData() {
     try {
-      console.log('[PopupManager] Loading comparison data...');
       
       const resultsContainer = document.getElementById('comparisonResults');
       if (!resultsContainer) return;
@@ -5449,7 +5118,6 @@ class PopupManager {
       }
       
     } catch (error) {
-      console.error('[PopupManager] Failed to load comparison data:', error);
       const resultsContainer = document.getElementById('comparisonResults');
       if (resultsContainer) {
         resultsContainer.innerHTML = '<div class="error">Failed to load comparison data</div>';
@@ -5565,7 +5233,6 @@ class PopupManager {
   
   async loadBenchmarkData(metric = 'intelligence') {
     try {
-      console.log('[PopupManager] Loading benchmark data for:', metric);
       
       const response = await chrome.runtime.sendMessage({
         type: 'GET_MODEL_BENCHMARKS',
@@ -5575,11 +5242,9 @@ class PopupManager {
       if (response?.success) {
         this.displayBenchmarkResults(response.benchmarks, metric);
       } else {
-        console.error('[PopupManager] Failed to load benchmark data:', response?.error);
       }
       
     } catch (error) {
-      console.error('[PopupManager] Benchmark data request failed:', error);
     }
   }
   
@@ -5638,7 +5303,6 @@ class PopupManager {
         this.displayBenchmarkVisualization(response.benchmarks, metric);
       }
     } catch (error) {
-      console.error('[PopupManager] Failed to load benchmark visualization:', error);
       visualization.innerHTML = '<div class="error">Failed to load benchmark data</div>';
     }
   }
@@ -5729,7 +5393,6 @@ class PopupManager {
         trendingList.innerHTML = '<div class="no-data">No trending data available.</div>';
       }
     } catch (error) {
-      console.error('[PopupManager] Failed to load trending data:', error);
       trendingList.innerHTML = '<div class="error">Failed to load trending data</div>';
     }
   }
@@ -5793,7 +5456,6 @@ class PopupManager {
         this.showToastNotification('Export failed', 'error');
       }
     } catch (error) {
-      console.error('[PopupManager] Export failed:', error);
       this.showToastNotification('Export failed', 'error');
     }
   }
@@ -5805,14 +5467,12 @@ class PopupManager {
   }
   
   applyModelRecommendation(model, type) {
-    console.log('[PopupManager] Applying recommendation:', model, type);
     this.showToastNotification(`Applied ${type} recommendation: ${model}`, 'success');
   }
 
   // ===== TAB ENERGY RECOMMENDATIONS =====
   
   setupTabRecommendations() {
-    console.log('[PopupManager] Setting up tab energy recommendations');
     this.selectedTabsForClosure = new Set();
     this.tabRecommendationsVisible = false;
   }
@@ -5854,7 +5514,6 @@ class PopupManager {
         this.tabRecommendationsVisible = false;
       }
     } catch (error) {
-      console.error('[PopupManager] Error updating tab energy recommendations:', error);
     }
   }
 
@@ -6118,7 +5777,6 @@ class PopupManager {
 
     try {
       const tabIds = Array.from(this.selectedTabsForClosure);
-      console.log('[PopupManager] Closing recommended tabs:', tabIds);
 
       // Close the selected tabs
       if (this.isChromeApiAvailable()) {
@@ -6135,7 +5793,6 @@ class PopupManager {
       }, 1000);
 
     } catch (error) {
-      console.error('[PopupManager] Failed to close recommended tabs:', error);
       this.showToast('Failed to close some tabs', 'error');
     }
   }
@@ -6145,7 +5802,6 @@ class PopupManager {
    */
   async handleCloseTab(tabId) {
     try {
-      console.log('[PopupManager] Closing tab:', tabId);
       
       if (this.isChromeApiAvailable()) {
         await chrome.tabs.remove([tabId]);
@@ -6158,7 +5814,6 @@ class PopupManager {
       }, 1000);
 
     } catch (error) {
-      console.error('[PopupManager] Failed to close tab:', error);
       this.showToast('Failed to close tab', 'error');
     }
   }

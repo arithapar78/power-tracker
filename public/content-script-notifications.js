@@ -6,7 +6,6 @@
 (() => {
   // Prevent multiple initialization
   if (window.__powerAINotificationSystemLoaded) {
-    console.log('[PowerAI] Notification system already loaded');
     return;
   }
 
@@ -68,20 +67,16 @@
       try {
         // Enhanced security logging
         if (this.isSecureSite) {
-          console.log('[PowerAI] Running on secure site, using enhanced security mode');
         }
         if (this.hasStrictCSP) {
-          console.log('[PowerAI] Strict CSP detected, using safe DOM methods only');
         }
         
         // Check API availability first
         this.apiAvailable = this.checkChromeApiAvailability();
         
         if (this.apiAvailable) {
-          console.log('[PowerAI] Chrome APIs available, full functionality enabled');
           this.setupChromeIntegration();
         } else {
-          console.log('[PowerAI] Chrome APIs not available, running in standalone mode');
           this.setupStandaloneMode();
         }
         
@@ -90,7 +85,6 @@
         this.isInitialized = true;
         
       } catch (error) {
-        console.error('[PowerAI] Initialization failed:', error);
         this.setupStandaloneMode();
       }
     }
@@ -99,29 +93,24 @@
       try {
         // Comprehensive Chrome API check
         if (typeof chrome === 'undefined') {
-          console.log('[PowerAI] Chrome object not available');
           return false;
         }
         
         if (!chrome.runtime) {
-          console.log('[PowerAI] Chrome runtime not available');
           return false;
         }
         
         if (!chrome.runtime.id) {
-          console.log('[PowerAI] Chrome runtime ID not available - extension context invalid');
           return false;
         }
         
         if (!chrome.runtime.sendMessage) {
-          console.log('[PowerAI] Chrome sendMessage API not available');
           return false;
         }
         
         return true;
         
       } catch (error) {
-        console.log('[PowerAI] Chrome API availability check failed:', error.message);
         return false;
       }
     }
@@ -134,17 +123,14 @@
             this.handleMessage(message, sender, sendResponse);
           };
           chrome.runtime.onMessage.addListener(this.messageListener);
-          console.log('[PowerAI] Chrome integration setup complete');
         }
       } catch (error) {
-        console.error('[PowerAI] Chrome integration setup failed:', error);
         this.apiAvailable = false;
         this.setupStandaloneMode();
       }
     }
 
     setupStandaloneMode() {
-      console.log('[PowerAI] Setting up standalone mode with demo functionality');
       
       // Use default settings when Chrome APIs aren't available
       this.settings = {
@@ -205,7 +191,6 @@
             break;
         }
       } catch (error) {
-        console.error('[PowerAI] Message handling failed:', error);
         if (sendResponse) {
           sendResponse({ success: false, error: error.message });
         }
@@ -220,17 +205,13 @@
           
           if (response && response.success) {
             this.settings = response.settings;
-            console.log('[PowerAI] Settings loaded from extension');
           } else {
-            console.log('[PowerAI] Failed to load settings from extension, using defaults');
             this.useDefaultSettings();
           }
         } else {
-          console.log('[PowerAI] Using default settings (Chrome APIs unavailable)');
           this.useDefaultSettings();
         }
       } catch (error) {
-        console.error('[PowerAI] Settings loading failed:', error);
         this.useDefaultSettings();
       }
     }
@@ -247,12 +228,10 @@
     async sendMessage(message) {
       try {
         if (!this.apiAvailable) {
-          console.log('[PowerAI] Chrome APIs not available for message sending');
           return { success: false, error: 'API not available' };
         }
         
         if (!chrome.runtime || !chrome.runtime.id) {
-          console.log('[PowerAI] Extension context invalid during message send');
           this.apiAvailable = false;
           return { success: false, error: 'Context invalid' };
         }
@@ -261,7 +240,6 @@
         return response || { success: false, error: 'No response' };
         
       } catch (error) {
-        console.error('[PowerAI] Message sending failed:', error.message);
         
         // Mark API as unavailable if connection fails
         if (error.message.includes('Could not establish connection') ||
@@ -279,7 +257,6 @@
       try {
         // Wait for document.body to be available
         if (!document.body) {
-          console.log('[PowerAI] Document body not ready, waiting...');
           setTimeout(() => this.createNotificationContainer(), 100);
           return;
         }
@@ -299,12 +276,9 @@
         
         if (this.container && document.body) {
           document.body.appendChild(this.container);
-          console.log('[PowerAI] Notification container created');
         } else {
-          console.error('[PowerAI] Failed to create notification container - container or body null');
         }
       } catch (error) {
-        console.error('[PowerAI] Container creation failed:', error);
         // Retry container creation after a delay
         setTimeout(() => {
           if (!this.container) {
@@ -356,7 +330,6 @@
         return element;
         
       } catch (error) {
-        console.error('[PowerAI] Element creation failed:', error);
         return null;
       }
     }
@@ -392,7 +365,6 @@
         });
         
         if (!notification) {
-          console.error('[PowerAI] Failed to create notification container');
           return null;
         }
         
@@ -501,7 +473,6 @@
         return notification;
         
       } catch (error) {
-        console.error('[PowerAI] Notification element creation failed:', error);
         return null;
       }
     }
@@ -509,7 +480,6 @@
     showTip(tipData) {
       try {
         if (!this.settings || !this.settings.notificationsEnabled) {
-          console.log('[PowerAI] Notifications disabled');
           return;
         }
 
@@ -539,16 +509,13 @@
             this.dismissNotification(notificationElement);
           }, duration);
           
-          console.log('[PowerAI] Notification shown:', tipData.title);
         } else {
-          console.error('[PowerAI] Cannot show notification - missing container or element');
           // Try to recreate container if it's missing
           if (!this.container) {
             this.createNotificationContainer();
           }
         }
       } catch (error) {
-        console.error('[PowerAI] Show tip failed:', error);
       }
     }
 
@@ -579,7 +546,6 @@
     }
 
     handleActionClick(tipData) {
-      console.log('[PowerAI] Action clicked:', tipData.actionText);
       
       if (this.apiAvailable) {
         // Send action to extension
@@ -591,9 +557,7 @@
       } else {
         // Handle demo actions
         if (tipData.actionText === 'Learn More') {
-          console.log('[PowerAI] Would open extension popup or info page');
         } else if (tipData.actionText === 'Enable Dark Mode') {
-          console.log('[PowerAI] Would toggle dark mode if extension was active');
         }
       }
     }
@@ -617,7 +581,6 @@
         }, 400);
         
       } catch (error) {
-        console.error('[PowerAI] Dismiss notification failed:', error);
       }
     }
 
@@ -636,7 +599,6 @@
         // Remove message listener safely
         if (this.messageListener && chrome.runtime && chrome.runtime.onMessage) {
           chrome.runtime.onMessage.removeListener(this.messageListener);
-          console.log('[PowerAI] Message listener removed');
         }
         
         // Remove notification container
@@ -648,7 +610,6 @@
         this.isInitialized = false;
         
       } catch (error) {
-        console.error('[PowerAI] Cleanup failed:', error);
       }
     }
   }
@@ -667,7 +628,6 @@
       }
     }
   } catch (initError) {
-    console.error('[PowerAI] Failed to initialize:', initError);
   }
 
   // Safe cleanup on page unload
@@ -678,7 +638,6 @@
           notificationManager.cleanup();
         }
       } catch (cleanupError) {
-        console.error('[PowerAI] Cleanup error:', cleanupError);
       }
     });
   }
@@ -691,13 +650,11 @@
   // Export for cleanup
   window.__powerAINotificationSystemLoaded = true;
 
-  console.log('[PowerAI] CSP-compliant notification system loaded');
 
   // Universal error boundary for Chrome extension
   window.addEventListener('error', (event) => {
     if (event.error && event.error.message && 
         event.error.message.includes('Could not establish connection')) {
-      console.log('[ErrorBoundary] Chrome extension connection error caught and handled');
       event.preventDefault(); // Prevent the error from showing in console
       return true;
     }
@@ -706,7 +663,6 @@
   window.addEventListener('unhandledrejection', (event) => {
     if (event.reason && event.reason.message && 
         event.reason.message.includes('Could not establish connection')) {
-      console.log('[ErrorBoundary] Chrome extension promise rejection caught and handled');
       event.preventDefault();
       return true;
     }

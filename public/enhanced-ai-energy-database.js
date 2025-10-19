@@ -1386,12 +1386,9 @@ class EnhancedAIEnergyManager {
       // Check if EnhancedQueryEstimationEngine is available
       if (typeof EnhancedQueryEstimationEngine !== 'undefined') {
         this.queryEstimationEngine = new EnhancedQueryEstimationEngine(ENHANCED_AI_MODEL_DATABASE);
-        console.log('[EnhancedAIEnergyManager] Enhanced query estimation engine initialized');
       } else {
-        console.warn('[EnhancedAIEnergyManager] Enhanced query estimation engine not available, using fallback');
       }
     } catch (error) {
-      console.error('[EnhancedAIEnergyManager] Failed to initialize query estimation engine:', error);
     }
   }
 
@@ -1454,7 +1451,6 @@ class EnhancedAIEnergyManager {
       return this.detectByModelPatterns(url, title, content, context);
       
     } catch (error) {
-      console.warn('[EnhancedAIEnergyManager] Error detecting AI model:', error);
       return null;
     }
   }
@@ -1629,7 +1625,6 @@ class EnhancedAIEnergyManager {
         };
         
         const estimation = this.queryEstimationEngine.estimateQueries(tabData, detectedModel, enhancedContext);
-        console.log('[EnhancedAIEnergyManager] Enhanced query estimation:', estimation);
         
         return {
           queries: estimation.queries,
@@ -1639,7 +1634,6 @@ class EnhancedAIEnergyManager {
           breakdown: estimation.breakdown
         };
       } catch (error) {
-        console.warn('[EnhancedAIEnergyManager] Enhanced estimation failed, using fallback:', error);
       }
     }
     
@@ -2012,9 +2006,7 @@ class EnhancedAIEnergyManager {
         this.queryEstimationEngine.cleanup();
       }
       
-      console.log('[EnhancedAIEnergyManager] Cleanup completed');
     } catch (error) {
-      console.warn('[EnhancedAIEnergyManager] Cleanup failed:', error);
     }
   }
 }
