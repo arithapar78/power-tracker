@@ -119,7 +119,7 @@ html {
   width: 320px;
   min-width: 320px;
   max-width: 320px;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 body {
@@ -130,7 +130,7 @@ body {
   background: var(--background);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow: hidden;
   margin: 0;
   padding: 0;
   width: 320px;
@@ -143,14 +143,12 @@ body {
   min-width: 320px;
   max-width: 320px;
   min-height: 600px;
-  max-height: 800px;
   background: var(--background);
   padding: var(--space-5);
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: visible;
   box-sizing: border-box;
 }
 
@@ -998,21 +996,6 @@ body {
   grid-column: 1 / -1;
 }
 
-/* ===== TEST BUTTON CONTAINER ===== */
-.test-button-container {
-  margin-top: var(--space-5);
-  padding: var(--space-4);
-  border-top: 1px solid var(--border);
-  text-align: center;
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-}
-
-.test-button-container .btn {
-  width: 100%;
-  font-size: var(--text-sm);
-  font-weight: 500;
-}
 
 /* ===== LEARNTAV CARD ===== */
 .learntav-card {
@@ -2206,9 +2189,11 @@ body {
   word-wrap: break-word;
   overflow-wrap: break-word;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tab-domain {

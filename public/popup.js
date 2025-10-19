@@ -77,7 +77,8 @@ class PopupManager {
     // Add Enter key support for access code input
     this.safeAddEventListener('accessCodeInput', 'keydown', this.handleCodeInputKeydown.bind(this));
     
-    // Model comparison and benchmarking
+    // Model comparison and benchmarking - only add listeners if elements exist
+    // Note: These modals and buttons may not exist in the current HTML
     this.safeAddEventListener('comparisonCloseBtn', 'click', this.hideComparisonModal.bind(this));
     this.safeAddEventListener('benchmarksCloseBtn', 'click', this.hideBenchmarksModal.bind(this));
     this.safeAddEventListener('refreshComparisonBtn', 'click', this.refreshComparison.bind(this));
@@ -2750,19 +2751,21 @@ class PopupManager {
     try {
       // Show/hide the strip based on data availability
       if (!this.compareTabsData || this.compareTabsData.length === 0) {
-        compareTabsStrip.style.display = 'none';
+        if (compareTabsStrip) compareTabsStrip.style.display = 'none';
         return;
       }
 
-      compareTabsStrip.style.display = 'block';
-      
+      if (compareTabsStrip) compareTabsStrip.style.display = 'block';
+
       // Clear existing content
-      tabsContainer.innerHTML = '';
+      if (tabsContainer) tabsContainer.innerHTML = '';
       
       // Create tab cards for top energy consumers
       this.compareTabsData.slice(0, 3).forEach((tabData, index) => {
         const tabCard = this.createTabCard(tabData, index);
-        tabsContainer.appendChild(tabCard);
+        if (tabCard && tabsContainer) {
+          tabsContainer.appendChild(tabCard);
+        }
       });
       
       console.log('[PopupManager] Compare Tabs Strip updated with', this.compareTabsData.length, 'tabs');
@@ -2830,7 +2833,7 @@ class PopupManager {
       }
       
       // Always show the AI model info section
-      aiModelInfoSection.style.display = 'block';
+      if (aiModelInfoSection) aiModelInfoSection.style.display = 'block';
       
       // Update with actual detected model information
       if (this.detectedAIModel && this.detectedAIModel.model) {
@@ -3041,7 +3044,7 @@ class PopupManager {
     const powerDescription = this.safeGetElement('powerDescription');
     if (powerDescription) {
       this.safeSetInnerHTML(powerDescription, `Error: ${message}<br><small>Please try refreshing</small>`);
-      powerDescription.style.color = 'var(--danger-color, #dc3545)';
+      if (powerDescription) powerDescription.style.color = 'var(--danger-color, #dc3545)';
     }
     
     // Show toast notification
@@ -3082,7 +3085,9 @@ class PopupManager {
     `;
     toast.textContent = message;
     
-    document.body.appendChild(toast);
+    if (toast && document.body) {
+      document.body.appendChild(toast);
+    }
     
     const duration = type === 'error' ? 5000 : 3000;
     setTimeout(() => {
@@ -3297,9 +3302,13 @@ class PopupManager {
     if (modal && input) {
       modal.style.display = 'flex';
       input.value = '';
-      input.focus();
+      try {
+        input.focus();
+      } catch (error) {
+        console.warn('[PopupManager] Failed to focus input:', error);
+      }
       this.hideCodeError();
-      
+
       // Add click-to-close functionality for modal overlay
       modal.addEventListener('click', this.handleModalOverlayClick.bind(this));
     }
@@ -3342,7 +3351,11 @@ class PopupManager {
       this.showCodeError();
       // Clear the input and refocus for retry
       input.value = '';
-      input.focus();
+      try {
+        input.focus();
+      } catch (error) {
+        console.warn('[PopupManager] Failed to focus input:', error);
+      }
     }
   }
   
@@ -4059,7 +4072,7 @@ class PopupManager {
     const generateBtn = document.getElementById('generateOptimizedBtn');
     if (generateBtn) {
       generateBtn.disabled = true;
-      generateBtn.innerHTML = '<span class="btn-icon">⏳</span> Optimizing...';
+      this.safeSetInnerHTML(generateBtn, '<span class="btn-icon">⏳</span> Optimizing...');
     }
     
     // Store start time for processing time calculation
@@ -4073,7 +4086,7 @@ class PopupManager {
       // Reset button
       if (generateBtn) {
         generateBtn.disabled = false;
-        generateBtn.innerHTML = '<span class="btn-icon">⚡</span> Generate Optimized Prompt';
+        this.safeSetInnerHTML(generateBtn, '<span class="btn-icon">⚡</span> Generate Optimized Prompt');
       }
       
       // Update token analysis for optimized text
@@ -4170,17 +4183,17 @@ class PopupManager {
   handleToggleDetails() {
     const removedWordsSection = document.getElementById('removedWordsSection');
     const toggleBtn = document.getElementById('toggleDetailsBtn');
-    
+
     if (!removedWordsSection || !toggleBtn) return;
-    
+
     const isVisible = removedWordsSection.style.display !== 'none';
-    
+
     if (isVisible) {
       removedWordsSection.style.display = 'none';
-      toggleBtn.innerHTML = '<span class="btn-icon">👁️</span> Show Removed Words';
+      this.safeSetInnerHTML(toggleBtn, '<span class="btn-icon">👁️</span> Show Removed Words');
     } else {
       removedWordsSection.style.display = 'block';
-      toggleBtn.innerHTML = '<span class="btn-icon">🙈</span> Hide Removed Words';
+      this.safeSetInnerHTML(toggleBtn, '<span class="btn-icon">🙈</span> Hide Removed Words');
     }
   }
   
@@ -4994,10 +5007,10 @@ class PopupManager {
     const energySavingsResult = document.getElementById('energySavingsResult');
     
     if (resultsArea && optimizedPrompt && energySavingsResult) {
-      // Show results area
-      resultsArea.style.display = 'block';
-      optimizedPrompt.value = result.optimized;
-      energySavingsResult.textContent = `${result.percentageSaved || result.energySavings || 0}% Energy Saved`;
+      // Show results area with null safety
+      if (resultsArea) resultsArea.style.display = 'block';
+      if (optimizedPrompt) optimizedPrompt.value = result.optimized || '';
+      this.safeSetTextContent(energySavingsResult, `${result.percentageSaved || result.energySavings || 0}% Energy Saved`);
       
       // Update detailed metrics
       this.updateDetailedMetrics(result);
@@ -5178,7 +5191,9 @@ class PopupManager {
       result.optimizationCategories.forEach(category => {
         const li = document.createElement('li');
         li.textContent = category;
-        categoriesList.appendChild(li);
+        if (li && categoriesList) {
+          categoriesList.appendChild(li);
+        }
       });
     }
 
@@ -5206,7 +5221,9 @@ class PopupManager {
           const span = document.createElement('span');
           span.className = count > 1 ? 'removed-word redundant' : 'removed-word';
           span.textContent = count > 1 ? `${word} (${count}x)` : word;
-          removedWordsList.appendChild(span);
+          if (span && removedWordsList) {
+            removedWordsList.appendChild(span);
+          }
         });
 
         // Show the toggle button if there are removed words
@@ -5221,7 +5238,9 @@ class PopupManager {
         span.textContent = 'No specific words tracked';
         span.style.fontStyle = 'italic';
         span.style.color = 'var(--text-muted)';
-        removedWordsList.appendChild(span);
+        if (span && removedWordsList) {
+          removedWordsList.appendChild(span);
+        }
       }
     }
   }
@@ -5249,8 +5268,10 @@ class PopupManager {
     textArea.value = text;
     textArea.style.position = 'fixed';
     textArea.style.top = '-9999px';
-    document.body.appendChild(textArea);
-    textArea.select();
+    if (textArea && document.body) {
+      document.body.appendChild(textArea);
+      textArea.select();
+    }
     
     try {
       document.execCommand('copy');
@@ -5268,8 +5289,20 @@ class PopupManager {
     const optimizedPrompt = document.getElementById('optimizedPrompt');
     const resultsArea = document.getElementById('resultsArea');
     
-    if (promptInput) promptInput.value = '';
-    if (optimizedPrompt) optimizedPrompt.value = '';
+    if (promptInput) {
+      try {
+        promptInput.value = '';
+      } catch (error) {
+        console.warn('[PopupManager] Failed to clear prompt input:', error);
+      }
+    }
+    if (optimizedPrompt) {
+      try {
+        optimizedPrompt.value = '';
+      } catch (error) {
+        console.warn('[PopupManager] Failed to clear optimized prompt:', error);
+      }
+    }
     if (resultsArea) resultsArea.style.display = 'none';
     
     // Clear stored result
@@ -5286,7 +5319,9 @@ class PopupManager {
     toast.textContent = message;
     
     // Add to document
-    document.body.appendChild(toast);
+    if (toast && document.body) {
+      document.body.appendChild(toast);
+    }
     
     // Auto remove after 3 seconds
     setTimeout(() => {
@@ -6031,14 +6066,14 @@ class PopupManager {
       .filter(s => this.selectedTabsForClosure.has(s.tabId))
       .reduce((total, s) => total + s.potentialSaving, 0);
     
-    if (totalTabsCount) totalTabsCount.textContent = allTabs.length.toString();
-    if (highEnergyCount) highEnergyCount.textContent = highEnergyTabs.length.toString();
+    this.safeSetTextContent(totalTabsCount, allTabs.length.toString());
+    this.safeSetTextContent(highEnergyCount, highEnergyTabs.length.toString());
     if (potentialSavings) {
       if (selectedSavings > 0) {
-        potentialSavings.textContent = `${selectedSavings.toFixed(1)}W`;
+        this.safeSetTextContent(potentialSavings, `${selectedSavings.toFixed(1)}W`);
       } else {
         const maxSavings = suggestions.reduce((total, s) => total + s.potentialSaving, 0);
-        potentialSavings.textContent = maxSavings > 0 ? `~${maxSavings.toFixed(1)}W` : '--';
+        this.safeSetTextContent(potentialSavings, maxSavings > 0 ? `~${maxSavings.toFixed(1)}W` : '--');
       }
     }
   }

@@ -495,6 +495,144 @@ class EnergyTracker {
               // Handle tip display request
               return { success: true };
             }
+            case 'GET_HISTORICAL_AI_USAGE': {
+              const timeRange = message.timeRange || '30d';
+              const includeModels = message.includeModels || false;
+              const includeEnergyData = message.includeEnergyData || false;
+              
+              try {
+                // Get AI usage data from storage or generate sample data
+                const { aiUsageHistory = [] } = await chrome.storage.local.get('aiUsageHistory');
+                const now = Date.now();
+                const windows = { '1h': 3600000, '24h': 86400000, '7d': 604800000, '30d': 2592000000 };
+                const dur = windows[timeRange] ?? windows['30d'];
+                const cutoff = now - dur;
+                
+                const filteredData = aiUsageHistory.filter(entry => entry.timestamp > cutoff);
+                
+                return {
+                  success: true,
+                  data: {
+                    entries: filteredData,
+                    totalEntries: filteredData.length,
+                    timeRange: timeRange,
+                    models: includeModels ? this.getUniqueModels(filteredData) : undefined,
+                    totalEnergyWh: includeEnergyData ? this.calculateTotalEnergy(filteredData) : undefined
+                  }
+                };
+              } catch (error) {
+                console.error('[EnergyTracker] GET_HISTORICAL_AI_USAGE failed:', error);
+                return { success: false, error: error.message };
+              }
+            }
+            case 'GET_ENERGY_HISTORY': {
+              const timeRange = message.timeRange || '7d';
+              const includeAIUsage = message.includeAIUsage || false;
+              const granularity = message.granularity || 'daily';
+              
+              try {
+                const history = await this.getEnergyHistory(timeRange);
+                
+                // Process history based on granularity
+                const processedHistory = this.processHistoryByGranularity(history, granularity);
+                
+                return {
+                  success: true,
+                  history: processedHistory,
+                  totalEntries: processedHistory.length,
+                  timeRange: timeRange,
+                  granularity: granularity
+                };
+              } catch (error) {
+                console.error('[EnergyTracker] GET_ENERGY_HISTORY failed:', error);
+                return { success: false, error: error.message };
+              }
+            }
+            case 'GET_AI_MODEL_USAGE_SUMMARY': {
+              const timeRange = message.timeRange || '24h';
+              
+              try {
+                const { aiUsageHistory = [] } = await chrome.storage.local.get('aiUsageHistory');
+                const now = Date.now();
+                const windows = { '1h': 3600000, '24h': 86400000, '7d': 604800000, '30d': 2592000000 };
+                const dur = windows[timeRange] ?? windows['24h'];
+                const cutoff = now - dur;
+                
+                const recentEntries = aiUsageHistory.filter(entry => entry.timestamp > cutoff);
+                const totalEnergy = recentEntries.reduce((sum, entry) => sum + (entry.energy || 0), 0);
+                
+                return {
+                  success: true,
+                  data: {
+                    totalEnergy: totalEnergy,
+                    recentEntries: recentEntries.slice(-10),
+                    entryCount: recentEntries.length,
+                    modelBreakdown: this.getModelBreakdown(recentEntries)
+                  }
+                };
+              } catch (error) {
+                console.error('[EnergyTracker] GET_AI_MODEL_USAGE_SUMMARY failed:', error);
+                return { success: false, error: error.message };
+              }
+            }
+            case 'GET_MODEL_COMPARISON': {
+              const models = message.models || [];
+              const criteria = message.criteria || 'all';
+              
+              try {
+                const comparison = await this.generateModelComparison(models, criteria);
+                return {
+                  success: true,
+                  comparison: comparison
+                };
+              } catch (error) {
+                console.error('[EnergyTracker] GET_MODEL_COMPARISON failed:', error);
+                return { success: false, error: error.message };
+              }
+            }
+            case 'GET_MODEL_BENCHMARKS': {
+              const metric = message.metric || 'intelligence';
+              
+              try {
+                const benchmarks = await this.getModelBenchmarks(metric);
+                return {
+                  success: true,
+                  benchmarks: benchmarks
+                };
+              } catch (error) {
+                console.error('[EnergyTracker] GET_MODEL_BENCHMARKS failed:', error);
+                return { success: false, error: error.message };
+              }
+            }
+            case 'GET_TRENDING_MODELS': {
+              const timeframe = message.timeframe || '7d';
+              
+              try {
+                const trending = await this.getTrendingModels(timeframe);
+                return {
+                  success: true,
+                  trending: trending
+                };
+              } catch (error) {
+                console.error('[EnergyTracker] GET_TRENDING_MODELS failed:', error);
+                return { success: false, error: error.message };
+              }
+            }
+            case 'EXPORT_COMPARISON_DATA': {
+              const models = message.models || [];
+              const format = message.format || 'json';
+              
+              try {
+                const exportData = await this.exportComparisonData(models, format);
+                return {
+                  success: true,
+                  exportData: exportData
+                };
+              } catch (error) {
+                console.error('[EnergyTracker] EXPORT_COMPARISON_DATA failed:', error);
+                return { success: false, error: error.message };
+              }
+            }
             default:
               return { success: false, error: 'Unknown message type: ' + message.type };
           }
@@ -1894,6 +2032,225 @@ class EnergyTracker {
     if (watts < 15) return 'low';      // Green: < 15W
     if (watts < 30) return 'medium';   // Yellow: 15-30W
     return 'high';                     // Red: > 30W
+  }
+
+  // Helper methods for the new message handlers
+  getUniqueModels(usageData) {
+    const models = new Set();
+    usageData.forEach(entry => {
+      if (entry.model) {
+        models.add(entry.model);
+      }
+    });
+    return Array.from(models);
+  }
+
+  calculateTotalEnergy(usageData) {
+    return usageData.reduce((total, entry) => total + (entry.energy || 0), 0);
+  }
+
+  processHistoryByGranularity(history, granularity) {
+    if (granularity === 'hourly') {
+      return this.groupByHour(history);
+    } else if (granularity === 'daily') {
+      return this.groupByDay(history);
+    } else {
+      return history;
+    }
+  }
+
+  groupByHour(history) {
+    const groups = new Map();
+    history.forEach(entry => {
+      const hour = new Date(entry.timestamp);
+      hour.setMinutes(0, 0, 0);
+      const key = hour.getTime();
+      
+      if (!groups.has(key)) {
+        groups.set(key, { timestamp: key, energy: 0, count: 0 });
+      }
+      
+      const group = groups.get(key);
+      group.energy += entry.energy || 0;
+      group.count += 1;
+    });
+    
+    return Array.from(groups.values()).sort((a, b) => a.timestamp - b.timestamp);
+  }
+
+  groupByDay(history) {
+    const groups = new Map();
+    history.forEach(entry => {
+      const day = new Date(entry.timestamp);
+      day.setHours(0, 0, 0, 0);
+      const key = day.getTime();
+      
+      if (!groups.has(key)) {
+        groups.set(key, { timestamp: key, energy: 0, count: 0 });
+      }
+      
+      const group = groups.get(key);
+      group.energy += entry.energy || 0;
+      group.count += 1;
+    });
+    
+    return Array.from(groups.values()).sort((a, b) => a.timestamp - b.timestamp);
+  }
+
+  getModelBreakdown(usageData) {
+    const breakdown = {};
+    usageData.forEach(entry => {
+      if (entry.model) {
+        if (!breakdown[entry.model]) {
+          breakdown[entry.model] = { count: 0, energy: 0 };
+        }
+        breakdown[entry.model].count += 1;
+        breakdown[entry.model].energy += entry.energy || 0;
+      }
+    });
+    return breakdown;
+  }
+
+  async generateModelComparison(models, criteria) {
+    // Generate comparison data for the specified models
+    const comparison = {};
+    
+    for (const model of models) {
+      comparison[model] = {
+        efficiency: await this.getModelEfficiency(model),
+        performance: await this.getModelPerformance(model),
+        cost: await this.getModelCost(model),
+        availability: await this.getModelAvailability(model)
+      };
+    }
+    
+    return comparison;
+  }
+
+  async getModelEfficiency(model) {
+    // Return efficiency data for the model
+    const efficiencyMap = {
+      'gpt-4': 85,
+      'gpt-3.5-turbo': 92,
+      'claude-3-opus': 88,
+      'claude-3-sonnet': 90,
+      'claude-3-haiku': 95,
+      'gemini-pro': 87
+    };
+    return efficiencyMap[model] || 80;
+  }
+
+  async getModelPerformance(model) {
+    // Return performance data for the model
+    const performanceMap = {
+      'gpt-4': 95,
+      'gpt-3.5-turbo': 85,
+      'claude-3-opus': 93,
+      'claude-3-sonnet': 90,
+      'claude-3-haiku': 82,
+      'gemini-pro': 88
+    };
+    return performanceMap[model] || 75;
+  }
+
+  async getModelCost(model) {
+    // Return cost data for the model (per 1k tokens)
+    const costMap = {
+      'gpt-4': 0.03,
+      'gpt-3.5-turbo': 0.002,
+      'claude-3-opus': 0.015,
+      'claude-3-sonnet': 0.003,
+      'claude-3-haiku': 0.00025,
+      'gemini-pro': 0.001
+    };
+    return costMap[model] || 0.01;
+  }
+
+  async getModelAvailability(model) {
+    // Return availability percentage for the model
+    const availabilityMap = {
+      'gpt-4': 98.5,
+      'gpt-3.5-turbo': 99.2,
+      'claude-3-opus': 97.8,
+      'claude-3-sonnet': 98.9,
+      'claude-3-haiku': 99.1,
+      'gemini-pro': 96.5
+    };
+    return availabilityMap[model] || 95.0;
+  }
+
+  async getModelBenchmarks(metric) {
+    // Return benchmark data for all models based on the specified metric
+    const benchmarks = {
+      intelligence: {
+        'gpt-4': 92,
+        'claude-3-opus': 90,
+        'gemini-pro': 87,
+        'claude-3-sonnet': 85,
+        'gpt-3.5-turbo': 82,
+        'claude-3-haiku': 78
+      },
+      efficiency: {
+        'claude-3-haiku': 95,
+        'gpt-3.5-turbo': 92,
+        'claude-3-sonnet': 90,
+        'claude-3-opus': 88,
+        'gemini-pro': 87,
+        'gpt-4': 85
+      },
+      cost: {
+        'claude-3-haiku': 95,
+        'gemini-pro': 90,
+        'gpt-3.5-turbo': 88,
+        'claude-3-sonnet': 85,
+        'claude-3-opus': 70,
+        'gpt-4': 60
+      }
+    };
+    
+    return benchmarks[metric] || benchmarks.intelligence;
+  }
+
+  async getTrendingModels(timeframe) {
+    // Get trending models based on usage patterns
+    const { aiUsageHistory = [] } = await chrome.storage.local.get('aiUsageHistory');
+    const now = Date.now();
+    const windows = { '1h': 3600000, '24h': 86400000, '7d': 604800000, '30d': 2592000000 };
+    const dur = windows[timeframe] ?? windows['7d'];
+    const cutoff = now - dur;
+    
+    const recentUsage = aiUsageHistory.filter(entry => entry.timestamp > cutoff);
+    const modelCounts = {};
+    
+    recentUsage.forEach(entry => {
+      if (entry.model) {
+        modelCounts[entry.model] = (modelCounts[entry.model] || 0) + 1;
+      }
+    });
+    
+    // Sort by usage count and return top models
+    const trending = Object.entries(modelCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 10)
+      .map(([model, count]) => ({ model, count }));
+    
+    return trending;
+  }
+
+  async exportComparisonData(models, format) {
+    const comparison = await this.generateModelComparison(models, 'all');
+    
+    if (format === 'csv') {
+      // Convert to CSV format
+      let csv = 'Model,Efficiency,Performance,Cost,Availability\n';
+      for (const [model, data] of Object.entries(comparison)) {
+        csv += `${model},${data.efficiency},${data.performance},${data.cost},${data.availability}\n`;
+      }
+      return csv;
+    } else {
+      // Return as JSON
+      return JSON.stringify(comparison, null, 2);
+    }
   }
 }
 

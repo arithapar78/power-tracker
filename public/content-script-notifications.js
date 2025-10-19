@@ -277,6 +277,13 @@
       if (this.container) return;
       
       try {
+        // Wait for document.body to be available
+        if (!document.body) {
+          console.log('[PowerAI] Document body not ready, waiting...');
+          setTimeout(() => this.createNotificationContainer(), 100);
+          return;
+        }
+
         this.container = this.createSecureElement('div', {
           id: 'power-ai-notification-container',
           className: 'power-ai-notifications',
@@ -290,14 +297,20 @@
           }
         });
         
-        if (this.container) {
+        if (this.container && document.body) {
           document.body.appendChild(this.container);
           console.log('[PowerAI] Notification container created');
         } else {
-          console.error('[PowerAI] Failed to create notification container');
+          console.error('[PowerAI] Failed to create notification container - container or body null');
         }
       } catch (error) {
         console.error('[PowerAI] Container creation failed:', error);
+        // Retry container creation after a delay
+        setTimeout(() => {
+          if (!this.container) {
+            this.createNotificationContainer();
+          }
+        }, 1000);
       }
     }
 
@@ -443,14 +456,14 @@
           }
         });
         
-        // Assemble header
-        header.appendChild(icon);
-        header.appendChild(title);
-        header.appendChild(closeButton);
+        // Assemble header with null safety
+        if (header && icon) header.appendChild(icon);
+        if (header && title) header.appendChild(title);
+        if (header && closeButton) header.appendChild(closeButton);
         
-        // Assemble notification
-        notification.appendChild(header);
-        notification.appendChild(message);
+        // Assemble notification with null safety
+        if (notification && header) notification.appendChild(header);
+        if (notification && message) notification.appendChild(message);
         
         // Create action button if specified
         if (tipData.actionText) {
@@ -480,7 +493,9 @@
             }
           });
           
-          notification.appendChild(actionButton);
+          if (notification && actionButton) {
+            notification.appendChild(actionButton);
+          }
         }
         
         return notification;
@@ -500,12 +515,14 @@
 
         // Create and show notification
         const notificationElement = this.createNotificationElement(tipData);
-        if (notificationElement) {
+        if (notificationElement && this.container) {
           this.container.appendChild(notificationElement);
           
           // Animate in
           requestAnimationFrame(() => {
-            notificationElement.style.transform = 'translateX(0)';
+            if (notificationElement) {
+              notificationElement.style.transform = 'translateX(0)';
+            }
           });
           
           // Store notification reference
@@ -523,6 +540,12 @@
           }, duration);
           
           console.log('[PowerAI] Notification shown:', tipData.title);
+        } else {
+          console.error('[PowerAI] Cannot show notification - missing container or element');
+          // Try to recreate container if it's missing
+          if (!this.container) {
+            this.createNotificationContainer();
+          }
         }
       } catch (error) {
         console.error('[PowerAI] Show tip failed:', error);

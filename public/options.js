@@ -170,6 +170,14 @@ class OptionsManager {
             this.testModalWithData(e.target.dataset.testSite);
           }
         }
+        // Insights action buttons
+        else if (e.target.classList.contains('action-btn')) {
+          e.preventDefault();
+          const actionCard = e.target.closest('.action-card');
+          if (actionCard) {
+            this.handleInsightAction(actionCard.dataset.action);
+          }
+        }
         // Theme toggle
         else if (e.target.id === 'themeToggle') {
           e.preventDefault();
@@ -4575,6 +4583,266 @@ class OptionsManager {
       }
       this.helpModalBackdropListener = null;
     }
+  }
+
+  // ===== INSIGHTS ACTION HANDLERS =====
+
+  handleInsightAction(action) {
+    console.log('[OptionsManager] Handling insight action:', action);
+    
+    try {
+      switch (action) {
+        case 'close-tabs':
+          this.handleCloseUnusedTabs();
+          break;
+        case 'video-quality':
+          this.handleOptimizeVideoSettings();
+          break;
+        case 'dark-mode':
+          this.handleEnableDarkMode();
+          break;
+        case 'background-apps':
+          this.handleReduceBackgroundProcesses();
+          break;
+        default:
+          console.warn('[OptionsManager] Unknown insight action:', action);
+          this.showError('Unknown action: ' + action);
+      }
+    } catch (error) {
+      console.error('[OptionsManager] Error handling insight action:', error);
+      this.showError('Failed to execute action: ' + error.message);
+    }
+  }
+
+  async handleCloseUnusedTabs() {
+    try {
+      // Get all tabs and find unused ones
+      if (!chrome.tabs) {
+        this.showError('Tab management not available');
+        return;
+      }
+
+      const tabs = await chrome.tabs.query({});
+      const currentTab = await chrome.tabs.query({ active: true, currentWindow: true });
+      
+      // Define criteria for "unused" tabs (not active, not pinned, not playing audio)
+      const unusedTabs = tabs.filter(tab =>
+        tab.id !== currentTab[0]?.id &&
+        !tab.pinned &&
+        !tab.audible &&
+        tab.discarded !== true
+      );
+
+      if (unusedTabs.length === 0) {
+        this.showSuccess('No unused tabs found to close');
+        return;
+      }
+
+      const confirmed = confirm(
+        `Close ${unusedTabs.length} unused tabs? This will help reduce power consumption.\n\n` +
+        `Tabs to close:\n${unusedTabs.slice(0, 5).map(tab => `• ${tab.title}`).join('\n')}` +
+        `${unusedTabs.length > 5 ? `\n...and ${unusedTabs.length - 5} more` : ''}`
+      );
+
+      if (confirmed) {
+        const tabIds = unusedTabs.map(tab => tab.id);
+        await chrome.tabs.remove(tabIds);
+        this.showSuccess(`Closed ${unusedTabs.length} unused tabs! Estimated power savings: ${unusedTabs.length * 5}-${unusedTabs.length * 10}W`);
+      }
+    } catch (error) {
+      console.error('[OptionsManager] Failed to close unused tabs:', error);
+      this.showError('Failed to close unused tabs: ' + error.message);
+    }
+  }
+
+  handleOptimizeVideoSettings() {
+    const optimizationModal = document.createElement('div');
+    optimizationModal.className = 'video-optimization-modal';
+    optimizationModal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+    `;
+
+    optimizationModal.innerHTML = `
+      <div class="modal-content" style="
+        background: var(--background-color);
+        border-radius: 16px;
+        padding: 32px;
+        max-width: 600px;
+        width: 90%;
+        box-shadow: var(--shadow-elevated);
+        border: 1px solid var(--border-color);
+      ">
+        <h2 style="color: var(--primary-color); margin-bottom: 16px; text-align: center;">
+          Video Optimization Tips
+        </h2>
+        <div style="color: var(--text-primary); line-height: 1.6; margin-bottom: 24px;">
+          <h3>Reduce Video Power Consumption:</h3>
+          <ul style="margin: 16px 0; padding-left: 20px;">
+            <li>Lower video quality to 720p or 480p when possible</li>
+            <li>Disable auto-play videos</li>
+            <li>Close video tabs when not actively watching</li>
+            <li>Use picture-in-picture mode to minimize video size</li>
+            <li>Enable hardware acceleration in browser settings</li>
+          </ul>
+          <p><strong>Potential Savings:</strong> 15-25W per video stream</p>
+        </div>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+          <button class="btn-secondary video-modal-close">
+            Got it!
+          </button>
+          <button class="btn-primary video-modal-settings">
+            Open Browser Settings
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(optimizationModal);
+
+    // Add event listeners
+    const closeBtn = optimizationModal.querySelector('.video-modal-close');
+    const settingsBtn = optimizationModal.querySelector('.video-modal-settings');
+
+    closeBtn.addEventListener('click', () => {
+      optimizationModal.remove();
+    });
+
+    settingsBtn.addEventListener('click', () => {
+      // Open Chrome settings page for media
+      chrome.tabs.create({ url: 'chrome://settings/content/mediaStream' });
+      optimizationModal.remove();
+      this.showSuccess('Browser settings opened in new tab');
+    });
+
+    // Close on backdrop click
+    optimizationModal.addEventListener('click', (e) => {
+      if (e.target === optimizationModal) {
+        optimizationModal.remove();
+      }
+    });
+  }
+
+  async handleEnableDarkMode() {
+    try {
+      // Check current theme
+      const result = await chrome.storage.sync.get(['theme']);
+      const currentTheme = result.theme || 'light';
+
+      if (currentTheme === 'dark') {
+        this.showSuccess('Dark mode is already enabled! Power savings active on OLED displays.');
+        return;
+      }
+
+      const confirmed = confirm(
+        'Enable dark mode for Power Tracker?\n\n' +
+        'This will:\n' +
+        '• Switch Power Tracker to dark theme\n' +
+        '• Reduce power consumption on OLED displays by 2-5W\n' +
+        '• Provide better visibility in low-light conditions'
+      );
+
+      if (confirmed) {
+        await this.setTheme('dark');
+        this.showSuccess('Dark mode enabled! Estimated power savings: 2-5W on OLED displays');
+      }
+    } catch (error) {
+      console.error('[OptionsManager] Failed to enable dark mode:', error);
+      this.showError('Failed to enable dark mode: ' + error.message);
+    }
+  }
+
+  handleReduceBackgroundProcesses() {
+    const processModal = document.createElement('div');
+    processModal.className = 'process-optimization-modal';
+    processModal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+    `;
+
+    processModal.innerHTML = `
+      <div class="modal-content" style="
+        background: var(--background-color);
+        border-radius: 16px;
+        padding: 32px;
+        max-width: 600px;
+        width: 90%;
+        box-shadow: var(--shadow-elevated);
+        border: 1px solid var(--border-color);
+      ">
+        <h2 style="color: var(--primary-color); margin-bottom: 16px; text-align: center;">
+          Reduce Background Power Usage
+        </h2>
+        <div style="color: var(--text-primary); line-height: 1.6; margin-bottom: 24px;">
+          <h3>Background Process Optimization:</h3>
+          <ul style="margin: 16px 0; padding-left: 20px;">
+            <li>Disable unused browser extensions</li>
+            <li>Close unnecessary system applications</li>
+            <li>Reduce browser notification frequency</li>
+            <li>Enable power saving mode on laptop</li>
+            <li>Close background tabs with auto-refresh</li>
+          </ul>
+          <p><strong>Potential Savings:</strong> 10-20W from system optimization</p>
+        </div>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <button class="btn-secondary process-modal-close">
+            Close
+          </button>
+          <button class="btn-primary process-modal-extensions">
+            Manage Extensions
+          </button>
+          <button class="btn-primary process-modal-task-manager">
+            Open Task Manager
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(processModal);
+
+    // Add event listeners
+    const closeBtn = processModal.querySelector('.process-modal-close');
+    const extensionsBtn = processModal.querySelector('.process-modal-extensions');
+    const taskManagerBtn = processModal.querySelector('.process-modal-task-manager');
+
+    closeBtn.addEventListener('click', () => {
+      processModal.remove();
+    });
+
+    extensionsBtn.addEventListener('click', () => {
+      chrome.tabs.create({ url: 'chrome://extensions/' });
+      processModal.remove();
+      this.showSuccess('Extensions page opened in new tab');
+    });
+
+    taskManagerBtn.addEventListener('click', () => {
+      chrome.tabs.create({ url: 'chrome://system/' });
+      processModal.remove();
+      this.showSuccess('Chrome task manager opened in new tab');
+    });
+
+    // Close on backdrop click
+    processModal.addEventListener('click', (e) => {
+      if (e.target === processModal) {
+        processModal.remove();
+      }
+    });
   }
 }
 
