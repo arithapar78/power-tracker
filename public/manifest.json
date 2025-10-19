@@ -1,15 +1,31 @@
 {
   "manifest_version": 3,
-  "name": "Power Tracker – Monitor Your Browser’s Energy Impact",
+  "name": "Power Tracker – Monitor Your Browser's Energy Impact",
   "version": "2.1.0",
   "description": "Monitor your browser's power consumption, save usage history, export data to JSON, and get AI-powered tips to reduce energy use.",
-  "permissions": ["activeTab", "storage", "alarms", "scripting"],
-  "background": { "service_worker": "service-worker.js" },
+  "author": "LearnTAV",
+  "homepage_url": "https://github.com/learntav/power-tracker",
+  "permissions": ["activeTab", "storage", "alarms", "scripting", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "service-worker.js",
+    "type": "module"
+  },
   "action": {
     "default_popup": "popup.html",
-    "default_icon": { "16": "icon-16.png", "48": "icon-48.png", "128": "icon-128.png" }
+    "default_title": "Power Tracker",
+    "default_icon": {
+      "16": "icon-16.png",
+      "48": "icon-48.png",
+      "128": "icon-128.png"
+    }
   },
-  "icons": { "16": "icon-16.png", "48": "icon-48.png", "128": "icon-128.png" },
+  "options_page": "options.html",
+  "icons": {
+    "16": "icon-16.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
@@ -23,5 +39,6 @@
       "resources": ["content-script-notifications.js"],
       "matches": ["<all_urls>"]
     }
-  ]
+  ],
+  "minimum_chrome_version": "88"
 }
