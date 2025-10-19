@@ -1,0 +1,98 @@
+# PHASE 5: Prompt Generator Improvements
+
+## Prerequisites
+Phase 4 should be complete.
+
+## Task: Make Prompt Generator use real user data instead of dummy/random data
+
+### Step 1: Rename Section
+Find all references to "Advanced Features" and rename to "Prompt Generator":
+- UI labels and headings
+- Navigation menu items
+- HTML IDs and classes
+- JavaScript variables
+- Comments in code
+- Configuration files
+
+### Step 2: Identify Current Dummy Data
+Find where Prompt Generator currently uses placeholder/random data:
+
+Look for:
+- Hardcoded arrays with fake data
+- Math.random() calls generating fake metrics
+- Static placeholder values
+- Mock data objects
+- Test data that never changes
+
+Document in comments:
+- What data is currently fake
+- Where it's defined
+- What it should show instead
+
+### Step 3: Connect Graph to Real Data
+Current issue: Graph shows random/dummy data
+
+Replace with actual user activity:
+- Tab energy consumption over time
+- Historical watt usage per hour/day
+- Real timestamps from monitoring
+- Actual peak usage times
+
+Data sources to use:
+- Background worker's energy logs
+- Tab activity history
+- Timestamp-based energy records
+
+Graph should display:
+- X-axis: Time (hours, days, or custom range)
+- Y-axis: Energy consumption (watts)
+- Lines/bars showing real usage patterns
+
+### Step 4: Connect Statistics to Real Data
+Find all statistics displays in Prompt Generator section.
+
+Replace dummy values with:
+- Total energy consumed (cumulative watts)
+- Average energy per session
+- Most energy-intensive tabs (real tab names)
+- AI model usage breakdown (actual models used)
+- Query count (real number of queries)
+- Time spent on AI tasks (actual minutes/hours)
+
+### Step 5: AI Model Usage Stats
+Current issue: May show generic or wrong AI model names
+
+Fix to show:
+- Actual AI models detected from user's tabs
+- Frequency of each model usage
+- Energy consumption per model type
+- Breakdown: Claude, ChatGPT, Gemini, etc.
+
+Data sources:
+- Tab URL detection
+- Model name parsing from page content
+- Historical model usage logs
+
+### Step 6: Query Pattern Analysis
+Replace any fake query data with:
+- Real query types detected
+- Timing patterns (when user queries most)
+- Average query length
+- Most common query topics (if tracked)
+
+### Step 7: Update Data Flow
+Establish connection between:
+- Background worker (data collection)
+- Storage (historical data)
+- Prompt Generator UI (display)
+
+Implement:
+- Function to fetch real user data
+- Function to aggregate historical data
+- Function to format data for graphs
+- Real-time or periodic data updates
+
+### Step 8: Document Changes
+Create file: `PHASE_5_CHANGES.md`
+
+Format:

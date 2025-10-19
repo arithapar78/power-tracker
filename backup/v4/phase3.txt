@@ -1,0 +1,131 @@
+PHASE_3.md
+Copy this into a file called PHASE_3.md in your project root:
+markdown# PHASE 3: Help & Instructions System
+
+## Prerequisites
+Phase 2 should be complete.
+
+## Task: Add comprehensive help system to settings page
+
+### Step 1: Add Help Button
+Location: Settings page, top-right corner near light/dark mode toggle
+
+Button specs:
+- Icon: "?" or "ℹ️" info icon
+- Tooltip text: "Help & Instructions"
+- ID: "help-button"
+- Style: Match existing LearnTav button design
+
+### Step 2: Create Help Popup
+When help button clicked:
+- Display popup centered on screen
+- Add overlay backdrop (semi-transparent dark background)
+- Popup should be scrollable if content exceeds viewport
+- Add close button (X) in top-right of popup
+- Use LearnTav's existing color scheme and design system
+
+Popup styling:
+- Match existing popup border-radius
+- Use same font family and sizes
+- Match shadow/elevation style
+- Responsive width (max 800px)
+
+### Step 3: Create Help Content
+Add these sections to help popup:
+
+**1. Getting Started**
+- Brief intro: what LearnTav does
+- Main purpose: track and reduce AI energy usage
+
+**2. Key Features**
+- Tab energy monitoring
+- Real-time watt tracking
+- AI model detection
+- Energy reduction tips
+
+**3. Navigation Guide**
+- Where to find settings
+- How to access different tools
+- Location of key features
+
+**4. Tab Energy Monitoring**
+- How to read energy metrics
+- What the numbers mean
+- Color coding explanation
+
+**5. Prompt Generator**
+- What it does
+- How to use it
+- Where to find it
+
+**6. Compare Tabs Strip**
+- Shows top 3 energy-consuming tabs
+- How to close/mute tabs from strip
+- What the watt numbers indicate
+
+**7. Tips for Reducing AI Energy**
+- Best practices
+- Common energy-saving actions
+- Tab management tips
+
+### Step 4: Implement Popup Functionality
+JavaScript requirements:
+- Click help button → show popup with fade-in animation
+- Click X button → close popup with fade-out
+- Click overlay backdrop → close popup
+- ESC key → close popup
+
+### Step 5: Document Implementation
+Create file: `PHASE_3_IMPLEMENTATION.md`
+
+Format:
+Phase 3: Help System Added
+Files Created/Modified
+
+[filename]: Help button added at line X
+[filename]: Popup HTML added
+[filename]: Popup CSS added
+[filename]: Popup JavaScript added
+
+Button Location
+
+File: [filename]
+Line: [number]
+Position: Top-right of settings page
+
+Popup Features
+
+Scrollable: YES
+Close button: YES
+Overlay backdrop: YES
+ESC key closes: YES
+Smooth animations: YES
+
+Content Sections
+✓ Getting Started
+✓ Key Features
+✓ Navigation Guide
+✓ Tab Energy Monitoring
+✓ Prompt Generator
+✓ Compare Tabs Strip
+✓ Energy Reduction Tips
+
+### Step 6: Test Help System
+After implementation:
+- Load extension
+- Open settings page
+- Click help button → popup appears
+- Test close button works
+- Test clicking overlay closes popup
+- Test ESC key closes popup
+- Verify all sections display correctly
+- Check styling matches LearnTav theme
+- Test on different screen sizes
+
+### Step 7: Stop and Report
+Show me PHASE_3_IMPLEMENTATION.md
+Confirm no console errors
+Report any issues encountered
+
+Tell Roo:
+@PHASE_3.md executeRetryClaude can make mistakes. Please double-check responses.

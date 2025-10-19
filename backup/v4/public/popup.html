@@ -110,6 +110,34 @@
       </div>
     </div>
 
+    <!-- AI Model Information Card -->
+    <div class="ai-model-card" id="aiModelInfoSection">
+      <div class="card-header">
+        <div class="header-icon">🤖</div>
+        <h2>AI Model Detected</h2>
+      </div>
+      <div class="ai-model-info">
+        <div class="model-details">
+          <div class="model-name" id="currentModelName">Detecting...</div>
+          <div class="model-version" id="currentModelVersion">-</div>
+        </div>
+        <div class="energy-metrics">
+          <div class="energy-metric">
+            <span class="metric-label">Session Energy</span>
+            <span class="metric-value" id="sessionEnergyUsage">~2.5 Wh</span>
+          </div>
+          <div class="energy-metric">
+            <span class="metric-label">Carbon Impact</span>
+            <span class="metric-value" id="sessionCarbonUsage">~1.2g CO₂</span>
+          </div>
+          <div class="energy-metric">
+            <span class="metric-label">Efficiency</span>
+            <span class="metric-value efficiency-good" id="modelEfficiency">High</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Current Tab Information Card -->
     <div class="tab-info-card">
       <div class="card-header">
@@ -118,49 +146,14 @@
       <div class="tab-details" id="currentTabInfo">
         <div class="tab-title" id="tabTitle">Loading...</div>
         <div class="tab-url" id="tabUrl">...</div>
-
-        <!-- Tab Metrics -->
-        <div class="tab-section">
-          <h3 class="section-title">📊 Tab Metrics</h3>
-          <div class="tab-metrics-grid">
-            <div class="tab-metric">
-              <span class="metric-label">DOM Nodes</span>
-              <span class="metric-value" id="domNodes">--</span>
-            </div>
-            <div class="tab-metric">
-              <span class="metric-label">Active Time</span>
-              <span class="metric-value" id="activeTime">--</span>
-            </div>
+        <div class="tab-metrics-grid">
+          <div class="tab-metric">
+            <span class="metric-label">DOM Nodes</span>
+            <span class="metric-value" id="domNodes">--</span>
           </div>
-        </div>
-
-        <!-- AI Model Detection -->
-        <div class="tab-section" id="aiModelSection">
-          <h3 class="section-title">🤖 AI Model</h3>
-          <div class="ai-model-info">
-            <div class="model-details">
-              <div class="model-name" id="currentModelName">Detecting...</div>
-              <div class="model-version" id="currentModelVersion">-</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Backend Energy Data -->
-        <div class="tab-section" id="backendEnergySection">
-          <h3 class="section-title">⚙️ Backend Energy</h3>
-          <div class="backend-metrics-grid">
-            <div class="backend-metric">
-              <span class="metric-label">Session Energy</span>
-              <span class="metric-value" id="sessionEnergyUsage">--</span>
-            </div>
-            <div class="backend-metric">
-              <span class="metric-label">Carbon Impact</span>
-              <span class="metric-value" id="sessionCarbonUsage">--</span>
-            </div>
-            <div class="backend-metric">
-              <span class="metric-label">Efficiency</span>
-              <span class="metric-value efficiency-good" id="modelEfficiency">--</span>
-            </div>
+          <div class="tab-metric">
+            <span class="metric-label">Active Time</span>
+            <span class="metric-value" id="activeTime">--</span>
           </div>
         </div>
       </div>

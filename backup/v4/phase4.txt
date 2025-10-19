@@ -1,0 +1,141 @@
+# PHASE 4: Compare Tabs Strip
+
+## Prerequisites
+Phase 3 should be complete.
+
+## Task: Create UI component showing top 3 energy-consuming tabs
+
+### Step 1: Background Worker - Data Collection
+Modify background worker/service worker:
+
+Add functionality to:
+- Track energy consumption per tab (watts)
+- Maintain rolling average for each tab
+- Store tab title and tab ID
+- Update continuously in real-time
+- Expose data via messaging API
+
+Data structure needed:
+```
+{
+  tabId: number,
+  title: string,
+  watts: number,
+  rollingAverage: number
+}
+```
+
+### Step 2: Create Compare Tabs Strip UI
+Location: Main popup, near top (below header, above main content)
+
+Layout:
+- Horizontal strip/list
+- Shows exactly 3 tabs (top energy consumers)
+- Compact card design for each tab
+
+### Step 3: Tab Card Design
+Each tab card displays:
+- Tab title (truncate if longer than 30 chars)
+- Watt usage number (e.g., "2.3W")
+- Close icon (×) - closes that tab
+- Mute icon (🔇) - mutes/unmutes that tab
+
+Card styling:
+- Color-code by energy level:
+  - Green: Low (< 1W)
+  - Yellow: Medium (1-3W)
+  - Red: High (> 3W)
+- Use LearnTav's existing design system
+- Add subtle shadow/border
+- Padding and spacing consistent with popup design
+
+### Step 4: Strip Container Styling
+Container specs:
+- Full width of popup
+- Horizontal scrolling if needed (on small screens)
+- Gap between cards: 8-12px
+- Background: match popup background
+- Border or separator line (optional)
+
+### Step 5: Implement Interactions
+Close icon functionality:
+- Click × → close that specific tab
+- Remove from strip immediately
+- Update with next highest tab
+
+Mute icon functionality:
+- Click 🔇 → mute tab
+- Icon changes to 🔊 when muted
+- Click again → unmute tab
+
+Optional:
+- Click tab card itself → switch to that tab
+
+### Step 6: Data Flow
+Setup messaging between:
+- Background worker → Popup
+- Request top 3 tabs sorted by watts
+- Update strip every 2-3 seconds
+- Handle tab closed externally (not via strip)
+- Handle case when < 3 tabs open
+
+### Step 7: Document Implementation
+Create file: `PHASE_4_IMPLEMENTATION.md`
+
+Format:
+```
+# Phase 4: Compare Tabs Strip Added
+
+## Files Created/Modified
+- [background worker file]: Rolling average tracking added
+- [popup HTML]: Strip container added at line X
+- [popup CSS]: Strip styling added
+- [popup JS]: Strip functionality added
+
+## Data Tracking
+- Rolling average window: X seconds
+- Update interval: X seconds
+- Data structure: [describe]
+
+## UI Components
+- Strip location: [describe]
+- Number of tabs shown: 3
+- Color coding: Green/Yellow/Red
+- Icons: Close (×), Mute (🔇/🔊)
+
+## Interactions Working
+✓ Close icon closes tab
+✓ Mute icon mutes/unmutes
+✓ Real-time updates
+✓ Handles tabs < 3
+✓ Updates when tab closed externally
+
+## Edge Cases Handled
+- Less than 3 tabs open: [solution]
+- Tab closed outside strip: [solution]
+- No tabs consuming energy: [solution]
+```
+
+### Step 8: Test Compare Tabs Strip
+After implementation:
+- Open extension popup
+- Verify strip appears with top 3 tabs
+- Open several tabs to test
+- Click close icon → tab closes
+- Click mute icon → tab mutes
+- Verify real-time watt updates
+- Test with < 3 tabs open
+- Check color coding works
+- Verify no console errors
+
+### Step 9: Stop and Report
+Show me PHASE_4_IMPLEMENTATION.md
+Demonstrate strip working with screenshot or description
+Report any issues or limitations
+```
+
+---
+
+## Tell Roo:
+```
+@PHASE_4.md execute
