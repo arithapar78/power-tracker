@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Test - Power Tracker</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+      font-size: 14px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .result {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .success {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+    .error {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+    h1 {
+      color: #333;
+    }
+    h2 {
+      color: #666;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔥 Firebase Integration Test</h1>
+  <p>Use these tests to verify your Firebase setup is working correctly.</p>
+
+  <div class="test-card">
+    <h2>Test 1: Log Energy Savings</h2>
+    <p>This will log a test energy savings entry to Firebase.</p>
+    <button onclick="testEnergySavings()">Run Test</button>
+    <div id="energy-result"></div>
+  </div>
+
+  <div class="test-card">
+    <h2>Test 2: Log Token Savings</h2>
+    <p>This will log a test token savings entry to Firebase.</p>
+    <button onclick="testTokenSavings()">Run Test</button>
+    <div id="token-result"></div>
+  </div>
+
+  <div class="test-card">
+    <h2>Test 3: Get Aggregate Stats</h2>
+    <p>This will fetch aggregate statistics from Firebase.</p>
+    <button onclick="testAggregateStats()">Run Test</button>
+    <div id="stats-result"></div>
+  </div>
+
+  <div class="test-card">
+    <h2>Test 4: Check Service Worker</h2>
+    <p>Verify the service worker can communicate with Firebase.</p>
+    <button onclick="testServiceWorker()">Run Test</button>
+    <div id="sw-result"></div>
+  </div>
+
+  <script src="firebase-helpers.js"></script>
+  <script>
+    function showResult(elementId, success, message) {
+      const element = document.getElementById(elementId);
+      element.className = 'result ' + (success ? 'success' : 'error');
+      element.innerHTML = '<strong>' + (success ? '✅ SUCCESS' : '❌ ERROR') + '</strong><br>' + message;
+    }
+
+    async function testEnergySavings() {
+      const resultDiv = document.getElementById('energy-result');
+      resultDiv.innerHTML = 'Testing...';
+      
+      try {
+        const success = await logEnergySavingsToFirebase(0.025, 30);
+        if (success) {
+          showResult('energy-result', true, 'Successfully logged 0.025 kWh energy savings for 30 minute session.');
+        } else {
+          showResult('energy-result', false, 'Failed to log energy savings. Check console for details.');
+        }
+      } catch (error) {
+        showResult('energy-result', false, 'Error: ' + error.message);
+      }
+    }
+
+    async function testTokenSavings() {
+      const resultDiv = document.getElementById('token-result');
+      resultDiv.innerHTML = 'Testing...';
+      
+      try {
+        const success = await logTokenSavingsToFirebase(500, 'GPT-4 Test', 1500, 1000);
+        if (success) {
+          showResult('token-result', true, 'Successfully logged 500 tokens saved (1500 → 1000 tokens).');
+        } else {
+          showResult('token-result', false, 'Failed to log token savings. Check console for details.');
+        }
+      } catch (error) {
+        showResult('token-result', false, 'Error: ' + error.message);
+      }
+    }
+
+    async function testAggregateStats() {
+      const resultDiv = document.getElementById('stats-result');
+      resultDiv.innerHTML = 'Testing...';
+      
+      try {
+        const stats = await getAggregateStatsFromFirebase();
+        if (stats) {
+          const message = `
+            Total Users: ${stats.totalUsers}<br>
+            Total Energy Saved: ${stats.totalEnergySavedKWh.toFixed(4)} kWh<br>
+            Total Tokens Saved: ${stats.totalTokensSaved.toLocaleString()}<br>
+            Last Updated: ${stats.lastUpdated}
+          `;
+          showResult('stats-result', true, message);
+        } else {
+          showResult('stats-result', false, 'No stats available yet. Try running Test 1 and Test 2 first.');
+        }
+      } catch (error) {
+        showResult('stats-result', false, 'Error: ' + error.message);
+      }
+    }
+
+    async function testServiceWorker() {
+      const resultDiv = document.getElementById('sw-result');
+      resultDiv.innerHTML = 'Testing...';
+      
+      try {
+        chrome.runtime.sendMessage({ type: 'PING' }, (response) => {
+          if (chrome.runtime.lastError) {
+            showResult('sw-result', false, 'Service worker not responding: ' + chrome.runtime.lastError.message);
+          } else {
+            showResult('sw-result', true, 'Service worker is active and responding.');
+          }
+        });
+      } catch (error) {
+        showResult('sw-result', false, 'Error: ' + error.message);
+      }
+    }
+  </script>
+</body>
+</html>
