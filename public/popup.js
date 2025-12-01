@@ -66,7 +66,11 @@ class PopupManager {
     this.safeAddEventListener('settingsBtn', 'click', this.handleSettings.bind(this));
     this.safeAddEventListener('tipAction', 'click', this.handleTipAction.bind(this));
     this.safeAddEventListener('themeToggle', 'click', this.handleThemeToggle.bind(this));
-    
+
+    // Width control listeners
+    this.safeAddEventListener('increaseWidthBtn', 'click', () => this.handleWidthChange(40));
+    this.safeAddEventListener('decreaseWidthBtn', 'click', () => this.handleWidthChange(-40));
+
     // Energy mode toggle listeners
     this.safeAddEventListener('frontendModeBtn', 'click', () => this.handleEnergyModeToggle('frontend'));
     this.safeAddEventListener('totalModeBtn', 'click', () => this.handleEnergyModeToggle('total'));
@@ -224,7 +228,10 @@ class PopupManager {
   async loadInitialData() {
     // Load theme first
     await this.loadTheme();
-    
+
+    // Load saved popup width
+    await this.loadPopupWidth();
+
     // Load settings
     await this.loadSettings();
     
@@ -2774,8 +2781,79 @@ class PopupManager {
       const popupContainer = document.querySelector('.popup-container');
       const currentTheme = popupContainer?.getAttribute('data-theme') || 'light';
       const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-      
+
       await this.setTheme(newTheme);
+    } catch (error) {
+    }
+  }
+
+  // Width control methods
+  async handleWidthChange(delta) {
+    try {
+      const minWidth = 320;
+      const maxWidth = 600;
+      const currentWidth = await this.getPopupWidth();
+      const newWidth = Math.min(maxWidth, Math.max(minWidth, currentWidth + delta));
+
+      if (newWidth !== currentWidth) {
+        await this.setPopupWidth(newWidth);
+      }
+    } catch (error) {
+    }
+  }
+
+  async getPopupWidth() {
+    try {
+      if (this.isChromeApiAvailable()) {
+        const result = await chrome.storage.sync.get(['popupWidth']);
+        return result.popupWidth || 320;
+      }
+      return 320;
+    } catch (error) {
+      return 320;
+    }
+  }
+
+  async setPopupWidth(width) {
+    try {
+      this.setPopupWidthUI(width);
+
+      if (this.isChromeApiAvailable()) {
+        await chrome.storage.sync.set({ popupWidth: width });
+      }
+    } catch (error) {
+    }
+  }
+
+  setPopupWidthUI(width) {
+    try {
+      const html = document.documentElement;
+      const body = document.body;
+      const popupContainer = document.querySelector('.popup-container');
+
+      const widthPx = `${width}px`;
+
+      html.style.width = widthPx;
+      html.style.minWidth = widthPx;
+      html.style.maxWidth = widthPx;
+
+      body.style.width = widthPx;
+      body.style.minWidth = widthPx;
+      body.style.maxWidth = widthPx;
+
+      if (popupContainer) {
+        popupContainer.style.width = widthPx;
+        popupContainer.style.minWidth = widthPx;
+        popupContainer.style.maxWidth = widthPx;
+      }
+    } catch (error) {
+    }
+  }
+
+  async loadPopupWidth() {
+    try {
+      const width = await this.getPopupWidth();
+      this.setPopupWidthUI(width);
     } catch (error) {
     }
   }
