@@ -2964,17 +2964,21 @@ class PopupManager {
   }
   
   showToast(message, type = 'info') {
-    
+    // Remove any existing toasts first to prevent stacking
+    const existingToasts = document.querySelectorAll('.popup-toast');
+    existingToasts.forEach(t => t.remove());
+
     // Simple toast notification with type support
     const toast = document.createElement('div');
-    
+    toast.className = 'popup-toast';
+
     const bgColor = {
       'info': '#007bff',
       'success': '#28a745',
       'warning': '#ffc107',
       'error': '#dc3545'
     }[type] || '#007bff';
-    
+
     toast.style.cssText = `
       position: fixed;
       top: 16px;
@@ -2993,12 +2997,17 @@ class PopupManager {
       text-align: center;
     `;
     toast.textContent = message;
-    
+
     if (toast && document.body) {
       document.body.appendChild(toast);
     }
-    
-    const duration = type === 'error' ? 5000 : 3000;
+
+    // Calculate duration based on word count: (word_count * 0.5s) + 1.5s
+    // Minimum 2s, maximum 8s
+    const wordCount = message.split(/\s+/).length;
+    const calculatedDuration = (wordCount * 500) + 1500;
+    const duration = Math.min(8000, Math.max(2000, calculatedDuration));
+
     setTimeout(() => {
       if (toast.parentNode) {
         toast.remove();

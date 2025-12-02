@@ -2397,7 +2397,12 @@ class OptionsManager {
   }
   
   showToast(message, type) {
+    // Remove any existing toasts first to prevent stacking
+    const existingToasts = document.querySelectorAll('.options-toast');
+    existingToasts.forEach(t => t.remove());
+
     const toast = document.createElement('div');
+    toast.className = 'options-toast';
 
     // Use proper design system colors with good contrast
     const bgColor = type === 'success' ? '#10b981' : '#ef4444'; // --success or --error
@@ -2424,13 +2429,19 @@ class OptionsManager {
 
     document.body.appendChild(toast);
 
+    // Calculate duration based on word count: (word_count * 0.5s) + 1.5s
+    // Minimum 2s, maximum 8s
+    const wordCount = message.split(/\s+/).length;
+    const calculatedDuration = (wordCount * 500) + 1500;
+    const duration = Math.min(8000, Math.max(2000, calculatedDuration));
+
     // Fade out animation
     setTimeout(() => {
       toast.style.animation = 'slideOutRight 0.3s ease-in';
       setTimeout(() => {
         toast.remove();
       }, 300);
-    }, 3500);
+    }, duration);
   }
   
   // Utility functions

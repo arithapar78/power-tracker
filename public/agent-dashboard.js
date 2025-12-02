@@ -1464,6 +1464,10 @@ class AgentDashboard {
   }
 
   showNotification(message, type = 'info') {
+    // Remove any existing notifications first to prevent stacking
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(n => n.remove());
+
     // Create notification element
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
@@ -1471,17 +1475,23 @@ class AgentDashboard {
       <span class="notification-message">${message}</span>
       <button class="notification-close">&times;</button>
     `;
-    
+
     // Add to page
     document.body.appendChild(notification);
-    
-    // Auto-remove after 3 seconds
+
+    // Calculate duration based on word count: (word_count * 0.5s) + 1.5s
+    // Minimum 2s, maximum 8s
+    const wordCount = message.split(/\s+/).length;
+    const calculatedDuration = (wordCount * 500) + 1500;
+    const duration = Math.min(8000, Math.max(2000, calculatedDuration));
+
+    // Auto-remove after calculated duration
     setTimeout(() => {
       if (notification.parentNode) {
         notification.parentNode.removeChild(notification);
       }
-    }, 3000);
-    
+    }, duration);
+
     // Manual close
     notification.querySelector('.notification-close').addEventListener('click', () => {
       if (notification.parentNode) {

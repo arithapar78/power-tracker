@@ -549,9 +549,9 @@
         if (notification && header) notification.appendChild(header);
         if (notification && message) notification.appendChild(message);
         
-        // Create action buttons if specified
-        if (tipData.actionText) {
-          // Create buttons container for AI reminder (supports multiple buttons)
+        // Create buttons container - only show "Disable Notifications" button
+        // Skip buttons for confirmation-type notifications
+        if (tipData.type !== 'confirmation') {
           const buttonsContainer = this.createSecureElement('div', {
             styles: {
               display: 'flex',
@@ -561,146 +561,32 @@
             }
           });
 
-          // Primary action button (Try Now)
-          const actionButton = this.createSecureElement('button', {
-            textContent: tipData.actionText,
-            styles: {
-              background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-              color: 'white',
-              border: 'none',
-              borderRadius: isProminent ? '10px' : '6px',
-              padding: isProminent ? '16px 24px' : '10px 16px',
-              fontSize: isProminent ? '16px' : '13px',
-              fontWeight: '700',
-              cursor: 'pointer',
-              width: '100%',
-              transition: 'all 0.3s ease',
-              boxShadow: isProminent ? '0 4px 15px rgba(59, 130, 246, 0.4)' : 'none',
-              transform: 'scale(1)',
-              textTransform: isProminent ? 'none' : 'none'
-            },
-            onclick: async () => {
-              // Handle action first, THEN dismiss (important for async operations)
-              await this.handleActionClick(tipData);
-              // Small delay to ensure message is sent before dismissing
-              setTimeout(() => {
-                this.dismissNotification(notification);
-              }, 100);
-            },
-            onmouseenter: (e) => {
-              e.target.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
-              e.target.style.transform = isProminent ? 'scale(1.05)' : 'scale(1)';
-              e.target.style.boxShadow = isProminent ? '0 6px 20px rgba(59, 130, 246, 0.6)' : 'none';
-            },
-            onmouseleave: (e) => {
-              e.target.style.background = 'linear-gradient(135deg, #3b82f6, #8b5cf6)';
-              e.target.style.transform = 'scale(1)';
-              e.target.style.boxShadow = isProminent ? '0 4px 15px rgba(59, 130, 246, 0.4)' : 'none';
-            }
-          });
-
-          if (buttonsContainer && actionButton) {
-            buttonsContainer.appendChild(actionButton);
-          }
-
-          // Secondary action button (Snooze) - for AI reminder
-          if (tipData.secondaryActionText) {
-            const secondaryButton = this.createSecureElement('button', {
-              textContent: tipData.secondaryActionText,
-              styles: {
-                background: this.settings?.darkMode ? 'rgba(100, 116, 139, 0.3)' : 'rgba(148, 163, 184, 0.2)',
-                color: this.settings?.darkMode ? '#cbd5e1' : '#475569',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '8px 12px',
-                fontSize: '12px',
-                fontWeight: '500',
-                cursor: 'pointer',
-                width: '100%',
-                transition: 'background-color 0.2s'
-              },
-              onclick: () => {
-                this.handleSnoozeClick(tipData);
-                this.dismissNotification(notification);
-              },
-              onmouseenter: (e) => {
-                e.target.style.backgroundColor = this.settings?.darkMode
-                  ? 'rgba(100, 116, 139, 0.4)'
-                  : 'rgba(148, 163, 184, 0.3)';
-              },
-              onmouseleave: (e) => {
-                e.target.style.backgroundColor = this.settings?.darkMode
-                  ? 'rgba(100, 116, 139, 0.3)'
-                  : 'rgba(148, 163, 184, 0.2)';
-              }
-            });
-
-            if (buttonsContainer && secondaryButton) {
-              buttonsContainer.appendChild(secondaryButton);
-            }
-          }
-
-          // Dismiss button (Got it!) - for AI reminder
-          if (tipData.dismissText) {
-            const dismissButton = this.createSecureElement('button', {
-              textContent: tipData.dismissText,
-              styles: {
-                background: 'transparent',
-                color: this.settings?.darkMode ? '#94a3b8' : '#64748b',
-                border: 'none',
-                padding: '8px 12px',
-                fontSize: '12px',
-                fontWeight: '500',
-                cursor: 'pointer',
-                width: '100%',
-                transition: 'color 0.2s',
-                textAlign: 'center'
-              },
-              onclick: () => {
-                this.handleDismissClick(tipData);
-                this.dismissNotification(notification);
-              },
-              onmouseenter: (e) => {
-                e.target.style.color = this.settings?.darkMode ? '#cbd5e1' : '#475569';
-              },
-              onmouseleave: (e) => {
-                e.target.style.color = this.settings?.darkMode ? '#94a3b8' : '#64748b';
-              }
-            });
-
-            if (buttonsContainer && dismissButton) {
-              buttonsContainer.appendChild(dismissButton);
-            }
-          }
-
-          // Add "Disable Notifications" button to ALL popups
+          // Add "Disable Notifications" button - the ONLY button in popups
           const disableButton = this.createSecureElement('button', {
-            textContent: '🔕 Disable Notifications',
+            textContent: '🔕 Disable Power Tracker Tips',
             styles: {
               background: 'transparent',
-              color: '#ef4444',
-              border: '1px solid #ef4444',
-              padding: '8px 12px',
-              fontSize: '11px',
+              color: this.settings?.darkMode ? '#f87171' : '#ef4444',
+              border: this.settings?.darkMode ? '1px solid #f87171' : '1px solid #ef4444',
+              padding: '10px 16px',
+              fontSize: '12px',
               fontWeight: '600',
               cursor: 'pointer',
               width: '100%',
               borderRadius: '6px',
               transition: 'all 0.2s',
-              textAlign: 'center',
-              marginTop: '4px'
+              textAlign: 'center'
             },
             onclick: async () => {
               await this.disableAllNotifications();
-              this.dismissNotification(notification);
             },
             onmouseenter: (e) => {
-              e.target.style.background = '#ef4444';
+              e.target.style.background = this.settings?.darkMode ? '#f87171' : '#ef4444';
               e.target.style.color = 'white';
             },
             onmouseleave: (e) => {
               e.target.style.background = 'transparent';
-              e.target.style.color = '#ef4444';
+              e.target.style.color = this.settings?.darkMode ? '#f87171' : '#ef4444';
             }
           });
 
@@ -850,163 +736,139 @@
           icon: '⚡',
           title: 'PowerAI Demo Mode',
           message: 'This tab would normally show 23W energy usage. Install the extension for real data.',
-          actionText: 'Learn More',
-          severity: 'info',
-          duration: 6000
+          severity: 'info'
         },
         {
           type: 'demo',
           icon: '🌱',
           title: 'Energy Tip',
           message: 'Gmail in dark mode can reduce screen energy consumption by up to 15%.',
-          actionText: 'Enable Dark Mode',
-          severity: 'success',
-          duration: 8000
+          severity: 'success'
         }
       ];
-      
+
       const randomTip = demoTips[Math.floor(Math.random() * demoTips.length)];
       this.showTip(randomTip);
     }
 
     showAIPromptReminder(data = {}) {
-      // Create special AI prompt reminder notification - PROMINENT VERSION
+      // Create AI prompt reminder notification - simplified version
       const reminderData = {
         type: 'ai_prompt_reminder',
         icon: '🌟',
-        title: '⚡ Save Energy with AI Prompt Generator!',
-        message: 'Reduce your AI energy usage by 15-45% per query! Our Prompt Generator optimizes your prompts for maximum efficiency while maintaining quality. Try it now!',
-        actionText: '🚀 Open Prompt Generator',
-        secondaryActionText: '⏰ Remind Me in 15 min',
-        dismissText: 'Don\'t show again',
+        title: 'Energy Saving Tip',
+        message: 'Reduce your AI energy usage by 15-45% per query with optimized prompts. Open the extension popup to try our Prompt Generator.',
         severity: 'info',
-        duration: 0, // Don't auto-dismiss - user must interact
-        isProminent: true, // Flag for special styling
         ...data
       };
 
       this.showTip(reminderData);
     }
 
-    async handleActionClick(tipData) {
-      if (this.apiAvailable) {
-        // Handle AI prompt reminder actions specially
-        if (tipData.type === 'ai_prompt_reminder') {
-          // Send message to open popup with prompt generator
-          try {
-            const response = await this.sendMessage({
-              type: 'OPEN_PROMPT_GENERATOR',
-              data: tipData
-            });
-          } catch (error) {
-            console.error('[PowerAI] Error sending message:', error);
-          }
-        } else {
-          // Get current tab ID
-          const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-          const currentTabId = tabs && tabs[0] ? tabs[0].id : null;
-
-          // Send action to extension with tab ID
-          await this.sendMessage({
-            type: 'NOTIFICATION_ACTION',
-            action: tipData.type || tipData.action,
-            data: tipData,
-            tabId: currentTabId
-          });
-        }
-      }
-    }
-
-    async handleSnoozeClick(tipData) {
-      if (this.apiAvailable) {
-        // Send snooze message to service worker
-        try {
-          const response = await this.sendMessage({
-            type: 'SNOOZE_AI_REMINDER',
-            duration: 15 * 60 * 1000 // 15 minutes
-          });
-
-          if (response && response.success) {
-            // Show confirmation
-            this.showTip({
-              type: 'confirmation',
-              icon: '⏰',
-              title: 'Reminder Snoozed',
-              message: 'You will be reminded again in 15 minutes.',
-              duration: 2500
-            });
-          }
-        } catch (error) {
-          console.error('Failed to snooze reminder:', error);
-        }
-      }
-    }
-
-    async handleDismissClick(tipData) {
-      if (this.apiAvailable) {
-        // Send dismiss message to service worker
-        try {
-          const response = await this.sendMessage({
-            type: 'DISMISS_AI_REMINDER'
-          });
-
-          if (response && response.success) {
-            // Show confirmation
-            this.showTip({
-              type: 'confirmation',
-              icon: '✓',
-              title: 'Reminder Disabled',
-              message: 'You won\'t see this reminder again.',
-              duration: 2500
-            });
-          }
-        } catch (error) {
-          console.error('Failed to dismiss reminder:', error);
-        }
-      }
-    }
-
     async disableAllNotifications() {
-      if (this.apiAvailable) {
-        try {
-          // Update notification settings to disable ALL popups globally
+      try {
+        // Try to update settings via API if available
+        if (this.apiAvailable) {
           const response = await this.sendMessage({
             type: 'DISABLE_ALL_POPUPS'
           });
 
-          if (response && response.success) {
-            // Update local settings immediately
-            this.settings.notificationsEnabled = false;
-
-            // Close all current notifications
-            this.hideAllTips();
-
-            // Show brief confirmation (this will be the last popup shown)
-            const confirmationElement = this.createNotificationElement({
-              type: 'confirmation',
-              icon: '🔕',
-              title: 'All Popups Disabled',
-              message: 'All Power Tracker popups have been disabled. Re-enable in Settings → Notifications.',
-              duration: 0 // We'll manually dismiss this
-            });
-
-            if (confirmationElement && this.container) {
-              this.container.appendChild(confirmationElement);
-
-              // Animate in
-              requestAnimationFrame(() => {
-                confirmationElement.style.transform = 'translateX(0)';
-              });
-
-              // Dismiss after 3 seconds
-              setTimeout(() => {
-                this.dismissNotification(confirmationElement);
-              }, 3000);
-            }
+          if (!response || !response.success) {
+            console.warn('[PowerAI] Failed to disable via API, using local fallback');
           }
-        } catch (error) {
-          console.error('Failed to disable notifications:', error);
         }
+
+        // Always update local settings immediately (works even without API)
+        this.settings.notificationsEnabled = false;
+
+        // Close all current notifications
+        this.hideAllTips();
+
+        // Show prominent confirmation (this will be the last popup shown)
+        const confirmationElement = this.createSecureElement('div', {
+          className: 'energy-tip-notification',
+          styles: {
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%) scale(0.9)',
+            opacity: '0',
+            background: this.settings?.darkMode ? 'rgba(20, 30, 48, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+            backdropFilter: 'blur(16px)',
+            border: '3px solid #10b981',
+            borderRadius: '16px',
+            padding: '32px 40px',
+            maxWidth: '400px',
+            minWidth: '350px',
+            boxShadow: '0 20px 60px rgba(16, 185, 129, 0.3), 0 0 0 1000px rgba(0, 0, 0, 0.5)',
+            zIndex: '2147483647',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            color: this.settings?.darkMode ? '#f1f5f9' : '#1f2937',
+            pointerEvents: 'auto',
+            textAlign: 'center'
+          }
+        });
+
+        // Icon
+        const icon = this.createSecureElement('div', {
+          textContent: '✓',
+          styles: {
+            fontSize: '48px',
+            marginBottom: '16px',
+            color: '#10b981'
+          }
+        });
+
+        // Title
+        const title = this.createSecureElement('div', {
+          textContent: 'Notifications Disabled',
+          styles: {
+            fontSize: '20px',
+            fontWeight: '700',
+            marginBottom: '12px',
+            color: '#10b981'
+          }
+        });
+
+        // Message
+        const message = this.createSecureElement('div', {
+          textContent: 'All Power Tracker tips have been turned off. You can re-enable them anytime in the extension settings.',
+          styles: {
+            fontSize: '14px',
+            lineHeight: '1.5',
+            color: this.settings?.darkMode ? '#cbd5e1' : '#4b5563'
+          }
+        });
+
+        if (confirmationElement) {
+          if (icon) confirmationElement.appendChild(icon);
+          if (title) confirmationElement.appendChild(title);
+          if (message) confirmationElement.appendChild(message);
+        }
+
+        if (confirmationElement && document.body) {
+          document.body.appendChild(confirmationElement);
+
+          // Animate in
+          requestAnimationFrame(() => {
+            confirmationElement.style.transform = 'translate(-50%, -50%) scale(1)';
+            confirmationElement.style.opacity = '1';
+          });
+
+          // Dismiss after 3 seconds
+          setTimeout(() => {
+            confirmationElement.style.transform = 'translate(-50%, -50%) scale(0.9)';
+            confirmationElement.style.opacity = '0';
+            setTimeout(() => {
+              if (confirmationElement.parentNode) {
+                confirmationElement.parentNode.removeChild(confirmationElement);
+              }
+            }, 400);
+          }, 3000);
+        }
+      } catch (error) {
+        console.error('[PowerAI] Failed to disable notifications:', error);
       }
     }
 
