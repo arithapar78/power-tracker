@@ -42,9 +42,11 @@
       name: 'Claude',
       model: 'claude-4',
       inputSelectors: [
+        'div.ProseMirror[contenteditable="true"]',
         'div[contenteditable="true"].ProseMirror',
-        'div[contenteditable="true"]',
+        '[data-placeholder] div[contenteditable="true"]',
         'fieldset div[contenteditable="true"]',
+        'div[contenteditable="true"]',
         'textarea'
       ]
     },
@@ -184,7 +186,7 @@
     if (!el) return false;
 
     const rect = el.getBoundingClientRect();
-    if (rect.width < 100 || rect.height < 30) return false;
+    if (rect.width < 100 || rect.height < 20) return false;
 
     const style = window.getComputedStyle(el);
     if (style.display === 'none' || style.visibility === 'hidden') return false;
