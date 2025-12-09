@@ -880,6 +880,8 @@ class EnergyTracker {
         try {
           if (alarm.name === 'et_process') {
             await this.periodicCleanup();
+            // Check if notifications should be auto-re-enabled
+            await this.checkAutoReEnableNotifications();
           }
         } catch (e) {
         }
@@ -1785,9 +1787,22 @@ class EnergyTracker {
    */
   async updateNotificationSettings(newSettings) {
     try {
+      const currentSettings = await this.getNotificationSettings();
       const sanitizedSettings = this.sanitizeNotificationSettings(newSettings);
+
+      // Track when notifications are disabled for auto-re-enable feature
+      if (sanitizedSettings.enabled === false && currentSettings.enabled === true) {
+        // Notifications being disabled - store timestamp for auto-re-enable
+        sanitizedSettings.disabledAt = Date.now();
+        sanitizedSettings.autoReEnableAt = Date.now() + (10 * 60 * 1000); // 10 minutes
+      } else if (sanitizedSettings.enabled === true) {
+        // Notifications being enabled - clear disabled timestamps
+        delete sanitizedSettings.disabledAt;
+        delete sanitizedSettings.autoReEnableAt;
+      }
+
       await chrome.storage.local.set({ notificationSettings: sanitizedSettings });
-      
+
       // Broadcast settings update to all tabs
       const tabs = await chrome.tabs.query({});
       for (const tab of tabs) {
@@ -1800,8 +1815,32 @@ class EnergyTracker {
           // Content script might not be loaded, ignore
         }
       }
-      
+
       return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Check and auto-re-enable notifications if disabled timeout has passed
+   */
+  async checkAutoReEnableNotifications() {
+    try {
+      const settings = await this.getNotificationSettings();
+
+      if (settings.enabled === false && settings.autoReEnableAt) {
+        const now = Date.now();
+        if (now >= settings.autoReEnableAt) {
+          // Auto-re-enable notifications
+          settings.enabled = true;
+          delete settings.disabledAt;
+          delete settings.autoReEnableAt;
+          await this.updateNotificationSettings(settings);
+          return true; // Notifications were re-enabled
+        }
+      }
+      return false;
     } catch (error) {
       return false;
     }

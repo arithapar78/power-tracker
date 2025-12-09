@@ -60,8 +60,13 @@ class OptionsManager {
       
       // Handle URL parameters for direct tab navigation
       this.handleURLParams();
-      
-      
+
+      // Initialize notification status panel with countdown timers
+      this.initNotificationStatusPanel();
+
+      // Auto-open Help & Instructions modal on first load
+      this.autoOpenHelpModal();
+
     } catch (error) {
       this.showError('Failed to initialize settings page: ' + error.message);
       

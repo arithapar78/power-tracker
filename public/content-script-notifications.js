@@ -358,11 +358,16 @@
           className: 'power-ai-notifications',
           styles: {
             position: 'fixed',
+            // Anchor to all corners to cover full viewport without affecting layout
+            top: '0',
+            right: '0',
+            bottom: '0',
+            left: '0',
             zIndex: '999999',
             pointerEvents: 'none',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-            right: '30px',
-            top: '80px'
+            // Prevent container from affecting page layout
+            overflow: 'visible'
           }
         });
         
@@ -440,9 +445,13 @@
           className: `energy-tip-notification ${this.settings?.darkMode ? 'dark-mode' : ''} ${isProminent ? 'prominent-reminder' : ''}`,
           styles: {
             position: 'fixed',
-            top: isProminent ? '50%' : '80px',
-            right: isProminent ? '50%' : '30px',
-            transform: isProminent ? 'translate(50%, -50%) scale(0.9)' : 'translateX(100%)',
+            // Explicit positioning - top-right anchor for standard, center for prominent
+            top: isProminent ? '50%' : '20px',
+            right: isProminent ? 'auto' : '20px',
+            bottom: 'auto',
+            left: isProminent ? '50%' : 'auto',
+            // Transform for animation - only use for slide-in, not positioning
+            transform: isProminent ? 'translate(-50%, -50%) scale(0.9)' : 'translateX(120%)',
             opacity: isProminent ? '0' : '1',
             background: isProminent
               ? (this.settings?.darkMode ? 'rgba(20, 30, 48, 0.98)' : 'rgba(255, 255, 255, 0.98)')
@@ -455,15 +464,22 @@
             padding: isProminent ? '32px 40px' : '20px 24px',
             maxWidth: isProminent ? '500px' : '350px',
             minWidth: isProminent ? '450px' : '300px',
+            // Use max-content width to prevent layout shifts
+            width: 'max-content',
             boxShadow: isProminent
               ? '0 20px 60px rgba(59, 130, 246, 0.3), 0 0 0 1000px rgba(0, 0, 0, 0.5)'
               : '0 8px 32px rgba(0, 0, 0, 0.12)',
             zIndex: '2147483647',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            // Only transition transform and opacity - NOT position properties
+            transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
             color: this.settings?.darkMode ? '#f1f5f9' : '#1f2937',
             pointerEvents: 'auto',
-            animation: isProminent ? 'pulse-glow 2s ease-in-out infinite' : 'none'
+            animation: isProminent ? 'pulse-glow 2s ease-in-out infinite' : 'none',
+            // Prevent text selection issues during zoom
+            userSelect: 'none',
+            // Hardware acceleration for smoother transforms
+            willChange: 'transform, opacity'
           },
           onmouseenter: () => {
             this.handleNotificationMouseEnter(notification);
@@ -700,12 +716,13 @@
             if (notificationElement) {
               const isProminent = tipData.isProminent || tipData.type === 'ai_prompt_reminder';
               if (isProminent) {
-                // Animate from scale 0.9 to scale 1
+                // Animate from scale 0.9 to scale 1 (centered with translate -50%, -50%)
                 setTimeout(() => {
-                  notificationElement.style.transform = 'translate(50%, -50%) scale(1)';
+                  notificationElement.style.transform = 'translate(-50%, -50%) scale(1)';
                   notificationElement.style.opacity = '1';
                 }, 50);
               } else {
+                // Slide in from right (translateX 0 = final position)
                 notificationElement.style.transform = 'translateX(0)';
               }
             }
@@ -902,8 +919,8 @@
           this.autoDismissTimers.delete(notificationElement);
         }
 
-        // Animate out
-        notificationElement.style.transform = 'translateX(100%)';
+        // Animate out - slide to the right
+        notificationElement.style.transform = 'translateX(120%)';
         notificationElement.style.opacity = '0';
 
         // Remove from DOM after animation
