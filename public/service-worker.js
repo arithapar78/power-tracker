@@ -55,6 +55,14 @@ try {
 } catch (error) {
 }
 
+// Import Prompt Helper Core for prompt optimization
+let PROMPT_HELPER_AVAILABLE = false;
+try {
+  importScripts('prompt-helper-core.js');
+  PROMPT_HELPER_AVAILABLE = true;
+} catch (error) {
+}
+
 try {
   importScripts('data-migration.js');
   DATA_MIGRATION_AVAILABLE = true;
@@ -532,6 +540,11 @@ class EnergyTracker {
             }
             case 'PING': {
               return { success: true, message: 'Service worker alive' };
+            }
+            case 'PROMPT_HELPER_GENERATE': {
+              // Handle prompt optimization request from widget or popup
+              const result = await this.handlePromptHelperGenerate(message.payload);
+              return result;
             }
             case 'SHOW_ENERGY_TIP': {
               // Handle tip display request
@@ -1407,6 +1420,87 @@ class EnergyTracker {
       return { ...defaultSettings, ...settings };
     } catch (error) {
       return defaultSettings;
+    }
+  }
+
+  /**
+   * Handle prompt optimization request from widget or popup
+   * @param {Object} payload - { input, level, model, source, hostname }
+   * @returns {Object} - { success, resultPrompt, stats, error? }
+   */
+  async handlePromptHelperGenerate(payload) {
+    try {
+      if (!payload || !payload.input) {
+        return {
+          success: false,
+          error: 'No prompt input provided'
+        };
+      }
+
+      const { input, level = 'balanced', model = 'gpt-4', source, hostname } = payload;
+
+      // Check if PromptHelperCore is available
+      if (!PROMPT_HELPER_AVAILABLE || typeof PromptHelperCore === 'undefined') {
+        return {
+          success: false,
+          error: 'Prompt optimization module not available'
+        };
+      }
+
+      // Perform optimization
+      const result = PromptHelperCore.optimizePrompt(input, level, model);
+
+      if (!result.success) {
+        return {
+          success: false,
+          error: result.error || 'Optimization failed'
+        };
+      }
+
+      // Log usage for analytics (optional)
+      try {
+        const { promptHelperUsage = [] } = await chrome.storage.local.get('promptHelperUsage');
+        promptHelperUsage.push({
+          timestamp: Date.now(),
+          source: source || 'unknown',
+          hostname: hostname || 'unknown',
+          model,
+          level,
+          tokensSaved: result.tokensSaved,
+          percentageSaved: result.percentageSaved
+        });
+
+        // Keep only last 100 entries
+        if (promptHelperUsage.length > 100) {
+          promptHelperUsage.splice(0, promptHelperUsage.length - 100);
+        }
+
+        await chrome.storage.local.set({ promptHelperUsage });
+      } catch (storageError) {
+        // Non-critical - continue without logging
+      }
+
+      return {
+        success: true,
+        resultPrompt: result.optimized,
+        original: result.original,
+        optimized: result.optimized,
+        stats: {
+          originalTokens: result.originalTokens,
+          optimizedTokens: result.optimizedTokens,
+          tokensSaved: result.tokensSaved,
+          percentageSaved: result.percentageSaved,
+          energySavings: result.energySavings,
+          processingTime: result.processingTime,
+          removedWords: result.removedWords,
+          categories: result.optimizationCategories
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message || 'An unexpected error occurred'
+      };
     }
   }
 
