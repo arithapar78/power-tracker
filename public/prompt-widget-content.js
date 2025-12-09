@@ -74,6 +74,46 @@
         'textarea',
         'div[contenteditable="true"]'
       ]
+    },
+    'grok.com': {
+      name: 'Grok',
+      model: 'grok-4',
+      inputSelectors: [
+        'textarea[placeholder*="Ask"]',
+        'textarea[placeholder*="Message"]',
+        'textarea',
+        'div[contenteditable="true"]'
+      ]
+    },
+    'x.com': {
+      name: 'Grok',
+      model: 'grok-4',
+      inputSelectors: [
+        'textarea[placeholder*="Ask"]',
+        'textarea[placeholder*="Message"]',
+        'textarea',
+        'div[contenteditable="true"]'
+      ]
+    },
+    'deepseek.com': {
+      name: 'DeepSeek',
+      model: 'deepseek-r1',
+      inputSelectors: [
+        'textarea[placeholder*="Message"]',
+        'textarea[placeholder*="Ask"]',
+        'textarea',
+        'div[contenteditable="true"]'
+      ]
+    },
+    'chat.deepseek.com': {
+      name: 'DeepSeek',
+      model: 'deepseek-r1',
+      inputSelectors: [
+        'textarea[placeholder*="Message"]',
+        'textarea[placeholder*="Ask"]',
+        'textarea',
+        'div[contenteditable="true"]'
+      ]
     }
   };
 
@@ -84,6 +124,8 @@
   let isGenerating = false;
   let lastResult = null;
   let repositionThrottle = null;
+  let lastKnownInputTop = null;
+  let positionCheckInterval = null;
 
   /**
    * Get site configuration for current hostname
@@ -245,14 +287,14 @@
   }
 
   /**
-   * Position the widget near the input
+   * Position the widget near the input (uses fixed positioning)
    */
   function positionWidget() {
     if (!widgetElement || !currentInput) return;
 
     const inputRect = currentInput.getBoundingClientRect();
     const widgetSize = 36;
-    const offset = 8;
+    const offset = 12;
 
     // Position at the right side of the input, vertically centered
     let left = inputRect.right - widgetSize - offset;
@@ -275,8 +317,12 @@
       top = viewportHeight - widgetSize - 10;
     }
 
-    widgetElement.style.left = `${left + window.scrollX}px`;
-    widgetElement.style.top = `${top + window.scrollY}px`;
+    // Fixed positioning - no scroll offset needed
+    widgetElement.style.left = `${left}px`;
+    widgetElement.style.top = `${top}px`;
+
+    // Store the input's top position for change detection
+    lastKnownInputTop = inputRect.top;
   }
 
   /**
@@ -400,7 +446,7 @@
   }
 
   /**
-   * Position the panel near the widget
+   * Position the panel near the widget (uses fixed positioning)
    */
   function positionPanel() {
     if (!panelElement || !currentInput) return;
@@ -433,8 +479,9 @@
       top = viewportHeight - panelHeight - 10;
     }
 
-    panelElement.style.left = `${left + window.scrollX}px`;
-    panelElement.style.top = `${top + window.scrollY}px`;
+    // Fixed positioning - no scroll offset needed
+    panelElement.style.left = `${left}px`;
+    panelElement.style.top = `${top}px`;
   }
 
   /**
@@ -650,6 +697,36 @@
   }
 
   /**
+   * Start checking if the input has moved significantly
+   */
+  function startPositionCheck() {
+    if (positionCheckInterval) {
+      clearInterval(positionCheckInterval);
+    }
+
+    positionCheckInterval = setInterval(() => {
+      if (!currentInput || !widgetElement) return;
+
+      // Check if input is still in DOM
+      if (!document.body.contains(currentInput)) {
+        const newInput = findChatInput();
+        if (newInput) {
+          currentInput = newInput;
+          lastKnownInputTop = null;
+          positionWidget();
+        }
+        return;
+      }
+
+      // Check if input position changed significantly (more than 20px)
+      const inputRect = currentInput.getBoundingClientRect();
+      if (lastKnownInputTop !== null && Math.abs(inputRect.top - lastKnownInputTop) > 20) {
+        positionWidget();
+      }
+    }, 1000); // Check every 1 second - very gentle
+  }
+
+  /**
    * Initialize the widget
    */
   function init() {
@@ -666,6 +743,7 @@
     } else {
       createWidget();
       positionWidget();
+      startPositionCheck();
     }
 
     // Set up MutationObserver to detect DOM changes
@@ -675,10 +753,12 @@
         const newInput = findChatInput();
         if (newInput && newInput !== currentInput) {
           currentInput = newInput;
+          lastKnownInputTop = null;
           if (!widgetElement) {
             createWidget();
           }
           positionWidget();
+          startPositionCheck();
         }
       }
     });
@@ -688,8 +768,7 @@
       subtree: true
     });
 
-    // Reposition on scroll and resize
-    window.addEventListener('scroll', handleReposition, { passive: true });
+    // Reposition on resize only (fixed positioning handles viewport changes)
     window.addEventListener('resize', handleReposition, { passive: true });
 
     // Also watch for input focus to update position
@@ -701,6 +780,7 @@
           for (const selector of config.inputSelectors) {
             if (target.matches(selector)) {
               currentInput = target;
+              lastKnownInputTop = null;
               positionWidget();
               break;
             }
@@ -734,6 +814,7 @@
       if (currentInput) {
         createWidget();
         positionWidget();
+        startPositionCheck();
       }
     }
   }, 2000);
