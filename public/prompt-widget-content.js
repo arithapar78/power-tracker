@@ -44,11 +44,13 @@
       inputSelectors: [
         'div.ProseMirror[contenteditable="true"]',
         'div[contenteditable="true"].ProseMirror',
-        '[data-placeholder] div[contenteditable="true"]',
         'fieldset div[contenteditable="true"]',
+        '[data-placeholder] div[contenteditable="true"]',
         'div[contenteditable="true"]',
         'textarea'
-      ]
+      ],
+      // Claude needs more lenient validation due to dynamic input sizing
+      minHeight: 10
     },
     'gemini.google.com': {
       name: 'Gemini',
@@ -186,7 +188,9 @@
     if (!el) return false;
 
     const rect = el.getBoundingClientRect();
-    if (rect.width < 100 || rect.height < 20) return false;
+    const config = getSiteConfig();
+    const minHeight = config?.minHeight || 20;
+    if (rect.width < 100 || rect.height < minHeight) return false;
 
     const style = window.getComputedStyle(el);
     if (style.display === 'none' || style.visibility === 'hidden') return false;
@@ -254,7 +258,8 @@
    */
   function createWidget() {
     if (document.getElementById(WIDGET_ID)) {
-      return document.getElementById(WIDGET_ID);
+      widgetElement = document.getElementById(WIDGET_ID);
+      return widgetElement;
     }
 
     const container = document.createElement('div');
@@ -729,6 +734,20 @@
   }
 
   /**
+   * Try to initialize the widget - called when input might be available
+   */
+  function tryInitWidget() {
+    if (widgetElement) return; // Already created
+
+    currentInput = findChatInput();
+    if (currentInput) {
+      createWidget();
+      positionWidget();
+      startPositionCheck();
+    }
+  }
+
+  /**
    * Initialize the widget
    */
   function init() {
@@ -739,19 +758,12 @@
     }
 
     // Find input and create widget
-    currentInput = findChatInput();
-    if (!currentInput) {
-      console.debug('[PromptHelper] No suitable input found, will retry...');
-    } else {
-      createWidget();
-      positionWidget();
-      startPositionCheck();
-    }
+    tryInitWidget();
 
     // Set up MutationObserver to detect DOM changes
     const observer = new MutationObserver((mutations) => {
-      // Check if we need to re-find the input
-      if (!currentInput || !document.body.contains(currentInput)) {
+      // Check if we need to re-find the input or create widget
+      if (!widgetElement || !currentInput || !document.body.contains(currentInput)) {
         const newInput = findChatInput();
         if (newInput && newInput !== currentInput) {
           currentInput = newInput;
@@ -810,15 +822,14 @@
   }
 
   // Also try again after a longer delay for SPAs
-  setTimeout(() => {
-    if (!widgetElement && getSiteConfig()) {
-      currentInput = findChatInput();
-      if (currentInput) {
-        createWidget();
-        positionWidget();
-        startPositionCheck();
+  // Multiple retries to handle slow-loading chat interfaces like Claude
+  const retryDelays = [2000, 4000, 6000];
+  retryDelays.forEach(delay => {
+    setTimeout(() => {
+      if (!widgetElement && getSiteConfig()) {
+        tryInitWidget();
       }
-    }
-  }, 2000);
+    }, delay);
+  });
 
 })();
