@@ -93,6 +93,9 @@
       this.hoverTimers = new Map(); // Maps notification elements to their grace period timers
       this.autoDismissTimers = new Map(); // Maps notification elements to their auto-dismiss timers
 
+      // Maximum allowed notifications (safety limit to prevent stacking bug)
+      this.maxNotifications = 1;
+
       // Don't initialize if notifications are disabled on this site
       if (!this.notificationsDisabled) {
         this.init();
@@ -677,6 +680,16 @@
           return;
         }
 
+        // CRITICAL FIX: Dismiss all existing notifications before showing a new one
+        // This prevents the 120+ stacking notifications bug
+        this.hideAllTips();
+
+        // Safety check: Force cleanup if somehow notifications still exist
+        // This handles edge cases where hideAllTips might not have fully completed
+        if (this.notifications.length >= this.maxNotifications) {
+          this.forceCleanupNotifications();
+        }
+
         // Create and show notification
         const notificationElement = this.createNotificationElement(tipData);
         if (notificationElement && this.container) {
@@ -911,6 +924,43 @@
       this.notifications.forEach(notification => {
         this.dismissNotification(notification.element);
       });
+    }
+
+    /**
+     * Force cleanup of all notification elements - immediate removal without animation
+     * Used as a safety fallback when hideAllTips doesn't fully complete
+     */
+    forceCleanupNotifications() {
+      try {
+        // Clear all timers
+        this.hoverTimers.forEach(timer => clearTimeout(timer));
+        this.hoverTimers.clear();
+        this.autoDismissTimers.forEach(timer => clearTimeout(timer));
+        this.autoDismissTimers.clear();
+
+        // Force remove all notification elements from DOM
+        if (this.container) {
+          const existingNotifications = this.container.querySelectorAll('.energy-tip-notification');
+          existingNotifications.forEach(el => {
+            if (el.parentNode) {
+              el.parentNode.removeChild(el);
+            }
+          });
+        }
+
+        // Also check document.body for any stray notifications
+        const strayNotifications = document.querySelectorAll('.energy-tip-notification');
+        strayNotifications.forEach(el => {
+          if (el.parentNode) {
+            el.parentNode.removeChild(el);
+          }
+        });
+
+        // Reset notifications array
+        this.notifications = [];
+      } catch (error) {
+        // Silently fail - this is a safety cleanup
+      }
     }
 
     updateSettings(newSettings) {
