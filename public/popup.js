@@ -2557,14 +2557,12 @@ class PopupManager {
       const sessionEnergyUsage = this.safeGetElement('sessionEnergyUsage');
       const sessionCarbonUsage = this.safeGetElement('sessionCarbonUsage');
       const modelEfficiency = this.safeGetElement('modelEfficiency');
-      const aiModelInfoSection = document.querySelector('.ai-model-info-section');
-      
-      if (!aiModelInfoSection) {
-        return;
+      const aiModelInfoSection = document.querySelector('.ai-model-info');
+
+      // Continue even if aiModelInfoSection doesn't exist - we can still update model name/version
+      if (aiModelInfoSection) {
+        aiModelInfoSection.style.display = 'block';
       }
-      
-      // Always show the AI model info section
-      if (aiModelInfoSection) aiModelInfoSection.style.display = 'block';
       
       // Update with actual detected model information
       if (this.detectedAIModel && this.detectedAIModel.model) {
