@@ -4727,6 +4727,175 @@ class OptionsManager {
       }
     });
   }
+
+  /**
+   * Initialize the notification status panel with countdown timers
+   */
+  async initNotificationStatusPanel() {
+    try {
+      // Start the countdown timer update loop
+      this.updateNotificationStatusPanel();
+
+      // Update every second
+      this.notificationTimerInterval = setInterval(() => {
+        this.updateNotificationStatusPanel();
+      }, 1000);
+    } catch (error) {
+      console.error('Failed to initialize notification status panel:', error);
+    }
+  }
+
+  /**
+   * Update the notification status panel with current countdown values
+   */
+  async updateNotificationStatusPanel() {
+    try {
+      if (!this.isChromeApiAvailable()) return;
+
+      // Get notification settings
+      const response = await chrome.runtime.sendMessage({ type: 'GET_NOTIFICATION_SETTINGS' });
+      if (!response || !response.success) return;
+
+      const settings = response.settings;
+      const now = Date.now();
+
+      // Get last notification time - if never set, treat as if it was set to now
+      // This means the countdown will start from the full interval
+      let { lastEnergyTipTime } = await chrome.storage.local.get('lastEnergyTipTime');
+      if (!lastEnergyTipTime || lastEnergyTipTime === 0) {
+        // No notification has been shown yet - start countdown from now
+        lastEnergyTipTime = now;
+        await chrome.storage.local.set({ lastEnergyTipTime: now });
+      }
+
+      // Update UI elements
+      const nextPopupCountdown = document.getElementById('nextPopupCountdown');
+      const reEnableCountdown = document.getElementById('reEnableCountdown');
+      const reEnableTimer = document.getElementById('reEnableTimer');
+      const nextPopupTimer = document.getElementById('nextPopupTimer');
+      const statusDot = document.getElementById('notificationStatusDot');
+      const statusText = document.getElementById('notificationStatusText');
+
+      if (settings.enabled) {
+        // Notifications are enabled - show countdown to next popup
+        if (nextPopupTimer) nextPopupTimer.style.display = 'flex';
+        if (reEnableTimer) reEnableTimer.style.display = 'none';
+
+        const interval = settings.notificationInterval || 900000; // Default 15 min
+        const timeSinceLastTip = now - lastEnergyTipTime;
+        let timeUntilNext = interval - timeSinceLastTip;
+
+        // If timer expired, trigger a popup and reset the timer
+        if (timeUntilNext <= 0 && !this.popupTriggering) {
+          this.popupTriggering = true; // Prevent multiple triggers
+
+          // Trigger the popup via service worker
+          try {
+            await chrome.runtime.sendMessage({ type: 'TRIGGER_SCHEDULED_TIP' });
+            // Reset the timer by updating lastEnergyTipTime
+            await chrome.storage.local.set({ lastEnergyTipTime: Date.now() });
+            lastEnergyTipTime = Date.now();
+            timeUntilNext = interval; // Reset countdown
+          } catch (err) {
+            console.error('Failed to trigger scheduled tip:', err);
+          }
+
+          this.popupTriggering = false;
+        }
+
+        if (nextPopupCountdown) {
+          nextPopupCountdown.textContent = this.formatCountdown(Math.max(0, timeUntilNext));
+        }
+
+        if (statusDot) {
+          statusDot.className = 'status-dot active';
+        }
+        if (statusText) {
+          statusText.textContent = 'Notifications Active';
+        }
+      } else {
+        // Notifications are disabled - show countdown to auto-re-enable
+        if (nextPopupTimer) nextPopupTimer.style.display = 'none';
+
+        if (settings.autoReEnableAt) {
+          if (reEnableTimer) reEnableTimer.style.display = 'flex';
+
+          const timeUntilReEnable = Math.max(0, settings.autoReEnableAt - now);
+
+          if (reEnableCountdown) {
+            reEnableCountdown.textContent = this.formatCountdown(timeUntilReEnable);
+          }
+
+          // Check if it's time to re-enable (refresh the checkbox if needed)
+          if (timeUntilReEnable <= 0) {
+            // Trigger a settings refresh to update checkbox
+            await this.loadNotificationSettings();
+          }
+
+          if (statusDot) {
+            statusDot.className = 'status-dot warning';
+          }
+          if (statusText) {
+            statusText.textContent = 'Paused - Auto-resume soon';
+          }
+        } else {
+          if (reEnableTimer) reEnableTimer.style.display = 'none';
+
+          if (statusDot) {
+            statusDot.className = 'status-dot inactive';
+          }
+          if (statusText) {
+            statusText.textContent = 'Notifications Disabled';
+          }
+        }
+      }
+    } catch (error) {
+      // Silently fail - panel will just show default values
+      console.error('Failed to update notification status panel:', error);
+    }
+  }
+
+  /**
+   * Format milliseconds into MM:SS countdown string
+   */
+  formatCountdown(ms) {
+    if (ms <= 0) return '00:00';
+
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    if (minutes >= 60) {
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      return `${hours}h ${remainingMinutes.toString().padStart(2, '0')}m`;
+    }
+
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  /**
+   * Auto-open the Help & Instructions modal when settings page loads
+   */
+  autoOpenHelpModal() {
+    try {
+      // Small delay to ensure the page is fully rendered
+      setTimeout(() => {
+        this.showHelpModal();
+      }, 300);
+    } catch (error) {
+      console.error('Failed to auto-open help modal:', error);
+    }
+  }
+
+  /**
+   * Clean up notification timer interval when page unloads
+   */
+  cleanup() {
+    if (this.notificationTimerInterval) {
+      clearInterval(this.notificationTimerInterval);
+    }
+  }
 }
 
 // Function to show prompt generator instructions

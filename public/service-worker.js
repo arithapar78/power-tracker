@@ -512,6 +512,11 @@ class EnergyTracker {
               await this.updateNotificationSettings({ enabled: false });
               return { success: true };
             }
+            case 'TRIGGER_SCHEDULED_TIP': {
+              // Triggered by the settings page countdown timer
+              await this.triggerScheduledTip();
+              return { success: true };
+            }
             case 'GET_TOP_TABS': {
               const topTabs = await this.getTopEnergyTabs(message.count || 3);
               return { success: true, topTabs };
@@ -1224,6 +1229,56 @@ class EnergyTracker {
     }
   }
 
+  /**
+   * Trigger a scheduled tip - called when the countdown timer reaches 0
+   * This sends a tip to the active tab regardless of power conditions
+   */
+  async triggerScheduledTip() {
+    try {
+      const notificationSettings = await this.getNotificationSettings();
+      if (!notificationSettings.enabled) return;
+
+      // Get the active tab
+      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!activeTab || !activeTab.id) return;
+
+      // Get tab data if available, or create minimal data
+      const tabData = this.tabMetrics.get(activeTab.id) || {
+        url: activeTab.url || '',
+        title: activeTab.title || 'Current Tab',
+        watts: 15 // Default moderate power
+      };
+
+      // Generate a tip (use moderate power level for scheduled tips)
+      const powerWatts = tabData.watts || 15;
+      const tipData = this.generateAdvancedContextualTip(powerWatts, tabData, notificationSettings);
+
+      if (tipData) {
+        try {
+          await chrome.tabs.sendMessage(activeTab.id, {
+            type: 'SHOW_ENERGY_TIP',
+            tipData: tipData
+          });
+          // Update last notification time
+          await chrome.storage.local.set({ lastEnergyTipTime: Date.now() });
+        } catch (contentScriptError) {
+          // Fallback to browser notification if content script not available
+          if (chrome.notifications) {
+            chrome.notifications.create({
+              type: 'basic',
+              iconUrl: 'icon-48.png',
+              title: tipData.title || 'Power Tracker Tip',
+              message: tipData.message
+            });
+            await chrome.storage.local.set({ lastEnergyTipTime: Date.now() });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to trigger scheduled tip:', error);
+    }
+  }
+
   // Convert legacy energy threshold percentage to watts
   convertThresholdToWatts(thresholdPercent) {
     // Map 0-100% threshold to realistic watts ranges
@@ -1794,7 +1849,7 @@ class EnergyTracker {
       if (sanitizedSettings.enabled === false && currentSettings.enabled === true) {
         // Notifications being disabled - store timestamp for auto-re-enable
         sanitizedSettings.disabledAt = Date.now();
-        sanitizedSettings.autoReEnableAt = Date.now() + (10 * 60 * 1000); // 10 minutes
+        sanitizedSettings.autoReEnableAt = Date.now() + (10 * 60 * 60 * 1000); // 10 hours
       } else if (sanitizedSettings.enabled === true) {
         // Notifications being enabled - clear disabled timestamps
         delete sanitizedSettings.disabledAt;

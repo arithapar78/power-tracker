@@ -39,30 +39,30 @@
       <button class="nav-tab" data-tab="about">About</button>
     </nav>
 
-    <!-- Settings Tab -->
-    <div class="tab-content" id="settings-tab">
-      <!-- Notification Status Panel (top-right) -->
-      <div class="notification-status-panel" id="notificationStatusPanel">
-        <div class="status-panel-header">
-          <span class="status-icon">🔔</span>
-          <span class="status-title">Notification Status</span>
+    <!-- Notification Status Panel (top-right, always visible) -->
+    <div class="notification-status-panel" id="notificationStatusPanel">
+      <div class="status-panel-header">
+        <span class="status-icon">🔔</span>
+        <span class="status-title">Notification Status</span>
+      </div>
+      <div class="status-timers">
+        <div class="timer-row" id="nextPopupTimer">
+          <span class="timer-label">Next popup in:</span>
+          <span class="timer-value" id="nextPopupCountdown">--:--</span>
         </div>
-        <div class="status-timers">
-          <div class="timer-row" id="nextPopupTimer">
-            <span class="timer-label">Next popup in:</span>
-            <span class="timer-value" id="nextPopupCountdown">--:--</span>
-          </div>
-          <div class="timer-row disabled-timer" id="reEnableTimer" style="display: none;">
-            <span class="timer-label">Notifications re-enable in:</span>
-            <span class="timer-value" id="reEnableCountdown">--:--</span>
-          </div>
-        </div>
-        <div class="status-indicator-row">
-          <span class="status-dot active" id="notificationStatusDot"></span>
-          <span class="status-text" id="notificationStatusText">Notifications Active</span>
+        <div class="timer-row disabled-timer" id="reEnableTimer" style="display: none;">
+          <span class="timer-label">Turns back on in:</span>
+          <span class="timer-value" id="reEnableCountdown">10:00</span>
         </div>
       </div>
+      <div class="status-indicator-row">
+        <span class="status-dot active" id="notificationStatusDot"></span>
+        <span class="status-text" id="notificationStatusText">Notifications Active</span>
+      </div>
+    </div>
 
+    <!-- Settings Tab -->
+    <div class="tab-content" id="settings-tab">
       <div class="settings-grid">
         <!-- Tracking Settings Card -->
         <div class="setting-card">
