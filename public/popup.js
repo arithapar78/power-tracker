@@ -2474,11 +2474,12 @@ class PopupManager {
   
   /**
    * Update the Compare Tabs Strip UI with current data
+   * Uses in-place DOM updates to prevent flickering
    */
   updateCompareTabsStrip() {
     const compareTabsStrip = document.getElementById('compareTabsStrip');
     const tabsContainer = compareTabsStrip?.querySelector('.tabs-container');
-    
+
     if (!compareTabsStrip || !tabsContainer) {
       return;
     }
@@ -2492,21 +2493,70 @@ class PopupManager {
 
       if (compareTabsStrip) compareTabsStrip.style.display = 'block';
 
-      // Clear existing content
-      if (tabsContainer) tabsContainer.innerHTML = '';
-      
-      // Create tab cards for top energy consumers
-      this.compareTabsData.slice(0, 3).forEach((tabData, index) => {
-        const tabCard = this.createTabCard(tabData, index);
-        if (tabCard && tabsContainer) {
-          tabsContainer.appendChild(tabCard);
+      const newTabsData = this.compareTabsData.slice(0, 3);
+      const existingCards = tabsContainer.querySelectorAll('.tab-card');
+
+      // Update existing cards or create new ones
+      newTabsData.forEach((tabData, index) => {
+        const existingCard = existingCards[index];
+
+        if (existingCard) {
+          // Update existing card in-place to avoid flickering
+          this.updateTabCard(existingCard, tabData);
+        } else {
+          // Create new card only if needed
+          const tabCard = this.createTabCard(tabData, index);
+          if (tabCard) {
+            tabsContainer.appendChild(tabCard);
+          }
         }
       });
-      
+
+      // Remove extra cards if we have fewer tabs now
+      for (let i = newTabsData.length; i < existingCards.length; i++) {
+        existingCards[i].remove();
+      }
+
     } catch (error) {
     }
   }
-  
+
+  /**
+   * Update an existing tab card element in-place (prevents flickering)
+   */
+  updateTabCard(tabCard, tabData) {
+    const newEnergyClass = `tab-card energy-${tabData.energyLevel || this.getEnergyLevelFromWatts(tabData.watts)}`;
+    if (tabCard.className !== newEnergyClass) {
+      tabCard.className = newEnergyClass;
+    }
+
+    const currentTabId = tabCard.getAttribute('data-tab-id');
+    if (currentTabId !== String(tabData.tabId)) {
+      tabCard.setAttribute('data-tab-id', tabData.tabId);
+    }
+
+    const truncatedTitle = this.truncateText(tabData.title || 'Unknown Tab', 30);
+    const formattedWatts = (tabData.watts || 0).toFixed(1);
+
+    const titleEl = tabCard.querySelector('.tab-title');
+    const wattsEl = tabCard.querySelector('.tab-watts');
+
+    if (titleEl) {
+      const newTitle = this.escapeHtml(truncatedTitle);
+      if (titleEl.textContent !== truncatedTitle) {
+        titleEl.textContent = truncatedTitle;
+        titleEl.setAttribute('title', this.escapeHtml(tabData.title || 'Unknown Tab'));
+      }
+    }
+
+    if (wattsEl) {
+      const newWatts = `${formattedWatts}W`;
+      if (wattsEl.textContent !== newWatts) {
+        wattsEl.textContent = newWatts;
+      }
+    }
+  }
+
   /**
    * Create a tab card element for the Compare Tabs Strip
    */
@@ -2514,11 +2564,11 @@ class PopupManager {
     const tabCard = document.createElement('div');
     tabCard.className = `tab-card energy-${tabData.energyLevel || this.getEnergyLevelFromWatts(tabData.watts)}`;
     tabCard.setAttribute('data-tab-id', tabData.tabId);
-    
+
     // Truncate title to 30 characters as specified
     const truncatedTitle = this.truncateText(tabData.title || 'Unknown Tab', 30);
     const formattedWatts = (tabData.watts || 0).toFixed(1);
-    
+
     tabCard.innerHTML = `
       <div class="tab-info">
         <div class="tab-title" title="${this.escapeHtml(tabData.title || 'Unknown Tab')}">${this.escapeHtml(truncatedTitle)}</div>
@@ -2528,7 +2578,7 @@ class PopupManager {
         <button class="tab-action-btn close-btn" aria-label="Close tab" title="Close tab">×</button>
       </div>
     `;
-    
+
     return tabCard;
   }
   
