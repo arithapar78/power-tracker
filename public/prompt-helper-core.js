@@ -86,89 +86,238 @@ const PromptHelperCore = {
     let categories = [];
 
     const fillerWordCategories = {
-      politenessMarkers: {
+      // Priority 1: Basic filler words to delete
+      basicFillers: {
         priority: 1,
         words: [
-          'please', 'thank you', 'thanks', 'kindly', 'if you don\'t mind',
-          'if possible', 'if you could', 'would you mind', 'could you please',
-          'would you be so kind', 'I would appreciate', 'thank you in advance',
-          'many thanks', 'much appreciated', 'grateful', 'sorry to bother you',
-          'I apologize for', 'excuse me', 'pardon me'
+          'actually', 'really', 'very', 'basically', 'literally', 'honestly',
+          'essentially', 'kind of', 'sort of', 'just', 'like', 'totally',
+          'completely', 'entirely', 'absolutely', 'quite', 'rather', 'somewhat',
+          'maybe', 'perhaps', 'possibly', 'probably'
         ],
-        description: 'Politeness markers'
+        description: 'Basic filler words'
+      },
+      conversationalFillers: {
+        priority: 1,
+        words: [
+          'I mean', 'you know', 'you see', 'in fact', 'as a matter of fact',
+          'truth be told', 'to be honest', 'to be frank', 'for the most part',
+          'by the way', 'FYI', 'at the end of the day', 'in my opinion',
+          'in my personal opinion', 'in my honest opinion', 'I believe that',
+          'I think that', 'it seems that', 'it appears that', 'to be fair',
+          'needless to say', 'for what it\'s worth', 'basically speaking',
+          'practically speaking', 'technically speaking',
+          'well', 'um', 'uh', 'er', 'ah', 'anyway', 'speaking of which',
+          'as I was saying', 'where was I'
+        ],
+        description: 'Conversational fillers'
       },
       intensifiers: {
         priority: 1,
         words: [
-          'very', 'really', 'quite', 'extremely', 'absolutely', 'completely',
-          'totally', 'literally', 'seriously', 'highly', 'incredibly',
-          'tremendously', 'exceptionally', 'remarkably', 'particularly',
-          'especially', 'significantly', 'substantially'
+          'extremely', 'highly', 'seriously', 'significantly', 'definitely',
+          'certainly', 'clearly', 'obviously', 'surely', 'undoubtedly',
+          'remarkably', 'particularly', 'mostly', 'largely', 'slightly',
+          'arguably', 'virtually', 'relatively', 'frankly', 'incredibly',
+          'tremendously', 'exceptionally', 'especially', 'substantially'
         ],
         description: 'Intensifiers'
       },
-      qualifiers: {
-        priority: 1,
-        words: [
-          'just', 'simply', 'basically', 'actually', 'obviously', 'clearly',
-          'sort of', 'kind of', 'somewhat', 'rather', 'pretty much',
-          'more or less', 'in a way', 'to some extent', 'relatively'
-        ],
-        description: 'Qualifiers'
-      },
+      // Priority 2: Verbose phrase replacements
       verbosePhrases: {
         priority: 2,
         phrases: [
           { from: 'in order to', to: 'to' },
           { from: 'due to the fact that', to: 'because' },
-          { from: 'with regard to', to: 'about' },
-          { from: 'in terms of', to: 'for' },
-          { from: 'for the purpose of', to: 'to' },
           { from: 'in the event that', to: 'if' },
+          { from: 'with regard to', to: 'about' },
+          { from: 'with respect to', to: 'about' },
+          { from: 'in terms of', to: 'about' },
+          { from: 'as a result of', to: 'because of' },
+          { from: 'in light of the fact that', to: 'because' },
+          { from: 'for the purpose of', to: 'to' },
+          { from: 'for the reason that', to: 'because' },
+          { from: 'for the sake of', to: 'for' },
+          { from: 'in relation to', to: 'about' },
+          { from: 'in connection with', to: 'about' },
+          { from: 'in consideration of', to: 'for' },
+          { from: 'for all intents and purposes', to: 'basically' },
           { from: 'at this point in time', to: 'now' },
+          { from: 'at the present time', to: 'now' },
+          { from: 'at this moment', to: 'now' },
+          { from: 'at some point in time', to: 'later' },
+          { from: 'regardless of the fact that', to: 'although' },
+          { from: 'despite the fact that', to: 'although' },
+          { from: 'because of the fact that', to: 'because' },
+          { from: 'in close proximity to', to: 'near' },
+          { from: 'until such time as', to: 'until' },
+          { from: 'in the near future', to: 'soon' },
+          { from: 'in the immediate future', to: 'soon' },
+          { from: 'in the majority of cases', to: 'usually' },
+          { from: 'a large number of', to: 'many' },
+          { from: 'a small number of', to: 'few' },
+          { from: 'at a later date', to: 'later' },
           { from: 'prior to', to: 'before' },
           { from: 'subsequent to', to: 'after' }
         ],
         description: 'Verbose phrases'
       },
-      fillerPhrases: {
+      // Priority 2: Phrases to delete entirely
+      deletablePhrases: {
         priority: 2,
         words: [
-          'at the end of the day', 'for all intents and purposes',
-          'the thing is', 'as a matter of fact',
-          'to tell you the truth', 'to be honest', 'frankly speaking',
-          'needless to say', 'it goes without saying'
+          'it should be noted that', 'it is worth mentioning that',
+          'it is important to note that', 'the fact that', 'in my view',
+          'from my perspective', 'I would like to say that',
+          'I want to point out that', 'I am writing to inform you that',
+          'the purpose of this is to', 'for your information',
+          'please be advised that', 'it is clear that',
+          'it goes without saying that', 'it is obvious that',
+          'as previously mentioned', 'as mentioned earlier', 'as I said before',
+          'as stated above', 'let me be clear', 'you could say that',
+          'sorta kinda', 'for the record', 'at this point', 'in reality',
+          'for example', 'for instance'
         ],
-        description: 'Filler phrases'
+        description: 'Deletable phrases'
       },
+      // Priority 2: Padding phrases
+      paddingPhrases: {
+        priority: 2,
+        words: [
+          'a little bit', 'a whole lot', 'as soon as possible',
+          'as quickly as possible', 'as much as possible',
+          'to the best of your ability', 'if possible', 'if you can',
+          'if you are able to', 'with the best possible detail',
+          'in a detailed manner', 'in a quick manner', 'in a simple manner',
+          'in a clear manner', 'for the time being', 'in the meantime',
+          'moving forward', 'going forward', 'from here on out',
+          'until further notice'
+        ],
+        description: 'Padding phrases'
+      },
+      // Priority 2: Verb upgrades
+      verbUpgrades: {
+        priority: 2,
+        phrases: [
+          { from: 'make', to: 'create' },
+          { from: 'do', to: 'perform' },
+          { from: 'use', to: 'apply' },
+          { from: 'get', to: 'obtain' },
+          { from: 'give', to: 'provide' },
+          { from: 'show', to: 'demonstrate' },
+          { from: 'tell', to: 'explain' },
+          { from: 'look', to: 'examine' },
+          { from: 'put', to: 'place' },
+          { from: 'try', to: 'attempt' },
+          { from: 'fix', to: 'repair' },
+          { from: 'take', to: 'capture' },
+          { from: 'have', to: 'include' },
+          { from: 'seem', to: 'appear' },
+          { from: 'think', to: 'consider' },
+          { from: 'say', to: 'state' }
+        ],
+        description: 'Verb upgrades'
+      },
+      // Priority 2: Redundant phrase pairs
       redundancies: {
         priority: 2,
         phrases: [
+          { from: 'each and every', to: 'every' },
+          { from: 'first and foremost', to: 'first' },
+          { from: 'any and all', to: 'all' },
+          { from: 'various different', to: 'various' },
+          { from: 'future plans', to: 'plans' },
+          { from: 'end result', to: 'result' },
+          { from: 'final outcome', to: 'outcome' },
+          { from: 'past history', to: 'history' },
+          { from: 'advance warning', to: 'warning' },
+          { from: 'free gift', to: 'gift' },
+          { from: 'new innovation', to: 'innovation' },
+          { from: 'basic fundamentals', to: 'fundamentals' },
+          { from: 'unexpected surprise', to: 'surprise' },
+          { from: 'close proximity', to: 'proximity' },
+          { from: 'completely finished', to: 'finished' },
+          { from: 'completely complete', to: 'complete' },
+          { from: 'general consensus', to: 'consensus' },
+          { from: 'final conclusion', to: 'conclusion' },
+          { from: 'personal opinion', to: 'opinion' },
+          { from: 'important essentials', to: 'essentials' },
+          { from: 'true facts', to: 'facts' },
           { from: 'write down', to: 'write' },
           { from: 'empty out', to: 'empty' },
           { from: 'completely finish', to: 'finish' },
-          { from: 'final result', to: 'result' },
-          { from: 'end result', to: 'result' },
-          { from: 'past history', to: 'history' },
-          { from: 'future plans', to: 'plans' }
+          { from: 'final result', to: 'result' }
         ],
         description: 'Redundancies'
       },
-      conversationFillers: {
+      // Priority 2: Request simplifications
+      requestSimplifications: {
+        priority: 2,
+        phrases: [
+          { from: 'please provide me with', to: 'provide' },
+          { from: 'could you possibly', to: '' },
+          { from: 'I would like you to', to: '' },
+          { from: 'I need you to', to: '' },
+          { from: 'help me understand', to: 'explain' },
+          { from: 'help me figure out', to: 'explain' },
+          { from: 'help me solve', to: 'solve' },
+          { from: 'help me write', to: 'write' },
+          { from: 'I request that you', to: '' },
+          { from: 'I am looking for', to: '' },
+          { from: 'I am curious about', to: '' },
+          { from: 'I want to know', to: '' },
+          { from: 'can you tell me', to: 'explain' },
+          { from: 'could you give me', to: 'provide' },
+          { from: 'would you mind', to: '' },
+          { from: 'just wanted to', to: '' }
+        ],
+        description: 'Request simplifications'
+      },
+      // Priority 2: Academic filler
+      academicFiller: {
+        priority: 2,
+        words: [
+          'the objective of this request is to', 'the primary focus of this is',
+          'this analysis will demonstrate that', 'this paper aims to show',
+          'it can be seen that', 'one could argue that', 'this illustrates that',
+          'this indicates that', 'it is evident that', 'it is widely known that',
+          'research suggests that', 'studies have shown that',
+          'it is commonly believed that'
+        ],
+        description: 'Academic filler'
+      },
+      // Priority 2: Corporate jargon
+      corporateJargon: {
+        priority: 2,
+        words: [
+          'synergy', 'optimize workflow', 'leverage resources', 'value-added',
+          'actionable insight', 'thought leadership', 'circle back',
+          'low-hanging fruit', 'best practices', 'mission-critical',
+          'core competency', 'scalable solution', 'strategic initiative',
+          'streamline process', 'touch base', 'paradigm shift', 'bandwidth',
+          'move the needle', 'drill down', 'align stakeholders', 'visibility',
+          'holistic approach'
+        ],
+        description: 'Corporate jargon'
+      },
+      // Priority 3: Politeness markers
+      politenessMarkers: {
         priority: 3,
         words: [
-          'you know', 'you see', 'like', 'um', 'uh', 'er', 'ah',
-          'well', 'anyway', 'by the way', 'speaking of which',
-          'as I was saying', 'where was I'
+          'please', 'thank you', 'thanks', 'kindly', 'if you don\'t mind',
+          'could you please', 'would you be so kind', 'I would appreciate',
+          'thank you in advance', 'many thanks', 'much appreciated', 'grateful',
+          'sorry to bother you', 'I apologize for', 'excuse me', 'pardon me'
         ],
-        description: 'Conversation fillers'
+        description: 'Politeness markers'
       },
+      // Priority 3: Redundant requests
       redundantRequests: {
         priority: 3,
         words: [
           'can you', 'could you', 'would you', 'will you', 'are you able to',
-          'I need you to', 'I want you to', 'I would like you to',
-          'help me', 'assist me', 'I\'m asking you to'
+          'I want you to', 'I would like you to', 'help me', 'assist me',
+          'I\'m asking you to'
         ],
         description: 'Redundant requests'
       }
