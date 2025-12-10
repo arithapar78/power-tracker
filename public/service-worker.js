@@ -1457,9 +1457,55 @@ class EnergyTracker {
         };
       }
 
-      // Log usage for analytics (optional)
+      // Save statistics to the SAME storage locations as the popup's prompt generator
+      // This ensures both the widget and popup share the same cumulative stats
       try {
-        const { promptHelperUsage = [] } = await chrome.storage.local.get('promptHelperUsage');
+        const storageData = await chrome.storage.local.get([
+          'promptOptimizationStats',
+          'totalOptimizationSessions',
+          'cumulativeTokensSaved',
+          'cumulativeEnergySaved',
+          'promptHelperUsage'
+        ]);
+
+        // Get current stats or initialize defaults
+        const currentStats = storageData.promptOptimizationStats || {
+          totalOptimizations: 0,
+          averageEnergyPercent: 0,
+          averageTokenReduction: 0,
+          lastOptimization: null
+        };
+
+        const currentTotal = storageData.totalOptimizationSessions || currentStats.totalOptimizations || 0;
+        const currentCumulativeTokens = storageData.cumulativeTokensSaved || 0;
+        const currentCumulativeEnergy = storageData.cumulativeEnergySaved || 0;
+
+        // Calculate new totals
+        const newTotal = currentTotal + 1;
+        const newCumulativeTokens = currentCumulativeTokens + (result.tokensSaved || 0);
+        const newCumulativeEnergy = currentCumulativeEnergy + (result.energySavings?.energySavedMwh || 0);
+
+        // Calculate new averages
+        const currentAvgSavings = currentStats.averageEnergyPercent || 0;
+        const currentAvgReduction = currentStats.averageTokenReduction || 0;
+        const newAvgSavings = Math.round(((currentAvgSavings * currentTotal) + (result.percentageSaved || 0)) / newTotal);
+        const newAvgReduction = Math.round(((currentAvgReduction * currentTotal) + (result.tokensSaved || 0)) / newTotal);
+
+        // Update the main statistics (same as popup uses)
+        await chrome.storage.local.set({
+          promptOptimizationStats: {
+            totalOptimizations: newTotal,
+            averageEnergyPercent: newAvgSavings,
+            averageTokenReduction: newAvgReduction,
+            lastOptimization: Date.now()
+          },
+          totalOptimizationSessions: newTotal,
+          cumulativeTokensSaved: newCumulativeTokens,
+          cumulativeEnergySaved: newCumulativeEnergy
+        });
+
+        // Also log to usage history for detailed analytics
+        const promptHelperUsage = storageData.promptHelperUsage || [];
         promptHelperUsage.push({
           timestamp: Date.now(),
           source: source || 'unknown',
@@ -1467,7 +1513,8 @@ class EnergyTracker {
           model,
           level,
           tokensSaved: result.tokensSaved,
-          percentageSaved: result.percentageSaved
+          percentageSaved: result.percentageSaved,
+          energySavedMwh: result.energySavings?.energySavedMwh || 0
         });
 
         // Keep only last 100 entries

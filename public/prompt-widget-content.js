@@ -200,60 +200,6 @@
   }
 
   /**
-   * Get the value from an input element (textarea or contenteditable)
-   */
-  function getInputValue(el) {
-    if (!el) return '';
-    if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
-      return el.value || '';
-    }
-    return el.innerText || el.textContent || '';
-  }
-
-  /**
-   * Set the value of an input element
-   */
-  function setInputValue(el, value) {
-    if (!el) return;
-
-    if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
-      el.value = value;
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      el.dispatchEvent(new Event('change', { bubbles: true }));
-    } else if (el.contentEditable === 'true') {
-      // For contenteditable elements (like Claude's input)
-      el.innerHTML = '';
-
-      // Handle ProseMirror editors
-      if (el.classList.contains('ProseMirror')) {
-        const p = document.createElement('p');
-        p.textContent = value;
-        el.appendChild(p);
-      } else {
-        el.textContent = value;
-      }
-
-      // Dispatch events to notify the app
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      el.dispatchEvent(new Event('change', { bubbles: true }));
-
-      // Some apps need focus events
-      el.focus();
-      el.dispatchEvent(new Event('focus', { bubbles: true }));
-    }
-  }
-
-  /**
-   * Append value to an input element
-   */
-  function appendInputValue(el, value) {
-    if (!el) return;
-    const currentValue = getInputValue(el);
-    const separator = currentValue.trim() ? '\n\n' : '';
-    setInputValue(el, currentValue + separator + value);
-  }
-
-  /**
    * Create the floating widget button
    */
   function createWidget() {
@@ -407,14 +353,6 @@
           <div class="ph-result-text" id="ph-result-text"></div>
 
           <div class="ph-actions">
-            <button id="ph-replace-btn" class="ph-btn ph-btn-action" title="Replace text box content">
-              <span class="ph-btn-icon">↻</span>
-              Replace
-            </button>
-            <button id="ph-append-btn" class="ph-btn ph-btn-action" title="Append to text box">
-              <span class="ph-btn-icon">+</span>
-              Append
-            </button>
             <button id="ph-copy-btn" class="ph-btn ph-btn-action" title="Copy to clipboard">
               <span class="ph-btn-icon">📋</span>
               Copy
@@ -435,8 +373,6 @@
     // Event listeners
     panel.querySelector('.ph-close-btn').addEventListener('click', closePanel);
     panel.querySelector('#ph-generate-btn').addEventListener('click', handleGenerate);
-    panel.querySelector('#ph-replace-btn').addEventListener('click', handleReplace);
-    panel.querySelector('#ph-append-btn').addEventListener('click', handleAppend);
     panel.querySelector('#ph-copy-btn').addEventListener('click', handleCopy);
 
     // Close on Escape key
@@ -632,40 +568,6 @@
     }
 
     resultSection.style.display = 'block';
-  }
-
-  /**
-   * Handle replace button click
-   */
-  function handleReplace() {
-    if (!lastResult || !currentInput) {
-      updateStatus('No result to insert', 'error');
-      return;
-    }
-
-    const text = lastResult.resultPrompt || lastResult.optimized || '';
-    setInputValue(currentInput, text);
-    updateStatus('Replaced text box content', 'success');
-
-    // Close panel after action
-    setTimeout(closePanel, 800);
-  }
-
-  /**
-   * Handle append button click
-   */
-  function handleAppend() {
-    if (!lastResult || !currentInput) {
-      updateStatus('No result to insert', 'error');
-      return;
-    }
-
-    const text = lastResult.resultPrompt || lastResult.optimized || '';
-    appendInputValue(currentInput, text);
-    updateStatus('Appended to text box', 'success');
-
-    // Close panel after action
-    setTimeout(closePanel, 800);
   }
 
   /**

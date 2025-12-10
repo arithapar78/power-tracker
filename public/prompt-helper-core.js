@@ -53,10 +53,24 @@ const PromptHelperCore = {
     removedWords = removedWords.concat(layer3Result.removedWords);
     optimizationCategories = optimizationCategories.concat(layer3Result.categories);
 
-    // Calculate final metrics
-    const optimizedTokens = this.estimateTokenCount(optimized, model);
-    const tokensSaved = Math.max(0, originalTokens - optimizedTokens);
-    const percentageSaved = originalTokens > 0 ? Math.round((tokensSaved / originalTokens) * 100) : 0;
+    // Calculate initial metrics
+    let optimizedTokens = this.estimateTokenCount(optimized, model);
+    let tokensSaved = Math.max(0, originalTokens - optimizedTokens);
+    let percentageSaved = originalTokens > 0 ? Math.round((tokensSaved / originalTokens) * 100) : 0;
+
+    // Apply optimization caps to match the popup's behavior
+    // This ensures consistent results between widget and popup
+    const cappedResults = this.applyOptimizationCaps(prompt, optimized, level, {
+      tokensSaved,
+      percentageSaved,
+      model
+    });
+
+    optimized = cappedResults.optimized;
+    tokensSaved = cappedResults.tokensSaved;
+    percentageSaved = cappedResults.percentageSaved;
+    optimizedTokens = this.estimateTokenCount(optimized, model);
+
     const energySavings = this.calculateEnergySavings(tokensSaved, model);
     const processingTime = Date.now() - startTime;
 
@@ -674,14 +688,86 @@ const PromptHelperCore = {
   },
 
   /**
-   * Clean up whitespace in text
+   * Clean up whitespace in text (matches popup.js implementation)
    */
   cleanupWhitespace(text) {
     return text
-      .replace(/\s+/g, ' ')
-      .replace(/\s([.,!?;:])/g, '$1')
-      .replace(/^\s+|\s+$/g, '')
+      .replace(/\s+/g, ' ')                    // Multiple spaces to single
+      .replace(/\s*,\s*,+/g, ',')             // Multiple commas
+      .replace(/\s*\.\s*\.+/g, '.')           // Multiple periods
+      .replace(/^\s*[,.]/, '')                 // Leading punctuation
+      .replace(/\s*([,.!?;:])/g, '$1')        // Space before punctuation
+      .replace(/([,.!?;:])\s*([,.!?;:])/g, '$1$2') // Double punctuation
       .trim();
+  },
+
+  /**
+   * Apply optimization caps to ensure consistent results with popup
+   * This is the key function that makes widget match the popup's behavior
+   */
+  applyOptimizationCaps(original, optimized, level, metrics) {
+    const caps = {
+      conservative: { min: 5, max: 15 },
+      balanced: { min: 15, max: 25 },
+      aggressive: { min: 25, max: 45 }
+    };
+
+    const cap = caps[level] || caps.balanced;
+
+    // If reduction is too low, try more aggressive techniques
+    if (metrics.percentageSaved < cap.min) {
+      optimized = this.applyAdditionalCompression(optimized, cap.min - metrics.percentageSaved);
+    }
+
+    // If reduction is too high, restore some content
+    if (metrics.percentageSaved > cap.max) {
+      optimized = this.restoreEssentialContent(original, optimized, metrics.percentageSaved - cap.max);
+    }
+
+    // Recalculate metrics
+    const finalTokens = this.estimateTokenCount(optimized, metrics.model);
+    const originalTokens = this.estimateTokenCount(original, metrics.model);
+    const tokensSaved = Math.max(0, originalTokens - finalTokens);
+    const percentageSaved = originalTokens > 0 ? Math.round((tokensSaved / originalTokens) * 100) : 0;
+
+    return {
+      optimized,
+      tokensSaved,
+      percentageSaved
+    };
+  },
+
+  /**
+   * Apply additional compression when initial optimization doesn't reach target
+   * Matches popup.js applyAdditionalCompression exactly
+   */
+  applyAdditionalCompression(text, targetReduction) {
+    let compressed = text;
+
+    // Remove articles more aggressively
+    compressed = compressed.replace(/\b(a|an|the)\b/gi, '');
+
+    // Remove auxiliary verbs
+    compressed = compressed.replace(/\b(is|are|was|were|be|been|being)\b/gi, '');
+
+    // Remove prepositions where context allows
+    compressed = compressed.replace(/\b(in|on|at|by|for|with|from)\b/gi, '');
+
+    return this.cleanupWhitespace(compressed);
+  },
+
+  /**
+   * Restore essential content if too much was removed
+   * Matches popup.js restoreEssentialContent exactly
+   */
+  restoreEssentialContent(original, optimized, excessReduction) {
+    // Simple restoration: if too much was removed, use a blend
+    if (excessReduction > 20) {
+      // Too aggressive, use more of the original
+      return original;
+    }
+
+    return optimized;
   },
 
   /**
