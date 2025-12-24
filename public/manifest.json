@@ -5,16 +5,16 @@
   "description": "Monitor your browser's power consumption, save usage history, export data to JSON, and get AI-powered tips to reduce energy use.",
   "permissions": ["activeTab", "tabs", "storage", "alarms", "scripting"],
   "host_permissions": ["https://firestore.googleapis.com/*"],
-  "background": { "service_worker": "service-worker.js" },
+  "background": { "service_worker": "js/core/service-worker.js" },
   "action": {
-    "default_popup": "popup.html",
-    "default_icon": { "16": "icon-16.png", "48": "icon-48.png", "128": "icon-128.png" }
+    "default_popup": "html/popup.html",
+    "default_icon": { "16": "icons/icon-16.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" }
   },
-  "icons": { "16": "icon-16.png", "48": "icon-48.png", "128": "icon-128.png" },
+  "icons": { "16": "icons/icon-16.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content-script.js", "content-script-notifications.js"],
+      "js": ["js/content/content-script.js", "js/content/content-script-notifications.js"],
       "run_at": "document_idle",
       "all_frames": false
     }

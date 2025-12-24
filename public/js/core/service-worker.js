@@ -3,6 +3,16 @@
 // Robust against restarts, handles async sendResponse correctly, and
 // never crashes the content script if the SW gets reloaded.
 
+// ============================================
+// NOTIFICATION CONTROL FLAGS
+// ============================================
+// Set individual flags to false to disable specific notification types
+// These only affect in-page notifications, NOT the main extension popup
+const ENABLE_ENERGY_TIPS = false;       // Energy consumption tips (e.g., "Close unused tabs") - DISABLED BY DEFAULT
+const ENABLE_CARBON_TIPS = false;       // Carbon footprint tips (e.g., "Reduce screen brightness") - DISABLED BY DEFAULT
+const ENABLE_AI_REMINDERS = false;      // AI prompt reminders (e.g., "Use Prompt Optimizer") - DISABLED BY DEFAULT
+// ============================================
+
 // Suppress non-critical errors
 self.addEventListener('error', (event) => {
   // Suppress common non-critical service worker errors
@@ -50,13 +60,13 @@ try {
 // Import Energy-Saving Tips Database
 let ENERGY_TIPS_AVAILABLE = false;
 try {
-  importScripts('energy-saving-tips.js');
+  importScripts('../features/energy-saving-tips.js');
   ENERGY_TIPS_AVAILABLE = true;
 } catch (error) {
 }
 
 try {
-  importScripts('data-migration.js');
+  importScripts('../utils/data-migration.js');
   DATA_MIGRATION_AVAILABLE = true;
 } catch (error) {
 }
@@ -65,7 +75,7 @@ try {
 let ENHANCED_INTEGRATION_AVAILABLE = false;
 
 try {
-  importScripts('energy-tracker-with-agent.js');
+  importScripts('../../energy-tracker-with-agent.js');
   AGENT_SYSTEM_AVAILABLE = true;
 } catch (error) {
 }
@@ -75,8 +85,8 @@ let FIREBASE_AVAILABLE = false;
 
 (function initFirebase() {
   try {
-    importScripts('firebase-config.js');
-    importScripts('firebase-manager.js');
+    importScripts('../config/firebase-config.js');
+    importScripts('../utils/firebase-manager.js');
     FIREBASE_AVAILABLE = true;
     
     // Initialize Firebase asynchronously without crashing SW
@@ -101,12 +111,12 @@ let FIREBASE_AVAILABLE = false;
 
 // Try to load enhanced AI energy database and integration
 try {
-  importScripts('enhanced-ai-energy-database.js');
+  importScripts('../features/enhanced-ai-energy-database.js');
 } catch (error) {
 }
 
 try {
-  importScripts('energy-tracker-enhanced-integration.js');
+  importScripts('../../energy-tracker-enhanced-integration.js');
   ENHANCED_INTEGRATION_AVAILABLE = true;
 } catch (error) {
 }
@@ -254,7 +264,7 @@ class EnergyTracker {
             try {
               await chrome.notifications.create({
                 type: 'basic',
-                iconUrl: 'icon-48.png',
+                iconUrl: 'icons/icon-48.png',
                 title: 'PowerTracker - Data Migration Complete',
                 message: `Successfully migrated ${result.stats.entriesMigrated} entries to the new power-based system.`
               });
@@ -285,7 +295,7 @@ class EnergyTracker {
     // Install/open welcome
     chrome.runtime.onInstalled.addListener((details) => {
       if (details.reason === 'install') {
-        chrome.tabs.create({ url: chrome.runtime.getURL('options.html?welcome=true') });
+        chrome.tabs.create({ url: chrome.runtime.getURL('html/options.html?welcome=true') });
       }
     });
 
@@ -375,7 +385,7 @@ class EnergyTracker {
                   if (canInject) {
                     await chrome.scripting.executeScript({
                       target: { tabId },
-                      files: ['content-script.js']
+                      files: ['js/content/content-script.js']
                     });
                     contentScriptInjected = true;
                   } else {
@@ -477,7 +487,7 @@ class EnergyTracker {
             }
             case 'OPEN_SETTINGS': {
               await chrome.tabs.create({
-                url: chrome.runtime.getURL('options.html?tab=settings')
+                url: chrome.runtime.getURL('html/options.html?tab=settings')
               });
               return { success: true };
             }
@@ -678,7 +688,7 @@ class EnergyTracker {
                 });
 
                 // Open options page with a special flag to show prompt generator instructions
-                const optionsUrl = chrome.runtime.getURL('options.html?openPromptGenerator=true');
+                const optionsUrl = chrome.runtime.getURL('html/options.html?openPromptGenerator=true');
                 console.log('[ServiceWorker] Opening options page:', optionsUrl);
 
                 await chrome.tabs.create({
@@ -963,7 +973,7 @@ class EnergyTracker {
     try {
       await chrome.scripting.executeScript({
         target: { tabId },
-        files: ['content-script.js']
+        files: ['js/content/content-script.js']
       });
       
       // Wait for content script to be ready with timeout
@@ -1164,6 +1174,11 @@ class EnergyTracker {
   // Enhanced method for contextual in-tab tips
   async maybeShowEnergyTip(tabId, powerWatts, tabData) {
     try {
+      // Check energy tips flag - if disabled, don't show energy tips
+      if (!ENABLE_ENERGY_TIPS) {
+        return;
+      }
+      
       const s = await this.getSettings();
       const notificationSettings = await this.getNotificationSettings();
 
@@ -1208,7 +1223,7 @@ class EnergyTracker {
             if (chrome.notifications) {
               chrome.notifications.create({
                 type: 'basic',
-                iconUrl: 'icon-48.png',
+                iconUrl: 'icons/icon-48.png',
                 title: tipData.title || 'Power AI Tip',
                 message: tipData.message
               });
@@ -1718,13 +1733,13 @@ class EnergyTracker {
           
         case 'open_settings':
           await chrome.tabs.create({
-            url: chrome.runtime.getURL('options.html?tab=settings')
+            url: chrome.runtime.getURL('html/options.html?tab=settings')
           });
           return { success: true, message: 'Settings opened' };
           
         case 'show_history':
           await chrome.tabs.create({
-            url: chrome.runtime.getURL('options.html?tab=history')
+            url: chrome.runtime.getURL('html/options.html?tab=history')
           });
           return { success: true, message: 'History opened' };
           
@@ -2413,6 +2428,11 @@ class EnergyTracker {
    */
   async maybeShowCarbonTip(tabId) {
     try {
+      // Check carbon tips flag - if disabled, don't show carbon tips
+      if (!ENABLE_CARBON_TIPS) {
+        return;
+      }
+      
       const notificationSettings = await this.getNotificationSettings();
       if (!notificationSettings.enabled) return;
 
@@ -2515,6 +2535,11 @@ class EnergyTracker {
    */
   async checkAndShowAIReminder(tabId, tab) {
     try {
+      // Check AI reminders flag - if disabled, don't show AI reminders
+      if (!ENABLE_AI_REMINDERS) {
+        return;
+      }
+      
       // Check if this is an AI site
       const url = (tab.url || '').toLowerCase();
       const title = (tab.title || '').toLowerCase();

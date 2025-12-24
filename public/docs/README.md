@@ -8,19 +8,34 @@ A sophisticated Chrome extension that monitors and tracks browser power consumpt
 ```
 PowerTrackingApp/
 ├── manifest.json              # Extension manifest (Manifest V3)
-├── service-worker.js           # Background service worker
-├── content-script.js           # Main content script
-├── content-script-notifications.js # Enhanced notification system
-├── popup.html/js/css          # Extension popup interface
-├── options.html/js/css        # Settings and history page
-├── power-calculator.js        # Power consumption calculations
-├── data-migration.js          # Data migration utilities
-└── icons/                     # Extension icons (16, 48, 128px)
+├── html/                      # HTML pages
+│   ├── popup.html            # Extension popup interface
+│   ├── options.html          # Settings and history page
+│   └── dashboard.html        # Dashboard page
+├── css/                      # Stylesheets
+│   ├── popup.css
+│   ├── options.css
+│   └── dashboard.css
+├── js/
+│   ├── core/                 # Core functionality
+│   │   ├── service-worker.js # Background service worker
+│   │   └── power-calculator.js # Power consumption calculations
+│   ├── content/              # Content scripts
+│   │   ├── content-script.js # Main content script
+│   │   └── content-script-notifications.js # Enhanced notification system
+│   ├── popup/                # Popup interface
+│   │   └── popup.js
+│   ├── options/              # Options page
+│   │   └── options.js
+│   ├── features/             # Feature modules
+│   ├── utils/                # Utilities (data-migration.js, etc.)
+│   └── config/               # Configuration files
+└── icons/                    # Extension icons (16, 48, 128px)
 ```
 
 ### Core Components
 
-#### 1. Service Worker (`service-worker.js`)
+#### 1. Service Worker (`js/core/service-worker.js`)
 - **Main Class**: `EnergyTracker`
 - **Purpose**: Central coordinator for energy tracking, data storage, and tab management
 - **Key Responsibilities**:
@@ -30,7 +45,7 @@ PowerTrackingApp/
   - Notification management
   - Settings management
 
-#### 2. Content Script (`content-script.js`)
+#### 2. Content Script (`js/content/content-script.js`)
 - **Main Classes**: `PageEnergyMonitor`, `EnergyTipNotifications`
 - **Purpose**: Page-level energy monitoring and user notifications
 - **Key Responsibilities**:
@@ -39,7 +54,7 @@ PowerTrackingApp/
   - In-page energy tips
   - Real-time data transmission
 
-#### 3. Popup Interface (`popup.js`)
+#### 3. Popup Interface (`js/popup/popup.js`)
 - **Main Class**: `PopupManager`
 - **Purpose**: User interface for current energy status and advanced features
 - **Key Responsibilities**:
@@ -48,7 +63,7 @@ PowerTrackingApp/
   - Quick actions and tips
   - **Prompt Generator**: Secure access to integrated prompt optimization tools
 
-#### 4. Options Page (`options.js`)
+#### 4. Options Page (`js/options/options.js`)
 - **Purpose**: Settings management and historical data viewing
 - **Features**:
   - Power consumption history

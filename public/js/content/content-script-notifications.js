@@ -3,6 +3,16 @@
 // Secure implementation for Gmail, Docs, and other secure sites
 // ===========================
 
+// ============================================
+// NOTIFICATION CONTROL FLAGS
+// ============================================
+// Set individual flags to false to disable specific notification types
+// These only affect in-page notifications, NOT the main extension popup
+const ENABLE_ENERGY_TIPS = false;       // Energy consumption tips (e.g., "Close unused tabs") - DISABLED BY DEFAULT
+const ENABLE_CARBON_TIPS = false;       // Carbon footprint tips (e.g., "Reduce screen brightness") - DISABLED BY DEFAULT
+const ENABLE_AI_REMINDERS = false;      // AI prompt reminders (e.g., "Use Prompt Optimizer") - DISABLED BY DEFAULT
+// ============================================
+
 (() => {
   // Prevent multiple initialization
   if (window.__powerAINotificationSystemLoaded) {
@@ -256,7 +266,10 @@
             }
             break;
           case 'SHOW_AI_PROMPT_REMINDER':
-            this.showAIPromptReminder(message.data);
+            // Check AI reminders flag before showing
+            if (ENABLE_AI_REMINDERS) {
+              this.showAIPromptReminder(message.data);
+            }
             if (sendResponse) {
               sendResponse({ success: true });
             }
@@ -787,6 +800,30 @@
 
     showTip(tipData) {
       try {
+        // Check notification type flags - disable specific types if flag is false
+        const tipType = tipData.type || '';
+        
+        // Check energy tips flag
+        if (tipType.includes('energy') || tipType.includes('power') || tipType === 'high_power_video' || tipType === 'high_power_gaming' || tipType === 'high_power_general' || tipType === 'moderate_power') {
+          if (!ENABLE_ENERGY_TIPS) {
+            return;
+          }
+        }
+        
+        // Check carbon tips flag
+        if (tipType === 'carbon_tip' || tipType.includes('carbon')) {
+          if (!ENABLE_CARBON_TIPS) {
+            return;
+          }
+        }
+        
+        // Check AI reminders flag
+        if (tipType === 'ai_prompt_reminder' || tipType.includes('ai_reminder') || tipType.includes('prompt')) {
+          if (!ENABLE_AI_REMINDERS) {
+            return;
+          }
+        }
+        
         if (!this.settings || !this.settings.notificationsEnabled) {
           return;
         }
@@ -870,6 +907,11 @@
     }
 
     showAIPromptReminder(data = {}) {
+      // Check AI reminders flag - if disabled, don't show AI reminders
+      if (!ENABLE_AI_REMINDERS) {
+        return;
+      }
+      
       // Create special AI prompt reminder notification - PROMINENT VERSION
       const reminderData = {
         type: 'ai_prompt_reminder',

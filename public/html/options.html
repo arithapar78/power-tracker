@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Power Tracker Settings</title>
-  <link rel="stylesheet" href="options.css">
+  <link rel="stylesheet" href="../css/options.css">
 </head>
 <body>
   <div class="container" data-theme="dark">
@@ -21,7 +21,7 @@
     <!-- Header -->
     <header class="header">
       <div class="header-content">
-        <img src="icon-48.png" alt="Power Tracker" class="logo" id="optionsLogo">
+        <img src="../icons/icon-48.png" alt="Power Tracker" class="logo" id="optionsLogo">
         <div class="header-text">
           <h1>Power Tracker Settings</h1>
           <p>Configure your browser energy monitoring preferences</p>
@@ -1716,7 +1716,20 @@
     </footer>
   </div>
 
-  <script src="power-calculator.js"></script>
-  <script src="options.js"></script>
+  <!-- 
+    SCRIPT LOADING ORDER:
+    1. CONFIG: Firebase and app constants
+    2. CORE: Power calculator
+    3. OPTIONS: Main options controller
+  -->
+  
+  <!-- Config Layer -->
+  <script src="../js/config/firebase-config.js"></script>
+  
+  <!-- Core Layer -->
+  <script src="../js/core/power-calculator.js"></script>
+  
+  <!-- Options Layer -->
+  <script src="../js/options/options.js"></script>
 </body>
 </html>

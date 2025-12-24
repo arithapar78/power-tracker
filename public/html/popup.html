@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Power Tracker</title>
-  <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="../css/popup.css">
 </head>
 <body>
   <div class="popup-container" data-theme="light">
@@ -12,7 +12,7 @@
     <div class="header-card">
       <div class="header-content">
         <div class="logo-section">
-          <img src="icon-48.png" alt="Power Tracker Logo" class="logo" id="popupLogo">
+          <img src="../icons/icon-48.png" alt="Power Tracker Logo" class="logo" id="popupLogo">
           <div class="brand-info">
             <h1>Power Tracker</h1>
             <div class="status-indicator" id="statusIndicator">
@@ -457,12 +457,33 @@
     </div>
   </div>
 
-  <script src="enhanced-ai-energy-database.js"></script>
-  <script src="enhanced-query-estimation.js"></script>
-  <script src="ai-model-comparison.js"></script>
-  <script src="ai-energy-database.js"></script>
-  <script src="backend-power-calculator.js"></script>
-  <script src="firebase-helpers.js"></script>
-  <script src="popup.js"></script>
+  <!-- 
+    SCRIPT LOADING ORDER (Bottom to Top = Execution Order):
+    
+    1. CONFIG: Firebase and app constants
+    2. CORE: Power calculator, storage manager  
+    3. FEATURES: AI energy, backend power, query estimation
+    4. UTILS: Helpers, firebase helpers
+    5. POPUP: Main popup controller
+  -->
+  
+  <!-- Config Layer -->
+  <script src="../js/config/firebase-config.js"></script>
+  
+  <!-- Core Layer -->
+  <script src="../js/core/power-calculator.js"></script>
+  
+  <!-- Features Layer -->
+  <script src="../js/features/enhanced-ai-energy-database.js"></script>
+  <script src="../js/features/enhanced-query-estimation.js"></script>
+  <script src="../js/features/ai-model-comparison.js"></script>
+  <script src="../js/features/ai-energy-database.js"></script>
+  <script src="../js/features/backend-power-calculator.js"></script>
+  
+  <!-- Utils Layer -->
+  <script src="../js/utils/firebase-helpers.js"></script>
+  
+  <!-- Popup Layer -->
+  <script src="../js/popup/popup.js"></script>
 </body>
 </html>

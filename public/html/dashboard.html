@@ -453,7 +453,13 @@
     </div>
   </div>
 
-  <script src="firebase-config.js"></script>
+  <!-- 
+    SCRIPT LOADING ORDER:
+    1. CONFIG: Firebase configuration
+  -->
+  
+  <!-- Config Layer -->
+  <script src="../js/config/firebase-config.js"></script>
   <script>
     // Firebase REST API Manager for Dashboard
     const projectId = firebaseConfig.projectId;

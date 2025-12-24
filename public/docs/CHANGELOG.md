@@ -5,6 +5,30 @@ All notable changes to Power Tracker will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.0.0] - 2024-12-XX
+
+### Code Refactoring & Notification Control
+
+#### Added
+- **Organized Directory Structure**: Refactored codebase into logical directories (js/core, js/content, js/popup, js/options, js/features, js/utils, js/config, html, css, icons, docs)
+- **Individual Notification Flags**: Three separate flags for granular control (`ENABLE_ENERGY_TIPS`, `ENABLE_CARBON_TIPS`, `ENABLE_AI_REMINDERS`)
+- **Comprehensive Documentation**: Added ARCHITECTURE.md, REFACTORING_SUMMARY.md, POPUP_TYPES.md, NOTIFICATION_CONTROL.md
+
+#### Changed
+- **Default Notification State**: All in-page notifications are now **disabled by default** (flags set to `false`)
+- **File Organization**: All files moved to organized directory structure
+- **Path Updates**: Updated all file references in manifest.json, HTML files, and JavaScript files
+- **Script Loading Order**: Added clear comments in HTML files showing script loading order
+
+#### Fixed
+- File path references after refactoring
+- Service worker importScripts paths for root-level files
+
+#### Documentation
+- Updated README.md with new directory structure
+- Created comprehensive architecture documentation
+- Consolidated notification control documentation into single file
+
 ## [6.0.0] - 2024-11-07
 
 ### Firebase Integration & Cloud Sync

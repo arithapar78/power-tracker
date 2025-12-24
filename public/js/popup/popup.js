@@ -633,7 +633,7 @@ class PopupManager {
             try {
               await chrome.scripting.executeScript({
                 target: { tabId: currentTab.id },
-                files: ['content-script.js']
+                files: ['js/content/content-script.js']
               });
               
               // Wait for injection to complete
@@ -2755,13 +2755,13 @@ class PopupManager {
   
   handleViewHistory() {
     chrome.tabs.create({
-      url: chrome.runtime.getURL('options.html?tab=history')
+      url: chrome.runtime.getURL('html/options.html?tab=history')
     });
   }
   
   handleSettings() {
     chrome.tabs.create({
-      url: chrome.runtime.getURL('options.html?tab=settings')
+      url: chrome.runtime.getURL('html/options.html?tab=settings')
     });
   }
   
