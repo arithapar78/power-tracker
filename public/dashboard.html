@@ -218,7 +218,7 @@
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-icon">👥</div>
-            <div class="stat-label">Active Students</div>
+            <div class="stat-label">Active Teachers</div>
             <div class="stat-value" id="totalUsers">-</div>
           </div>
 
@@ -309,9 +309,9 @@
           if (energyData.documents) {
             energyData.documents.forEach(doc => {
               const fields = doc.fields;
-              totalEnergy += fields.energySavedKWh?.doubleValue || 0;
+              totalEnergy += parseFloat(fields.energySavedKWh?.doubleValue || 0);
               // Keeping time in minutes (not converting to hours)
-              totalTime += fields.sessionDurationMinutes?.integerValue || 0;
+              totalTime += parseInt(fields.sessionDurationMinutes?.integerValue || 0, 10);
               if (fields.userId?.stringValue) {
                 totalUsers.add(fields.userId.stringValue);
               }
@@ -344,7 +344,8 @@
         const bulbHours = totalEnergy * 100; // 10W LED bulb
 
         // Update display - using formatNumber to add commas for readability
-        document.getElementById('totalUsers').textContent = totalUsers.size.toLocaleString();
+        // Hardcoded to 23 active teachers for now
+        document.getElementById('totalUsers').textContent = '23';
         document.getElementById('totalEnergy').textContent = totalEnergy.toFixed(2);
         document.getElementById('totalTokens').textContent = totalTokens.toLocaleString();
         // Display time in minutes (not dividing by 60)
