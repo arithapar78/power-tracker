@@ -811,12 +811,33 @@
         // Always update local settings immediately (works even without API)
         this.settings.notificationsEnabled = false;
 
-        // Close all current notifications
+        // Close all current notifications first
         this.hideAllTips();
 
-        // Show prominent confirmation (this will be the last popup shown)
+        // Show confirmation popup after a brief delay to ensure cleanup is complete
+        setTimeout(() => {
+          this.showDisabledConfirmation();
+        }, 100);
+
+      } catch (error) {
+        console.error('[PowerAI] Failed to disable notifications:', error);
+      }
+    }
+
+    /**
+     * Show confirmation popup that notifications have been disabled
+     * This is a special popup that bypasses the notificationsEnabled check
+     */
+    showDisabledConfirmation() {
+      try {
+        // Check if body exists
+        if (!document.body) {
+          return;
+        }
+
+        // Create confirmation popup element
         const confirmationElement = this.createSecureElement('div', {
-          className: 'energy-tip-notification',
+          className: 'energy-tip-notification power-ai-disable-confirmation',
           styles: {
             position: 'fixed',
             top: '50%',
@@ -833,12 +854,17 @@
             boxShadow: '0 20px 60px rgba(16, 185, 129, 0.3), 0 0 0 1000px rgba(0, 0, 0, 0.5)',
             zIndex: '2147483647',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
             color: this.settings?.darkMode ? '#f1f5f9' : '#1f2937',
             pointerEvents: 'auto',
-            textAlign: 'center'
+            textAlign: 'center',
+            willChange: 'transform, opacity'
           }
         });
+
+        if (!confirmationElement) {
+          return;
+        }
 
         // Icon
         const icon = this.createSecureElement('div', {
@@ -871,34 +897,42 @@
           }
         });
 
-        if (confirmationElement) {
-          if (icon) confirmationElement.appendChild(icon);
-          if (title) confirmationElement.appendChild(title);
-          if (message) confirmationElement.appendChild(message);
-        }
+        // Assemble the confirmation popup
+        if (icon) confirmationElement.appendChild(icon);
+        if (title) confirmationElement.appendChild(title);
+        if (message) confirmationElement.appendChild(message);
 
-        if (confirmationElement && document.body) {
-          document.body.appendChild(confirmationElement);
+        // Append to body
+        document.body.appendChild(confirmationElement);
 
-          // Animate in
-          requestAnimationFrame(() => {
+        // Force a reflow before animating to ensure the initial styles are applied
+        confirmationElement.offsetHeight;
+
+        // Animate in after a brief delay
+        requestAnimationFrame(() => {
+          setTimeout(() => {
             confirmationElement.style.transform = 'translate(-50%, -50%) scale(1)';
             confirmationElement.style.opacity = '1';
-          });
+          }, 50);
+        });
 
-          // Dismiss after 3 seconds
-          setTimeout(() => {
+        // Dismiss after 3 seconds
+        setTimeout(() => {
+          if (confirmationElement) {
             confirmationElement.style.transform = 'translate(-50%, -50%) scale(0.9)';
             confirmationElement.style.opacity = '0';
+
+            // Remove from DOM after animation completes
             setTimeout(() => {
-              if (confirmationElement.parentNode) {
+              if (confirmationElement && confirmationElement.parentNode) {
                 confirmationElement.parentNode.removeChild(confirmationElement);
               }
             }, 400);
-          }, 3000);
-        }
+          }
+        }, 3000);
+
       } catch (error) {
-        console.error('[PowerAI] Failed to disable notifications:', error);
+        console.error('[PowerAI] Failed to show disabled confirmation:', error);
       }
     }
 
