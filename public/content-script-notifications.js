@@ -80,6 +80,8 @@
     constructor() {
       this.notifications = [];
       this.container = null;
+      this.shadowHost = null;
+      this.shadowRoot = null;
       this.isInitialized = false;
       this.messageListener = null;
       this.settings = null;
@@ -130,40 +132,9 @@
     }
 
     injectAnimationStyles() {
-      // Add CSS animations for prominent notifications
-      if (document.getElementById('power-ai-animations')) {
-        return; // Already injected
-      }
-
-      const styleElement = document.createElement('style');
-      styleElement.id = 'power-ai-animations';
-      styleElement.textContent = `
-        @keyframes pulse-glow {
-          0%, 100% {
-            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3), 0 0 0 1000px rgba(0, 0, 0, 0.5);
-          }
-          50% {
-            box-shadow: 0 20px 70px rgba(59, 130, 246, 0.5), 0 0 0 1000px rgba(0, 0, 0, 0.5);
-          }
-        }
-
-        @keyframes bounce {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-5px);
-          }
-        }
-
-        .prominent-reminder {
-          animation: pulse-glow 2s ease-in-out infinite !important;
-        }
-      `;
-
-      if (document.head) {
-        document.head.appendChild(styleElement);
-      }
+      // Animations are now injected in injectShadowStyles() inside the Shadow DOM
+      // This method is kept for backwards compatibility but does nothing
+      // since all styles are now scoped within the Shadow DOM
     }
 
     checkChromeApiAvailability() {
@@ -345,7 +316,7 @@
 
     createNotificationContainer() {
       if (this.container) return;
-      
+
       try {
         // Wait for document.body to be available
         if (!document.body) {
@@ -353,40 +324,124 @@
           return;
         }
 
-        this.container = this.createSecureElement('div', {
-          id: 'power-ai-notification-container',
-          className: 'power-ai-notifications',
-          styles: {
-            position: 'fixed',
-            // Anchor to all corners to cover full viewport without affecting layout
-            top: '0',
-            right: '0',
-            bottom: '0',
-            left: '0',
-            zIndex: '999999',
-            pointerEvents: 'none',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-            // Prevent container from affecting page layout
-            overflow: 'visible'
-          }
-        });
-        
-        if (this.container && document.body) {
-          document.body.appendChild(this.container);
+        // Create a host element for the Shadow DOM
+        this.shadowHost = document.createElement('div');
+        this.shadowHost.id = 'power-ai-notification-host';
+        // Critical: Set all styles on the host to prevent page CSS interference
+        this.shadowHost.style.cssText = `
+          all: initial !important;
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          width: 0 !important;
+          height: 0 !important;
+          overflow: visible !important;
+          z-index: 2147483647 !important;
+          pointer-events: none !important;
+        `;
+
+        // Attach Shadow DOM for style isolation
+        this.shadowRoot = this.shadowHost.attachShadow({ mode: 'closed' });
+
+        // Create the actual container inside the shadow DOM
+        this.container = document.createElement('div');
+        this.container.id = 'power-ai-notification-container';
+        this.container.className = 'power-ai-notifications';
+        this.container.style.cssText = `
+          position: fixed;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          z-index: 999999;
+          pointer-events: none;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+          overflow: visible;
+        `;
+
+        // Inject base styles into shadow DOM
+        this.injectShadowStyles();
+
+        this.shadowRoot.appendChild(this.container);
+
+        if (document.body) {
+          document.body.appendChild(this.shadowHost);
         } else {
           // Body not ready, retry
           this.container = null;
+          this.shadowHost = null;
+          this.shadowRoot = null;
           setTimeout(() => this.createNotificationContainer(), 100);
         }
       } catch (error) {
         // Retry container creation after a delay
         this.container = null;
+        this.shadowHost = null;
+        this.shadowRoot = null;
         setTimeout(() => {
           if (!this.container) {
             this.createNotificationContainer();
           }
         }, 1000);
       }
+    }
+
+    injectShadowStyles() {
+      if (!this.shadowRoot) return;
+
+      const styleElement = document.createElement('style');
+      styleElement.textContent = `
+        /* Reset all inherited styles within shadow DOM */
+        *, *::before, *::after {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+
+        /* Base notification styles */
+        .energy-tip-notification {
+          all: initial;
+          display: block;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          line-height: 1.4;
+          color: #1f2937;
+        }
+
+        .energy-tip-notification * {
+          all: revert;
+          font-family: inherit;
+        }
+
+        .energy-tip-notification button {
+          font-family: inherit;
+          cursor: pointer;
+        }
+
+        /* Animations */
+        @keyframes pulse-glow {
+          0%, 100% {
+            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3), 0 0 0 1000px rgba(0, 0, 0, 0.5);
+          }
+          50% {
+            box-shadow: 0 20px 70px rgba(59, 130, 246, 0.5), 0 0 0 1000px rgba(0, 0, 0, 0.5);
+          }
+        }
+
+        @keyframes bounce {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-5px);
+          }
+        }
+
+        .prominent-reminder {
+          animation: pulse-glow 2s ease-in-out infinite !important;
+        }
+      `;
+
+      this.shadowRoot.appendChild(styleElement);
     }
 
     // Safe DOM creation that works with Content Security Policy
@@ -830,8 +885,8 @@
      */
     showDisabledConfirmation() {
       try {
-        // Check if body exists
-        if (!document.body) {
+        // Check if container exists (inside shadow DOM)
+        if (!this.container) {
           return;
         }
 
@@ -902,8 +957,8 @@
         if (title) confirmationElement.appendChild(title);
         if (message) confirmationElement.appendChild(message);
 
-        // Append to body
-        document.body.appendChild(confirmationElement);
+        // Append to shadow container
+        this.container.appendChild(confirmationElement);
 
         // Force a reflow before animating to ensure the initial styles are applied
         confirmationElement.offsetHeight;
@@ -989,7 +1044,7 @@
         this.autoDismissTimers.forEach(timer => clearTimeout(timer));
         this.autoDismissTimers.clear();
 
-        // Force remove all notification elements from DOM
+        // Force remove all notification elements from shadow DOM container
         if (this.container) {
           const existingNotifications = this.container.querySelectorAll('.energy-tip-notification');
           existingNotifications.forEach(el => {
@@ -998,14 +1053,6 @@
             }
           });
         }
-
-        // Also check document.body for any stray notifications
-        const strayNotifications = document.querySelectorAll('.energy-tip-notification');
-        strayNotifications.forEach(el => {
-          if (el.parentNode) {
-            el.parentNode.removeChild(el);
-          }
-        });
 
         // Reset notifications array
         this.notifications = [];
@@ -1031,11 +1078,14 @@
           chrome.runtime.onMessage.removeListener(this.messageListener);
         }
 
-        // Remove notification container
-        if (this.container && this.container.parentNode) {
-          this.container.parentNode.removeChild(this.container);
+        // Remove the shadow host (which contains everything)
+        if (this.shadowHost && this.shadowHost.parentNode) {
+          this.shadowHost.parentNode.removeChild(this.shadowHost);
         }
 
+        this.container = null;
+        this.shadowRoot = null;
+        this.shadowHost = null;
         this.notifications = [];
         this.isInitialized = false;
 
