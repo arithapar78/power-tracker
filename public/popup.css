@@ -3307,3 +3307,246 @@ body::before {
 .tab-card:nth-child(3) {
   animation-delay: 0.2s;
 }
+
+/* ===== COMPREHENSIVE DARK MODE FIXES ===== */
+/* Ensure all text has proper contrast in dark mode */
+
+[data-theme="dark"] {
+  /* Efficiency badges - dark mode versions */
+  .efficiency-badge.efficiency-excellent {
+    background: rgba(34, 197, 94, 0.2);
+    color: #86efac;
+  }
+
+  .efficiency-badge.efficiency-good {
+    background: rgba(59, 130, 246, 0.2);
+    color: #93c5fd;
+  }
+
+  .efficiency-badge.efficiency-average {
+    background: rgba(251, 146, 60, 0.2);
+    color: #fdba74;
+  }
+
+  .efficiency-badge.efficiency-poor {
+    background: rgba(248, 113, 113, 0.2);
+    color: #fca5a5;
+  }
+
+  /* Tips card - dark mode */
+  .tips-card {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.2) 100%);
+    border-color: rgba(251, 191, 36, 0.4);
+  }
+
+  .tips-card .card-header h2 {
+    color: #fcd34d;
+  }
+
+  .tip-text {
+    color: #fef3c7;
+  }
+
+  /* Backend metrics - ensure visibility */
+  .backend-metrics-grid .metric-value,
+  .backend-energy-value {
+    color: var(--text-primary);
+  }
+
+  .backend-metrics-grid .metric-label {
+    color: var(--text-secondary);
+  }
+
+  /* AI Model section - dark mode */
+  .ai-model-name {
+    color: var(--text-primary);
+  }
+
+  .ai-model-details {
+    color: var(--text-secondary);
+  }
+
+  /* Tab section text */
+  .tab-section .section-title {
+    color: var(--text-primary);
+  }
+
+  .tab-section p,
+  .tab-section span {
+    color: var(--text-secondary);
+  }
+
+  /* Stat cards */
+  .stat-value {
+    color: var(--text-primary);
+  }
+
+  .stat-label {
+    color: var(--text-secondary);
+  }
+
+  /* Quick stat cards */
+  .quick-stat-card .stat-value {
+    color: var(--primary-light);
+  }
+
+  .quick-stat-card .stat-label {
+    color: var(--text-secondary);
+  }
+
+  /* Token analysis */
+  .token-value {
+    color: var(--text-primary);
+  }
+
+  .token-unit,
+  .token-percentage {
+    color: var(--text-secondary);
+  }
+
+  /* Processing time */
+  .processing-label {
+    color: var(--text-secondary);
+  }
+
+  .processing-value {
+    color: #67e8f9;
+  }
+
+  /* Metric rows */
+  .metric-row .metric-label {
+    color: var(--text-secondary);
+  }
+
+  /* Category breakdown */
+  .category-tag {
+    color: var(--text-primary);
+    background: var(--surface-elevated);
+    border-color: var(--border);
+  }
+
+  /* Power display */
+  .tab-power-unit,
+  .tab-power-label {
+    color: var(--text-secondary);
+  }
+
+  /* Empty states */
+  .tabs-empty-state,
+  .tabs-loading {
+    color: var(--text-secondary);
+  }
+
+  /* Card headers */
+  .card-header h2,
+  .card-header h3 {
+    color: var(--text-primary);
+  }
+
+  /* Impact cards */
+  .impact-card .card-title {
+    color: var(--text-primary);
+  }
+
+  .impact-card .card-value {
+    color: var(--text-primary);
+  }
+
+  .impact-card .card-unit {
+    color: var(--text-secondary);
+  }
+
+  /* Generator stats */
+  .generator-stats .stat-label {
+    color: var(--text-secondary);
+  }
+
+  /* Prompt result */
+  .prompt-result-content {
+    color: var(--text-primary);
+    background: var(--surface-solid);
+  }
+
+  /* Modal content */
+  .modal-content {
+    background: var(--surface-solid);
+    color: var(--text-primary);
+  }
+
+  .modal-content h3,
+  .modal-content p {
+    color: var(--text-primary);
+  }
+
+  /* Form labels */
+  label {
+    color: var(--text-secondary);
+  }
+
+  /* Inputs */
+  input,
+  textarea,
+  select {
+    color: var(--text-primary);
+    background: var(--surface-solid);
+    border-color: var(--border);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--text-muted);
+  }
+
+  /* History items */
+  .history-item {
+    color: var(--text-primary);
+    background: var(--surface-elevated);
+  }
+
+  .history-item-date {
+    color: var(--text-secondary);
+  }
+
+  .history-item-value {
+    color: var(--text-primary);
+  }
+
+  /* Footer text */
+  .footer-text,
+  .version-text {
+    color: var(--text-muted);
+  }
+}
+
+/* ===== LIGHT MODE EXPLICIT STYLES ===== */
+/* Ensure light mode text is always dark enough */
+:root:not([data-theme="dark"]),
+[data-theme="light"] {
+  .stat-value {
+    color: #1e293b;
+  }
+
+  .stat-label {
+    color: #475569;
+  }
+
+  .card-header h2,
+  .card-header h3 {
+    color: #1e293b;
+  }
+
+  .metric-label {
+    color: #475569;
+  }
+
+  .metric-value {
+    color: #1e293b;
+  }
+
+  /* Ensure inputs have dark text */
+  input,
+  textarea,
+  select {
+    color: #1e293b;
+  }
+}

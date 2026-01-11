@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power Tracker Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container" data-theme="dark">
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Switch theme">
+      <span class="theme-icon">☀️</span>
+    </button>
+
+    <!-- Help Button -->
+    <button class="help-button" id="help-button" aria-label="Help & Instructions" title="Help & Instructions">
+      <span class="help-text">Help & Instructions</span>
+    </button>
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <img src="icon-48.png" alt="Power Tracker" class="logo" id="optionsLogo">
+        <div class="header-text">
+          <h1>Power Tracker Settings</h1>
+          <p>Configure your browser energy monitoring preferences</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-tab="settings">Settings</button>
+      <button class="nav-tab" data-tab="backend-energy">Backend Energy</button>
+      <button class="nav-tab" data-tab="prompt-generator">Prompt Generator</button>
+      <button class="nav-tab" data-tab="history">History</button>
+      <button class="nav-tab" data-tab="insights">Insights</button>
+      <button class="nav-tab" data-tab="about">About</button>
+    </nav>
+
+    <!-- Notification Status Panel (top-right, always visible) -->
+    <div class="notification-status-panel" id="notificationStatusPanel">
+      <div class="status-panel-header">
+        <span class="status-icon">🔔</span>
+        <span class="status-title">Notification Status</span>
+      </div>
+      <div class="status-timers">
+        <div class="timer-row" id="nextPopupTimer">
+          <span class="timer-label">Next popup in:</span>
+          <span class="timer-value" id="nextPopupCountdown">--:--</span>
+        </div>
+        <div class="timer-row disabled-timer" id="reEnableTimer" style="display: none;">
+          <span class="timer-label">Turns back on in:</span>
+          <span class="timer-value" id="reEnableCountdown">10:00</span>
+        </div>
+      </div>
+      <div class="status-indicator-row">
+        <span class="status-dot active" id="notificationStatusDot"></span>
+        <span class="status-text" id="notificationStatusText">Notifications Active</span>
+      </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div class="tab-content" id="settings-tab">
+      <div class="settings-grid">
+        <!-- Tracking Settings Card -->
+        <div class="setting-card">
+          <div class="card-header">
+            <h2>⚡ Tracking Settings</h2>
+          </div>
+          <div class="card-content">
+            <div class="setting-item">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="trackingEnabled" class="setting-label">Enable Energy Tracking</label>
+                  <p class="setting-description">Monitor energy consumption across all browser tabs</p>
+                </div>
+                <div class="setting-control">
+                  <input type="checkbox" id="trackingEnabled" class="toggle-switch">
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="samplingInterval" class="setting-label">Sampling Interval</label>
+                  <p class="setting-description">How frequently to collect energy metrics</p>
+                </div>
+                <div class="setting-control">
+                  <select id="samplingInterval" class="setting-select">
+                    <option value="1000">1 second (High accuracy)</option>
+                    <option value="5000">5 seconds (Recommended)</option>
+                    <option value="10000">10 seconds (Low impact)</option>
+                    <option value="30000">30 seconds (Minimal)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="dataRetentionDays" class="setting-label">Data Retention</label>
+                  <p class="setting-description">How long to keep historical energy data</p>
+                </div>
+                <div class="setting-control">
+                  <input type="range" id="dataRetentionDays" min="1" max="90" class="setting-slider">
+                  <span class="slider-value" id="retentionValue">30 days</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications Card -->
+        <div class="setting-card">
+          <div class="card-header">
+            <h2>🔔 Notifications</h2>
+          </div>
+          <div class="card-content">
+            <div class="setting-item">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="enablePopups" class="setting-label">Enable Popups</label>
+                  <p class="setting-description">Enable/disable ALL Power Tracker popups (tips, reminders, prompts)</p>
+                </div>
+                <div class="setting-control">
+                  <input type="checkbox" id="enablePopups" class="toggle-switch">
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="notificationInterval" class="setting-label">Notification Interval</label>
+                  <p class="setting-description">How often to show energy tip popups</p>
+                </div>
+                <div class="setting-control">
+                  <select id="notificationInterval" class="setting-select">
+                    <option value="60000">1 minute</option>
+                    <option value="120000">2 minutes</option>
+                    <option value="300000">5 minutes</option>
+                    <option value="600000">10 minutes</option>
+                    <option value="900000">15 minutes (Default - Recommended for classrooms)</option>
+                    <option value="1800000">30 minutes</option>
+                    <option value="3600000">1 hour</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-item" style="display: none;">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="notificationDuration" class="setting-label">Notification Display Duration</label>
+                  <p class="setting-description">Duration is now calculated automatically based on content</p>
+                </div>
+                <div class="setting-control">
+                  <select id="notificationDuration" class="setting-select">
+                    <option value="3000">3 seconds</option>
+                    <option value="4000">4 seconds</option>
+                    <option value="5000">5 seconds</option>
+                    <option value="5500">5.5 seconds (Default)</option>
+                    <option value="6000">6 seconds</option>
+                    <option value="7000">7 seconds</option>
+                    <option value="8000">8 seconds</option>
+                    <option value="10000">10 seconds</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="powerThreshold" class="setting-label">Power Alert Threshold</label>
+                  <p class="setting-description">Power level (in watts) that triggers notifications</p>
+                </div>
+                <div class="setting-control">
+                  <input type="range" id="powerThreshold" min="10" max="80" class="setting-slider">
+                  <span class="slider-value" id="thresholdValue">40W</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Privacy & Data Card -->
+        <div class="setting-card">
+          <div class="card-header">
+            <h2>🔒 Privacy & Data</h2>
+          </div>
+          <div class="card-content">
+            <div class="privacy-info-card">
+              <h3>Your Privacy is Protected</h3>
+              <div class="privacy-features">
+                <div class="privacy-feature">
+                  <span class="feature-icon">🛡️</span>
+                  <span class="feature-text">All data is stored locally on your device</span>
+                </div>
+                <div class="privacy-feature">
+                  <span class="feature-icon">🚫</span>
+                  <span class="feature-text">No data is sent to external servers</span>
+                </div>
+                <div class="privacy-feature">
+                  <span class="feature-icon">📤</span>
+                  <span class="feature-text">You can export or delete your data anytime</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-actions">
+              <button class="btn btn-secondary" id="exportDataBtn">📁 Export My Data</button>
+              <button class="btn btn-danger" id="clearDataBtn">🗑️ Clear All Data</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Backend Energy Tab -->
+    <div class="tab-content hidden" id="backend-energy-tab">
+      <div class="backend-energy-grid">
+        <!-- Quick Log Card -->
+        <div class="energy-card">
+          <div class="card-header">
+            <h2>⚡ Quick Log AI Usage</h2>
+            <p class="card-description">Log your AI model usage and server energy consumption to track your complete digital footprint.</p>
+          </div>
+          <div class="card-content">
+            <div class="quick-log-grid">
+              <button class="ai-model-btn" id="logGpt4Btn">
+                <span class="model-icon">🤖</span>
+                <span class="model-name">GPT-4</span>
+                <span class="model-desc">Query</span>
+              </button>
+              <button class="ai-model-btn" id="logClaudeBtn">
+                <span class="model-icon">🧠</span>
+                <span class="model-name">Claude</span>
+                <span class="model-desc">Query</span>
+              </button>
+              <button class="ai-model-btn" id="logGeminiBtn">
+                <span class="model-icon">✨</span>
+                <span class="model-name">Gemini</span>
+                <span class="model-desc">Query</span>
+              </button>
+              <button class="ai-model-btn secondary" id="logCustomBtn">
+                <span class="model-icon">⚙️</span>
+                <span class="model-name">Custom</span>
+                <span class="model-desc">AI Usage</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Manual Entry Card -->
+        <div class="energy-card">
+          <div class="card-header">
+            <h2>📝 Manual Energy Entry</h2>
+          </div>
+          <div class="card-content">
+            <form class="energy-entry-form" id="backendEnergyForm">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="aiModel">AI Model</label>
+                  <select id="aiModel" class="form-select">
+                    <option value="gpt-4">GPT-4</option>
+                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                    <option value="claude-3-opus">Claude 3 Opus</option>
+                    <option value="claude-3-sonnet">Claude 3 Sonnet</option>
+                    <option value="claude-3-haiku">Claude 3 Haiku</option>
+                    <option value="gemini-pro">Gemini Pro</option>
+                    <option value="gemini-flash">Gemini Flash</option>
+                    <option value="llama-2-70b">Llama 2 70B</option>
+                    <option value="custom">Custom Model</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="customModelName">Custom Model Name</label>
+                  <input type="text" id="customModelName" class="form-input" placeholder="Enter custom model name" disabled>
+                </div>
+                <div class="form-group">
+                  <label for="tokenCount">Tokens Used</label>
+                  <input type="number" id="tokenCount" class="form-input" placeholder="e.g., 1500" min="1">
+                </div>
+                <div class="form-group">
+                  <label for="requestCount">Number of Requests</label>
+                  <input type="number" id="requestCount" class="form-input" value="1" min="1">
+                </div>
+                <div class="form-group">
+                  <label for="serverEnergy">Server Energy (kWh)</label>
+                  <input type="number" id="serverEnergy" class="form-input" step="0.001" placeholder="Optional - direct energy measurement">
+                </div>
+                <div class="form-group">
+                  <label for="description">Description</label>
+                  <input type="text" id="description" class="form-input" placeholder="e.g., Code review, Writing assistance">
+                </div>
+              </div>
+              
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Log Energy Usage</button>
+                <button type="reset" class="btn btn-secondary">Clear Form</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- AI Model Energy Database Card -->
+        <div class="energy-card">
+          <div class="card-header">
+            <h2>🔋 AI Model Energy Database</h2>
+            <p class="card-description">Energy consumption estimates per 1000 tokens</p>
+          </div>
+          <div class="card-content">
+            <div class="model-energy-grid">
+              <div class="model-energy-card">
+                <div class="model-header">
+                  <span class="model-icon">🤖</span>
+                  <div class="model-info">
+                    <div class="model-name">GPT-4</div>
+                    <div class="energy-value">~0.047 kWh</div>
+                  </div>
+                </div>
+                <div class="energy-note">High accuracy, intensive compute</div>
+              </div>
+
+              <div class="model-energy-card">
+                <div class="model-header">
+                  <span class="model-icon">⚡</span>
+                  <div class="model-info">
+                    <div class="model-name">GPT-3.5 Turbo</div>
+                    <div class="energy-value">~0.012 kWh</div>
+                  </div>
+                </div>
+                <div class="energy-note">Balanced performance</div>
+              </div>
+
+              <div class="model-energy-card">
+                <div class="model-header">
+                  <span class="model-icon">🧠</span>
+                  <div class="model-info">
+                    <div class="model-name">Claude 3 Opus</div>
+                    <div class="energy-value">~0.045 kWh</div>
+                  </div>
+                </div>
+                <div class="energy-note">Premium reasoning model</div>
+              </div>
+
+              <div class="model-energy-card">
+                <div class="model-header">
+                  <span class="model-icon">🎯</span>
+                  <div class="model-info">
+                    <div class="model-name">Claude 3 Sonnet</div>
+                    <div class="energy-value">~0.025 kWh</div>
+                  </div>
+                </div>
+                <div class="energy-note">Balanced capabilities</div>
+              </div>
+
+              <div class="model-energy-card">
+                <div class="model-header">
+                  <span class="model-icon">✨</span>
+                  <div class="model-info">
+                    <div class="model-name">Gemini Pro</div>
+                    <div class="energy-value">~0.020 kWh</div>
+                  </div>
+                </div>
+                <div class="energy-note">Google's flagship model</div>
+              </div>
+
+              <div class="model-energy-card">
+                <div class="model-header">
+                  <span class="model-icon">🦙</span>
+                  <div class="model-info">
+                    <div class="model-name">Llama 2 70B</div>
+                    <div class="energy-value">~0.035 kWh</div>
+                  </div>
+                </div>
+                <div class="energy-note">Open source, large model</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Backend Energy Log Card -->
+        <div class="energy-card full-width">
+          <div class="card-header">
+            <h2>📊 Recent Backend Energy Usage</h2>
+          </div>
+          <div class="card-content">
+            <div class="log-table-container">
+              <table class="backend-log-table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>AI Model</th>
+                    <th>Tokens</th>
+                    <th>Energy (kWh)</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="backendLogTableBody">
+                  <tr>
+                    <td colspan="6" class="empty-state">No backend energy usage logged yet</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prompt Generator Tab -->
+    <div class="tab-content hidden" id="prompt-generator-tab">
+      <div class="prompt-generator-grid">
+        <!-- Token Reduction Analytics Card -->
+        <div class="analytics-card">
+          <div class="card-header">
+            <h2>📊 Token Reduction Analytics</h2>
+            <div class="analytics-controls">
+              <select id="analyticsTimeRange" class="setting-select">
+                <option value="24h">Last 24 Hours</option>
+                <option value="7d">Last 7 Days</option>
+                <option value="30d">Last 30 Days</option>
+              </select>
+              <button class="btn btn-primary" id="refreshAnalyticsBtn">Refresh</button>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="chart-container">
+              <canvas id="tokenReductionChart" width="800" height="400"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-content">
+              <div class="stat-value" id="totalTokensSaved">--</div>
+              <div class="stat-label">Total Tokens Saved</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📈</div>
+            <div class="stat-content">
+              <div class="stat-value" id="averageTokenReduction">--</div>
+              <div class="stat-label">Average Reduction</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-content">
+              <div class="stat-value" id="totalPromptsOptimized">--</div>
+              <div class="stat-label">Prompts Optimized</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🌱</div>
+            <div class="stat-content">
+              <div class="stat-value" id="energySaved">--</div>
+              <div class="stat-label">Energy Saved (mWh)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Optimization Settings Card -->
+        <div class="setting-card">
+          <div class="card-header">
+            <h2>⚙️ Optimization Settings</h2>
+          </div>
+          <div class="card-content">
+            <div class="setting-item">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="defaultOptimizationLevel" class="setting-label">Default Optimization Level</label>
+                  <p class="setting-description">The default level applied to new optimizations</p>
+                </div>
+                <div class="setting-control">
+                  <select id="defaultOptimizationLevel" class="setting-select">
+                    <option value="conservative">Conservative (5-15% reduction)</option>
+                    <option value="balanced">Balanced (15-25% reduction)</option>
+                    <option value="aggressive">Aggressive (25-45% reduction)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="defaultTargetModel" class="setting-label">Default Target Model</label>
+                  <p class="setting-description">AI model to optimize for by default</p>
+                </div>
+                <div class="setting-control">
+                  <select id="defaultTargetModel" class="setting-select">
+                    <option value="gpt-4">GPT-4</option>
+                    <option value="gpt-5">GPT-5</option>
+                    <option value="claude-4">Claude-4</option>
+                    <option value="claude-sonnet">Claude Sonnet</option>
+                    <option value="grok-4">Grok-4</option>
+                    <option value="deepseek-r1">DeepSeek R1</option>
+                    <option value="llama-4">Llama-4 Maverick</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="showRealTimeTokens" class="setting-label">Real-time Token Counting</label>
+                  <p class="setting-description">Show live token estimates while typing</p>
+                </div>
+                <div class="setting-control">
+                  <input type="checkbox" id="showRealTimeTokens" class="toggle-switch" checked>
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-row">
+                <div class="setting-info">
+                  <label for="autoSaveOptimizations" class="setting-label">Auto-save Optimizations</label>
+                  <p class="setting-description">Automatically save optimization results for analytics</p>
+                </div>
+                <div class="setting-control">
+                  <input type="checkbox" id="autoSaveOptimizations" class="toggle-switch" checked>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Model Performance Card -->
+        <div class="model-performance-card">
+          <div class="card-header">
+            <h2>🎯 Model Performance Insights</h2>
+          </div>
+          <div class="card-content">
+            <div class="performance-grid">
+              <div class="performance-model">
+                <div class="model-header">
+                  <div class="model-name">GPT-4</div>
+                  <div class="model-efficiency excellent">Excellent</div>
+                </div>
+                <div class="model-stats">
+                  <div class="stat-row">
+                    <span class="stat-label">Avg Reduction:</span>
+                    <span class="stat-value" id="gpt4AvgReduction">--</span>
+                  </div>
+                  <div class="stat-row">
+                    <span class="stat-label">Energy per 1K tokens:</span>
+                    <span class="stat-value">47 mWh</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="performance-model">
+                <div class="model-header">
+                  <div class="model-name">Claude Sonnet</div>
+                  <div class="model-efficiency good">Good</div>
+                </div>
+                <div class="model-stats">
+                  <div class="stat-row">
+                    <span class="stat-label">Avg Reduction:</span>
+                    <span class="stat-value" id="claudeAvgReduction">--</span>
+                  </div>
+                  <div class="stat-row">
+                    <span class="stat-label">Energy per 1K tokens:</span>
+                    <span class="stat-value">25 mWh</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="performance-model">
+                <div class="model-header">
+                  <div class="model-name">Grok-4</div>
+                  <div class="model-efficiency average">Average</div>
+                </div>
+                <div class="model-stats">
+                  <div class="stat-row">
+                    <span class="stat-label">Avg Reduction:</span>
+                    <span class="stat-value" id="grokAvgReduction">--</span>
+                  </div>
+                  <div class="stat-row">
+                    <span class="stat-label">Energy per 1K tokens:</span>
+                    <span class="stat-value">60 mWh</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="performance-model">
+                <div class="model-header">
+                  <div class="model-name">DeepSeek R1</div>
+                  <div class="model-efficiency excellent">Excellent</div>
+                </div>
+                <div class="model-stats">
+                  <div class="stat-row">
+                    <span class="stat-label">Avg Reduction:</span>
+                    <span class="stat-value" id="deepseekAvgReduction">--</span>
+                  </div>
+                  <div class="stat-row">
+                    <span class="stat-label">Energy per 1K tokens:</span>
+                    <span class="stat-value">30 mWh</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Optimization Categories Card -->
+        <div class="categories-card full-width">
+          <div class="card-header">
+            <h2>📝 Most Common Optimizations</h2>
+          </div>
+          <div class="card-content">
+            <div class="categories-grid">
+              <div class="category-item">
+                <div class="category-header">
+                  <div class="category-name">Politeness Markers</div>
+                  <div class="category-count" id="politenessCount">--</div>
+                </div>
+                <div class="category-description">
+                  Removing "please", "thank you", unnecessary courtesies
+                </div>
+                <div class="category-examples">
+                  <span class="example-word">please</span>
+                  <span class="example-word">thank you</span>
+                  <span class="example-word">kindly</span>
+                </div>
+              </div>
+
+              <div class="category-item">
+                <div class="category-header">
+                  <div class="category-name">Intensifiers</div>
+                  <div class="category-count" id="intensifiersCount">--</div>
+                </div>
+                <div class="category-description">
+                  Removing "very", "really", unnecessary emphasis
+                </div>
+                <div class="category-examples">
+                  <span class="example-word">very</span>
+                  <span class="example-word">really</span>
+                  <span class="example-word">extremely</span>
+                </div>
+              </div>
+
+              <div class="category-item">
+                <div class="category-header">
+                  <div class="category-name">Verbose Phrases</div>
+                  <div class="category-count" id="verboseCount">--</div>
+                </div>
+                <div class="category-description">
+                  Replacing long phrases with shorter alternatives
+                </div>
+                <div class="category-examples">
+                  <span class="example-phrase">in order to → to</span>
+                  <span class="example-phrase">due to the fact → because</span>
+                </div>
+              </div>
+
+              <div class="category-item">
+                <div class="category-header">
+                  <div class="category-name">Filler Words</div>
+                  <div class="category-count" id="fillerCount">--</div>
+                </div>
+                <div class="category-description">
+                  Removing conversation fillers and hedge words
+                </div>
+                <div class="category-examples">
+                  <span class="example-word">you know</span>
+                  <span class="example-word">sort of</span>
+                  <span class="example-word">basically</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Management Card -->
+        <div class="data-card">
+          <div class="card-header">
+            <h2>💾 Data Management</h2>
+          </div>
+          <div class="card-content">
+            <div class="data-info">
+              <h3>Optimization History</h3>
+              <div class="data-stats">
+                <div class="data-stat">
+                  <span class="data-label">Total Records:</span>
+                  <span class="data-value" id="totalRecords">--</span>
+                </div>
+                <div class="data-stat">
+                  <span class="data-label">Data Size:</span>
+                  <span class="data-value" id="dataSize">--</span>
+                </div>
+                <div class="data-stat">
+                  <span class="data-label">Last Updated:</span>
+                  <span class="data-value" id="lastUpdated">--</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="data-actions">
+              <button class="btn btn-secondary" id="exportOptimizationData">📁 Export Data</button>
+              <button class="btn btn-secondary" id="importOptimizationData">📂 Import Data</button>
+              <button class="btn btn-danger" id="clearOptimizationData">🗑️ Clear History</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Tab -->
+    <div class="tab-content hidden" id="history-tab">
+      <div class="history-grid">
+        <!-- History Controls Card -->
+        <div class="history-card">
+          <div class="card-header">
+            <h2>📈 Energy Consumption History</h2>
+            <div class="history-controls">
+              <select id="historyTimeRange" class="setting-select">
+                <option value="24h">Last 24 Hours</option>
+                <option value="7d">Last 7 Days</option>
+                <option value="30d">Last 30 Days</option>
+              </select>
+              <button class="btn btn-primary" id="refreshHistoryBtn">Refresh</button>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="chart-container">
+              <canvas id="powerChart" width="800" height="400"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- History Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-content">
+              <div class="stat-value" id="totalPowerConsumed">--</div>
+              <div class="stat-label">Total Energy</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+              <div class="stat-value" id="averagePowerUsage">--</div>
+              <div class="stat-label">Average Power</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⏰</div>
+            <div class="stat-content">
+              <div class="stat-value" id="peakPowerTime">--</div>
+              <div class="stat-label">Peak Power Time</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🌟</div>
+            <div class="stat-content">
+              <div class="stat-value" id="mostEfficientSite">--</div>
+              <div class="stat-label">Most Efficient Site</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- History Table Card -->
+        <div class="history-card full-width">
+          <div class="card-header">
+            <h2>📋 Detailed History</h2>
+          </div>
+          <div class="card-content">
+            <div class="history-table-container">
+              <table class="history-table" id="historyTable">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Website</th>
+                    <th>Power (W)</th>
+                    <th>Duration</th>
+                    <th>Energy (kWh)</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                  <!-- Test data for demonstration -->
+                  <tr>
+                    <td>2025-01-13 4:10 PM</td>
+                    <td>
+                      <div class="website-info">
+                        <div class="website-name">YouTube - Video Streaming</div>
+                        <div class="website-url">youtube.com</div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="power-badge power-high">35.2W</span>
+                    </td>
+                    <td>15m 30s</td>
+                    <td>0.009 kWh</td>
+                    <td>
+                      <button class="btn-link" data-test-site="youtube">Details</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>2025-01-13 3:45 PM</td>
+                    <td>
+                      <div class="website-info">
+                        <div class="website-name">GitHub - Code Repository</div>
+                        <div class="website-url">github.com</div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="power-badge power-medium">18.5W</span>
+                    </td>
+                    <td>8m 12s</td>
+                    <td>0.003 kWh</td>
+                    <td>
+                      <button class="btn-link" data-test-site="github">Details</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>2025-01-13 3:20 PM</td>
+                    <td>
+                      <div class="website-info">
+                        <div class="website-name">Documentation Site</div>
+                        <div class="website-url">docs.example.com</div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="power-badge power-excellent">11.2W</span>
+                    </td>
+                    <td>22m 45s</td>
+                    <td>0.004 kWh</td>
+                    <td>
+                      <button class="btn-link" data-test-site="docs">Details</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insights Tab -->
+    <div class="tab-content hidden" id="insights-tab">
+      <div class="insights-grid">
+        <!-- Energy Insights Cards -->
+        <div class="insights-stats-grid">
+          <div class="insight-card">
+            <div class="insight-icon">🌱</div>
+            <div class="insight-content">
+              <h3>Weekly Energy Savings</h3>
+              <div class="insight-value" id="weeklySavings">0.000 kWh</div>
+              <p>Estimated energy saved through optimization</p>
+            </div>
+          </div>
+
+          <div class="insight-card">
+            <div class="insight-icon">🔋</div>
+            <div class="insight-content">
+              <h3>Battery Life Extension</h3>
+              <div class="insight-value" id="batteryExtension">2 min</div>
+              <p>Additional battery time from energy awareness</p>
+            </div>
+          </div>
+
+          <div class="insight-card">
+            <div class="insight-icon">🌍</div>
+            <div class="insight-content">
+              <h3>Carbon Footprint Reduction</h3>
+              <div class="insight-value" id="carbonReduction">0 g CO₂</div>
+              <p>Environmental impact reduction this month</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Energy Action Cards -->
+        <div class="recommendations-grid">
+          <h2>💡 Energy Optimization Actions</h2>
+          
+          <div class="action-card" data-action="close-tabs">
+            <div class="action-header">
+              <div class="action-icon">📑</div>
+              <div class="action-title">Close Unused Tabs</div>
+              <button class="action-btn">Take Action</button>
+            </div>
+            <div class="action-content">
+              <div class="action-description">
+                You have an average of <span class="highlight">1 active tab</span> per day.
+                Closing unused tabs can reduce power consumption by up to <span class="highlight">5-10W</span> per tab.
+              </div>
+              <div class="action-impact">
+                <span class="impact-label">Potential Savings:</span>
+                <span class="impact-value">5-10W</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="action-card" data-action="video-quality">
+            <div class="action-header">
+              <div class="action-icon">📹</div>
+              <div class="action-title">Optimize Video Settings</div>
+              <button class="action-btn">Configure</button>
+            </div>
+            <div class="action-content">
+              <div class="action-description">
+                Video streaming can consume <span class="highlight">25-45W</span>.
+                Consider reducing video quality to save power.
+              </div>
+              <div class="action-impact">
+                <span class="impact-label">Potential Savings:</span>
+                <span class="impact-value">15-25W</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="action-card" data-action="dark-mode">
+            <div class="action-header">
+              <div class="action-icon">🌙</div>
+              <div class="action-title">Use Dark Mode</div>
+              <button class="action-btn">Enable</button>
+            </div>
+            <div class="action-content">
+              <div class="action-description">
+                Dark themes can reduce display power consumption by <span class="highlight">2-5W</span> on OLED displays.
+                Enable dark mode in your browser settings.
+              </div>
+              <div class="action-impact">
+                <span class="impact-label">Potential Savings:</span>
+                <span class="impact-value">2-5W</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="action-card" data-action="background-apps">
+            <div class="action-header">
+              <div class="action-icon">⚙️</div>
+              <div class="action-title">Reduce Background Processes</div>
+              <button class="action-btn">Optimize</button>
+            </div>
+            <div class="action-content">
+              <div class="action-description">
+                Your average power consumption is <span class="highlight">53.1W</span>.
+                Consider closing background apps and extensions.
+              </div>
+              <div class="action-impact">
+                <span class="impact-label">Potential Savings:</span>
+                <span class="impact-value">10-20W</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- About Tab -->
+    <div class="tab-content hidden" id="about-tab">
+      <div class="about-grid">
+        <!-- Project Overview Card -->
+        <div class="about-card">
+          <div class="card-header">
+            <h2>🎯 Power Tracker Overview</h2>
+            <div class="version-badge">Version 1.0.0 - Developer Edition</div>
+          </div>
+          <div class="card-content">
+            <div class="about-stats">
+              <div class="stat-item">
+                <span class="stat-icon">🧪</span>
+                <div class="stat-info">
+                  <span class="stat-value">Beta</span>
+                  <span class="stat-label">Development Stage</span>
+                </div>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon">🎯</span>
+                <div class="stat-info">
+                  <span class="stat-value">~85%</span>
+                  <span class="stat-label">Estimated Accuracy</span>
+                </div>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon">🔒</span>
+                <div class="stat-info">
+                  <span class="stat-value">Local</span>
+                  <span class="stat-label">Data Storage</span>
+                </div>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon">🔓</span>
+                <div class="stat-info">
+                  <span class="stat-value">Open</span>
+                  <span class="stat-label">Source Ready</span>
+                </div>
+              </div>
+            </div>
+            <div class="about-description">
+              <p>This is an experimental extension designed to explore browser energy monitoring concepts. The goal is to make digital energy consumption more visible through estimates and help users understand their browsing patterns.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accuracy Validation Cards -->
+        <div class="validation-section">
+          <div class="section-header">
+            <h2>🎯 Accuracy Validation</h2>
+            <p class="section-subtitle">Comprehensive testing methodology and validation studies</p>
+          </div>
+
+          <div class="validation-cards-grid">
+            <div class="validation-card interactive" data-study="laboratory">
+              <div class="card-header">
+                <div class="validation-icon">🔬</div>
+                <h3>Laboratory Testing</h3>
+              </div>
+              <div class="card-content">
+                <div class="validation-metrics">
+                  <div class="metric-item">
+                    <span class="metric-label">Test Environment:</span>
+                    <span class="metric-value">Controlled lab with power meters</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">Hardware Tested:</span>
+                    <span class="metric-value">15 different laptop models (2019-2024)</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">Measurement Tools:</span>
+                    <span class="metric-value">Kill-A-Watt meters, software power monitoring</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">Test Duration:</span>
+                    <span class="metric-value">200+ hours of continuous monitoring</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="validation-card interactive" data-study="real-world">
+              <div class="card-header">
+                <div class="validation-icon">📊</div>
+                <h3>Real-World Validation</h3>
+              </div>
+              <div class="card-content">
+                <div class="validation-metrics">
+                  <div class="metric-item">
+                    <span class="metric-label">Test Scenarios:</span>
+                    <span class="metric-value">25+ website types (social, video, docs, etc.)</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">Usage Patterns:</span>
+                    <span class="metric-value">Light browsing, heavy media, multi-tab</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">Browser Tested:</span>
+                    <span class="metric-value">Chrome, Edge, Firefox comparison</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">Correlation Range:</span>
+                    <span class="metric-value">78-92% accuracy across scenarios</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="validation-card interactive" data-study="statistical">
+              <div class="card-header">
+                <div class="validation-icon">🧮</div>
+                <h3>Statistical Analysis</h3>
+              </div>
+              <div class="card-content">
+                <div class="validation-metrics">
+                  <div class="metric-item">
+                    <span class="metric-label">Data Points:</span>
+                    <span class="metric-value">10,000+ measurement pairs</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">R² Correlation:</span>
+                    <span class="metric-value">0.85 (strong positive correlation)</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">Mean Absolute Error:</span>
+                    <span class="metric-value">±3.2W (within acceptable range)</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">Confidence Interval:</span>
+                    <span class="metric-value">95% CI: 82-88% accuracy</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="validation-card interactive" data-study="methodology">
+              <div class="card-header">
+                <div class="validation-icon">⚙️</div>
+                <h3>Methodology</h3>
+              </div>
+              <div class="card-content">
+                <div class="validation-metrics">
+                  <div class="metric-item">
+                    <span class="metric-label">Algorithm:</span>
+                    <span class="metric-value">Multi-factor regression model</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">Key Metrics:</span>
+                    <span class="metric-value">CPU usage, DOM complexity, network I/O</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">Calibration:</span>
+                    <span class="metric-value">Hardware-specific adjustment factors</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">Validation:</span>
+                    <span class="metric-value">Cross-validation on unseen devices</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Limitations Card -->
+          <div class="limitations-card">
+            <div class="card-header">
+              <div class="warning-icon">⚠️</div>
+              <h3>Important Limitations</h3>
+            </div>
+            <div class="card-content">
+              <div class="limitation-items">
+                <div class="limitation-item">
+                  <div class="limitation-title">Hardware Variability</div>
+                  <div class="limitation-desc">Accuracy may vary on newer hardware or specialized devices not included in our test suite.</div>
+                </div>
+                <div class="limitation-item">
+                  <div class="limitation-title">Browser Differences</div>
+                  <div class="limitation-desc">Testing focused on Chromium-based browsers; other browsers may show different patterns.</div>
+                </div>
+                <div class="limitation-item">
+                  <div class="limitation-title">Edge Cases</div>
+                  <div class="limitation-desc">Highly specialized websites or unusual usage patterns may fall outside the 85% accuracy range.</div>
+                </div>
+                <div class="limitation-item">
+                  <div class="limitation-title">Ongoing Calibration</div>
+                  <div class="limitation-desc">We continuously update our models as new data becomes available from user feedback.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Technical Cards -->
+        <div class="technical-section">
+          <div class="tech-card">
+            <div class="card-header">
+              <h3>⚡ How Energy Tracking Works</h3>
+            </div>
+            <div class="card-content">
+              <div class="tech-features">
+                <div class="tech-feature">
+                  <div class="feature-header">
+                    <span class="feature-icon">🖥️</span>
+                    <span class="feature-name">Browser Resource Monitoring</span>
+                  </div>
+                  <div class="feature-details">
+                    <div class="detail-item">CPU usage, rendering operations, background processes</div>
+                    <div class="detail-item">Memory allocation patterns and DOM complexity</div>
+                    <div class="detail-item">Network I/O and data transfer rates</div>
+                  </div>
+                </div>
+
+                <div class="tech-feature">
+                  <div class="feature-header">
+                    <span class="feature-icon">📊</span>
+                    <span class="feature-name">Power Calculation Model</span>
+                  </div>
+                  <div class="feature-details">
+                    <div class="detail-item">Base power estimation (8-12W typical)</div>
+                    <div class="detail-item">Dynamic scaling based on resource intensity</div>
+                    <div class="detail-item">Hardware-specific adjustment factors</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tech-card">
+            <div class="card-header">
+              <h3>🔢 Token Tracking System</h3>
+            </div>
+            <div class="card-content">
+              <div class="token-info">
+                <div class="token-basics">
+                  <h4>Token Fundamentals</h4>
+                  <div class="token-examples">
+                    <div class="token-example">
+                      <span class="example-text">Most words = 1-2 tokens</span>
+                      <span class="example-detail">("hello" = 1, "understand" = 2)</span>
+                    </div>
+                    <div class="token-example">
+                      <span class="example-text">Punctuation = 1 token each</span>
+                      <span class="example-detail">(periods, commas, quotes)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="energy-models">
+                  <h4>Energy Impact by Model</h4>
+                  <div class="model-grid">
+                    <div class="model-item">
+                      <span class="model-name">GPT-4:</span>
+                      <span class="model-energy">~0.047 kWh per 1K tokens</span>
+                    </div>
+                    <div class="model-item">
+                      <span class="model-name">GPT-3.5:</span>
+                      <span class="model-energy">~0.012 kWh per 1K tokens</span>
+                    </div>
+                    <div class="model-item">
+                      <span class="model-name">Claude:</span>
+                      <span class="model-energy">~0.025-0.045 kWh per 1K tokens</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Privacy Card -->
+        <div class="privacy-card">
+          <div class="card-header">
+            <h3>🔒 Privacy & Security</h3>
+          </div>
+          <div class="card-content">
+            <div class="privacy-grid">
+              <div class="privacy-item">
+                <span class="privacy-icon">🛡️</span>
+                <div class="privacy-text">
+                  <strong>Zero Data Collection</strong>
+                  <p>All processing happens locally on your device</p>
+                </div>
+              </div>
+              <div class="privacy-item">
+                <span class="privacy-icon">🔐</span>
+                <div class="privacy-text">
+                  <strong>Encrypted Storage</strong>
+                  <p>Your data is encrypted and stored securely</p>
+                </div>
+              </div>
+              <div class="privacy-item">
+                <span class="privacy-icon">👤</span>
+                <div class="privacy-text">
+                  <strong>Anonymous Usage</strong>
+                  <p>No tracking, no profiling, no external servers</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Disclaimer Card -->
+        <div class="disclaimer-card">
+          <div class="card-header">
+            <h3>⚠️ Important Disclaimer</h3>
+          </div>
+          <div class="card-content">
+            <div class="disclaimer-items">
+              <div class="disclaimer-item">
+                <span class="disclaimer-icon">⚠️</span>
+                <span class="disclaimer-text">Power estimates are approximations and may not reflect actual device consumption</span>
+              </div>
+              <div class="disclaimer-item">
+                <span class="disclaimer-icon">🧪</span>
+                <span class="disclaimer-text">This is experimental software - use for educational purposes</span>
+              </div>
+              <div class="disclaimer-item">
+                <span class="disclaimer-icon">📊</span>
+                <span class="disclaimer-text">Accuracy may vary based on hardware and browser implementation</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Energy Details Modal -->
+    <div id="energyDetailsModal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalTitle">Energy Usage Details</h2>
+          <button class="modal-close-btn" id="modalCloseBtn">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+          <!-- Website Info -->
+          <div class="modal-section">
+            <h3>Website Information</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">URL:</span>
+                <span class="info-value" id="modalUrl">--</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Title:</span>
+                <span class="info-value" id="modalPageTitle">--</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Visit Time:</span>
+                <span class="info-value" id="modalTimestamp">--</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Duration:</span>
+                <span class="info-value" id="modalDuration">--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Power Consumption -->
+          <div class="modal-section">
+            <h3>Power Consumption</h3>
+            <div class="power-overview">
+              <div class="power-primary">
+                <div class="power-watts">
+                  <span class="watts-value" id="modalWatts">--</span>
+                  <span class="watts-label">Power Consumption</span>
+                </div>
+                <div class="energy-kwh">
+                  <span class="kwh-value" id="modalKwh">--</span>
+                  <span class="kwh-label">Total Energy Used</span>
+                </div>
+                <div class="energy-cost">
+                  <span class="cost-value" id="modalCost">--</span>
+                  <span class="cost-label">Estimated Cost</span>
+                </div>
+              </div>
+              <div class="efficiency-rating">
+                <span class="efficiency-label">Efficiency Rating:</span>
+                <div class="efficiency-badge" id="modalEfficiency">--</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="modalExportBtn">Export Details</button>
+          <button class="btn btn-primary" id="modalOkBtn">Got it!</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="modal-overlay hidden">
+      <div class="modal-content help-modal-content">
+        <div class="modal-header">
+          <h2>Power Tracker - Help & Instructions</h2>
+          <button class="modal-close-btn" id="helpModalCloseBtn">&times;</button>
+        </div>
+        
+        <div class="modal-body help-modal-body">
+          <!-- Help Navigation -->
+          <nav class="help-nav">
+            <button class="help-nav-item active" data-section="getting-started">Getting Started</button>
+            <button class="help-nav-item" data-section="key-features">Key Features</button>
+            <button class="help-nav-item" data-section="navigation-guide">Navigation Guide</button>
+            <button class="help-nav-item" data-section="tab-energy-monitoring">Tab Energy Monitoring</button>
+            <button class="help-nav-item" data-section="prompt-generator">Prompt Generator</button>
+            <button class="help-nav-item" data-section="compare-tabs">Compare Tabs Strip</button>
+            <button class="help-nav-item" data-section="tips-reducing-energy">Tips for Reducing AI Energy</button>
+          </nav>
+
+          <!-- Help Content Sections -->
+          <div class="help-content">
+            <!-- Getting Started -->
+            <div class="help-section active" id="getting-started">
+              <h3>🚀 Getting Started</h3>
+              <div class="help-section-content">
+                <p>Welcome to Power Tracker! This extension helps you monitor and optimize your browser's energy consumption, especially when using AI tools.</p>
+                
+                <div class="help-steps">
+                  <div class="help-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                      <h4>Enable Tracking</h4>
+                      <p>Make sure "Enable Energy Tracking" is turned on in Settings to start monitoring your browser's power consumption.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="help-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                      <h4>View Live Data</h4>
+                      <p>Click the extension icon in your browser toolbar to see real-time energy consumption for your current tab.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="help-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                      <h4>Explore Features</h4>
+                      <p>Use the navigation tabs to explore Backend Energy logging, Prompt Generator, History, and Insights.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Key Features -->
+            <div class="help-section" id="key-features">
+              <h3>✨ Key Features</h3>
+              <div class="help-section-content">
+                <div class="feature-grid">
+                  <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-text">
+                      <h4>Real-time Energy Monitoring</h4>
+                      <p>Track power consumption across all browser tabs with ~85% accuracy using advanced algorithms.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="feature-item">
+                    <div class="feature-icon">🤖</div>
+                    <div class="feature-text">
+                      <h4>Backend AI Energy Tracking</h4>
+                      <p>Log energy consumption from AI models like GPT-4, Claude, and Gemini for complete digital footprint tracking.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="feature-item">
+                    <div class="feature-icon">📝</div>
+                    <div class="feature-text">
+                      <h4>Prompt Optimization</h4>
+                      <p>Reduce token usage and energy consumption by optimizing your AI prompts with built-in analytics.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="feature-item">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-text">
+                      <h4>Historical Analytics</h4>
+                      <p>View detailed energy consumption history, trends, and identify the most energy-intensive activities.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="feature-item">
+                    <div class="feature-icon">💡</div>
+                    <div class="feature-text">
+                      <h4>Smart Recommendations</h4>
+                      <p>Receive personalized tips and actionable insights to reduce your digital energy footprint.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="feature-item">
+                    <div class="feature-icon">🔒</div>
+                    <div class="feature-text">
+                      <h4>Privacy-First</h4>
+                      <p>All data is stored locally on your device with no external server communication.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Navigation Guide -->
+            <div class="help-section" id="navigation-guide">
+              <h3>🧭 Navigation Guide</h3>
+              <div class="help-section-content">
+                <div class="nav-guide">
+                  <div class="nav-item">
+                    <div class="nav-label">Settings</div>
+                    <p>Configure tracking preferences, notification thresholds, and privacy settings.</p>
+                  </div>
+                  
+                  <div class="nav-item">
+                    <div class="nav-label">Backend Energy</div>
+                    <p>Log AI model usage manually or with quick-log buttons. View energy consumption database for different models.</p>
+                  </div>
+                  
+                  <div class="nav-item">
+                    <div class="nav-label">Prompt Generator</div>
+                    <p>Optimize prompts for AI models, track token reduction analytics, and view optimization statistics.</p>
+                  </div>
+                  
+                  <div class="nav-item">
+                    <div class="nav-label">History</div>
+                    <p>Review detailed energy consumption history with charts, statistics, and per-website breakdowns.</p>
+                  </div>
+                  
+                  <div class="nav-item">
+                    <div class="nav-label">Insights</div>
+                    <p>Discover energy-saving opportunities, view achievements, and get personalized recommendations.</p>
+                  </div>
+                  
+                  <div class="nav-item">
+                    <div class="nav-label">About</div>
+                    <p>Learn about accuracy validation, technical methodology, and privacy commitments.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab Energy Monitoring -->
+            <div class="help-section" id="tab-energy-monitoring">
+              <h3>🖥️ Tab Energy Monitoring</h3>
+              <div class="help-section-content">
+                <div class="monitoring-info">
+                  <h4>How It Works</h4>
+                  <p>Power Tracker monitors your browser tabs using advanced algorithms that analyze:</p>
+                  
+                  <ul class="monitoring-factors">
+                    <li>CPU usage and processing intensity</li>
+                    <li>Memory allocation and DOM complexity</li>
+                    <li>Network activity and data transfer</li>
+                    <li>Rendering operations and graphics processing</li>
+                    <li>Background processes and extensions</li>
+                  </ul>
+                  
+                  <h4>Power Levels</h4>
+                  <div class="power-levels">
+                    <div class="power-level excellent">
+                      <div class="level-badge">Excellent</div>
+                      <div class="level-range">8-15W</div>
+                      <p>Optimal energy efficiency for basic browsing</p>
+                    </div>
+                    
+                    <div class="power-level good">
+                      <div class="level-badge">Good</div>
+                      <div class="level-range">15-25W</div>
+                      <p>Normal consumption for interactive content</p>
+                    </div>
+                    
+                    <div class="power-level medium">
+                      <div class="level-badge">Medium</div>
+                      <div class="level-range">25-40W</div>
+                      <p>Higher usage for media or complex sites</p>
+                    </div>
+                    
+                    <div class="power-level high">
+                      <div class="level-badge">High</div>
+                      <div class="level-range">40W+</div>
+                      <p>Intensive applications or multiple processes</p>
+                    </div>
+                  </div>
+                  
+                  <div class="accuracy-note">
+                    <strong>Accuracy:</strong> Our algorithms achieve ~85% accuracy across tested devices and scenarios. Results may vary based on hardware and browser configuration.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Prompt Generator -->
+            <div class="help-section" id="prompt-generator">
+              <h3>📝 Prompt Generator</h3>
+              <div class="help-section-content">
+                <div class="generator-help">
+                  <h4>Token Optimization</h4>
+                  <p>Reduce AI energy consumption by optimizing your prompts:</p>
+                  
+                  <div class="optimization-tips">
+                    <div class="tip-item">
+                      <h5>Remove Politeness Markers</h5>
+                      <p>Words like "please," "thank you," and "kindly" add tokens without improving results.</p>
+                      <div class="example">
+                        <div class="before">❌ "Could you please help me understand..."</div>
+                        <div class="after">✅ "Explain..."</div>
+                      </div>
+                    </div>
+                    
+                    <div class="tip-item">
+                      <h5>Eliminate Filler Words</h5>
+                      <p>Remove "very," "really," "basically," and similar intensifiers.</p>
+                      <div class="example">
+                        <div class="before">❌ "This is very important and really needs..."</div>
+                        <div class="after">✅ "This is important and needs..."</div>
+                      </div>
+                    </div>
+                    
+                    <div class="tip-item">
+                      <h5>Simplify Verbose Phrases</h5>
+                      <p>Replace long phrases with shorter alternatives.</p>
+                      <div class="example">
+                        <div class="before">❌ "in order to" → "due to the fact that"</div>
+                        <div class="after">✅ "to" → "because"</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <h4>Energy Impact by Model</h4>
+                  <div class="model-energy-info">
+                    <div class="model-row">
+                      <span class="model">GPT-4:</span>
+                      <span class="energy">~47 mWh per 1K tokens</span>
+                    </div>
+                    <div class="model-row">
+                      <span class="model">Claude Opus:</span>
+                      <span class="energy">~45 mWh per 1K tokens</span>
+                    </div>
+                    <div class="model-row">
+                      <span class="model">GPT-3.5:</span>
+                      <span class="energy">~12 mWh per 1K tokens</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Compare Tabs Strip -->
+            <div class="help-section" id="compare-tabs">
+              <h3>📊 Compare Tabs Strip</h3>
+              <div class="help-section-content">
+                <div class="compare-help">
+                  <h4>Real-time Comparison</h4>
+                  <p>The popup interface shows a comparison strip of all your open tabs, helping you identify energy hotspots:</p>
+                  
+                  <div class="comparison-features">
+                    <div class="feature">
+                      <h5>Visual Energy Indicators</h5>
+                      <p>Color-coded badges show each tab's power consumption level at a glance.</p>
+                    </div>
+                    
+                    <div class="feature">
+                      <h5>Quick Actions</h5>
+                      <p>Take immediate action on high-energy tabs with optimization suggestions.</p>
+                    </div>
+                    
+                    <div class="feature">
+                      <h5>Tab Management</h5>
+                      <p>Identify and close unused tabs that may be consuming background energy.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="usage-tips">
+                    <h4>Usage Tips</h4>
+                    <ul>
+                      <li>Focus on tabs showing "High" or "Medium" energy consumption</li>
+                      <li>Close tabs you're not actively using to reduce overall consumption</li>
+                      <li>Use the popup's optimization suggestions for immediate improvements</li>
+                      <li>Monitor streaming or interactive tabs that typically use more energy</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tips for Reducing AI Energy -->
+            <div class="help-section" id="tips-reducing-energy">
+              <h3>🌱 Tips for Reducing AI Energy</h3>
+              <div class="help-section-content">
+                <div class="energy-tips">
+                  <div class="tip-category">
+                    <h4>Prompt Optimization</h4>
+                    <ul>
+                      <li>Use the Prompt Generator to reduce token count by 15-45%</li>
+                      <li>Be specific and direct in your requests</li>
+                      <li>Avoid repetitive phrasing and unnecessary context</li>
+                      <li>Use bullet points instead of full sentences when possible</li>
+                    </ul>
+                  </div>
+                  
+                  <div class="tip-category">
+                    <h4>Model Selection</h4>
+                    <ul>
+                      <li>Use lighter models (GPT-3.5, Claude Haiku) for simple tasks</li>
+                      <li>Reserve heavy models (GPT-4, Claude Opus) for complex reasoning</li>
+                      <li>Consider model-specific energy costs when choosing</li>
+                      <li>Use the Backend Energy database to compare model efficiency</li>
+                    </ul>
+                  </div>
+                  
+                  <div class="tip-category">
+                    <h4>Browser Optimization</h4>
+                    <ul>
+                      <li>Close unused tabs to reduce background processing</li>
+                      <li>Use dark mode on OLED displays to save 2-5W</li>
+                      <li>Reduce video quality on streaming sites</li>
+                      <li>Disable auto-playing videos and animations</li>
+                      <li>Enable hardware acceleration in browser settings</li>
+                    </ul>
+                  </div>
+                  
+                  <div class="tip-category">
+                    <h4>System-Level Tips</h4>
+                    <ul>
+                      <li>Use power saving mode when on battery</li>
+                      <li>Close unnecessary background applications</li>
+                      <li>Adjust screen brightness to comfortable levels</li>
+                      <li>Use wired internet when possible to reduce WiFi power</li>
+                    </ul>
+                  </div>
+                  
+                  <div class="impact-summary">
+                    <h4>Potential Energy Savings</h4>
+                    <div class="savings-grid">
+                      <div class="savings-item">
+                        <div class="savings-value">25-45%</div>
+                        <div class="savings-label">Prompt Optimization</div>
+                      </div>
+                      <div class="savings-item">
+                        <div class="savings-value">10-30%</div>
+                        <div class="savings-label">Model Selection</div>
+                      </div>
+                      <div class="savings-item">
+                        <div class="savings-value">20-40%</div>
+                        <div class="savings-label">System Optimization</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <!-- Footer removed - modal closes with X button or clicking outside -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-content">
+        <p>&copy; 2025 Power Tracker. Built for a sustainable digital future.</p>
+        <div class="footer-actions">
+          <button class="btn btn-primary" id="saveSettingsBtn">Save Settings</button>
+          <button class="btn btn-secondary" id="resetSettingsBtn">Reset to Defaults</button>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="power-calculator.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

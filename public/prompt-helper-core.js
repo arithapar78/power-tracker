@@ -314,16 +314,25 @@ const PromptHelperCore = {
         ],
         description: 'Corporate jargon'
       },
-      // Priority 3: Politeness markers
+      // Priority 2: Common politeness markers (removed in balanced mode)
+      commonPoliteness: {
+        priority: 2,
+        words: [
+          'please', 'kindly', 'could you please', 'would you please',
+          'if you could', 'if you would'
+        ],
+        description: 'Common politeness markers'
+      },
+      // Priority 3: Extended politeness markers (only in aggressive mode)
       politenessMarkers: {
         priority: 3,
         words: [
-          'please', 'thank you', 'thanks', 'kindly', 'if you don\'t mind',
-          'could you please', 'would you be so kind', 'I would appreciate',
+          'thank you', 'thanks', 'if you don\'t mind',
+          'would you be so kind', 'I would appreciate',
           'thank you in advance', 'many thanks', 'much appreciated', 'grateful',
           'sorry to bother you', 'I apologize for', 'excuse me', 'pardon me'
         ],
-        description: 'Politeness markers'
+        description: 'Extended politeness markers'
       },
       // Priority 3: Redundant requests
       redundantRequests: {

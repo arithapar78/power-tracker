@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Power Tracker – Monitor Your Browser’s Energy Impact",
-  "version": "8.0.0",
+  "version": "8.2.0",
   "description": "Monitor your browser's power consumption, save usage history, export data to JSON, and get AI-powered tips to reduce energy use.",
   "permissions": ["activeTab", "tabs", "storage", "alarms", "scripting"],
   "host_permissions": ["https://firestore.googleapis.com/*"],
