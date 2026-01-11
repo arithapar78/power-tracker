@@ -127,9 +127,6 @@
   let panelElement = null;
   let isGenerating = false;
   let lastResult = null;
-  let repositionThrottle = null;
-  let lastKnownInputTop = null;
-  let positionCheckInterval = null;
   let currentTab = 0; // 0: Prompt Generator, 1: Current Energy, 2: Statistics
   let energyUpdateInterval = null;
   let statsUpdateInterval = null;
@@ -244,47 +241,15 @@
   }
 
   /**
-   * Position the widget near the input (uses fixed positioning)
-   * Positioned just outside the text box, close but not overlapping
+   * Position the widget - FIXED in bottom-right corner, STAYS THERE
    */
   function positionWidget() {
-    if (!widgetElement || !currentInput) return;
-
-    const inputRect = currentInput.getBoundingClientRect();
-    const widgetSize = 32;
-    const offset = 4; // Small gap - close but outside
-
-    // Position just outside the input - to the right of the text box
-    let left = inputRect.right + offset;
-    let top = inputRect.top + (inputRect.height / 2) - (widgetSize / 2);
-
-    // Ensure widget stays within viewport
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    // If no room on the right, position at bottom-right corner of input
-    if (left + widgetSize > viewportWidth - 5) {
-      left = inputRect.right - widgetSize - 4;
-      top = inputRect.bottom + offset;
-    }
-
-    // Boundary checks
-    if (left < 5) {
-      left = 5;
-    }
-    if (top < 5) {
-      top = inputRect.bottom + offset;
-    }
-    if (top + widgetSize > viewportHeight - 5) {
-      top = viewportHeight - widgetSize - 5;
-    }
-
-    // Fixed positioning - no scroll offset needed
-    widgetElement.style.left = `${left}px`;
-    widgetElement.style.top = `${top}px`;
-
-    // Store the input's top position for change detection
-    lastKnownInputTop = inputRect.top;
+    if (!widgetElement) return;
+    // Fixed bottom-right corner - no sliding, no repositioning
+    widgetElement.style.right = '20px';
+    widgetElement.style.bottom = '20px';
+    widgetElement.style.left = 'auto';
+    widgetElement.style.top = 'auto';
   }
 
   /**
@@ -594,7 +559,31 @@
   }
 
   /**
+   * AI Model Energy Database - Used to calculate backend energy
+   * Energy values are in Wh per query
+   */
+  const AI_MODEL_ENERGY_DATABASE = {
+    // ChatGPT / OpenAI
+    'chat.openai.com': { name: 'ChatGPT', energyWhPerQuery: 4.05, wattsEquivalent: 60 },
+    'chatgpt.com': { name: 'ChatGPT', energyWhPerQuery: 4.05, wattsEquivalent: 60 },
+    // Claude
+    'claude.ai': { name: 'Claude', energyWhPerQuery: 1.38, wattsEquivalent: 45 },
+    // Gemini
+    'gemini.google.com': { name: 'Gemini', energyWhPerQuery: 2.0, wattsEquivalent: 40 },
+    // Perplexity
+    'perplexity.ai': { name: 'Perplexity', energyWhPerQuery: 1.5, wattsEquivalent: 35 },
+    'www.perplexity.ai': { name: 'Perplexity', energyWhPerQuery: 1.5, wattsEquivalent: 35 },
+    // Grok
+    'grok.com': { name: 'Grok', energyWhPerQuery: 3.67, wattsEquivalent: 55 },
+    'x.com': { name: 'Grok', energyWhPerQuery: 3.67, wattsEquivalent: 55 },
+    // DeepSeek
+    'deepseek.com': { name: 'DeepSeek', energyWhPerQuery: 4.10, wattsEquivalent: 50 },
+    'chat.deepseek.com': { name: 'DeepSeek', energyWhPerQuery: 4.10, wattsEquivalent: 50 }
+  };
+
+  /**
    * Update current energy display (Total = Frontend + Backend)
+   * Backend energy is calculated from the AI model database based on current site
    * Includes water usage calculation for data center cooling
    */
   async function updateCurrentEnergy() {
@@ -602,7 +591,7 @@
       // Get frontend energy data
       const response = await chrome.runtime.sendMessage({ type: 'GET_CURRENT_ENERGY' });
 
-      // Get backend (AI) energy data - ALL history, not just recent
+      // Get backend (AI) energy data from history
       const backendResponse = await chrome.runtime.sendMessage({ type: 'GET_BACKEND_ENERGY_HISTORY' });
       const backendHistory = backendResponse?.history || [];
 
@@ -635,12 +624,17 @@
         }
       }
 
-      // Calculate TOTAL backend energy from ALL history (not just recent)
+      // Get backend energy from AI model database based on CURRENT SITE
+      const currentHost = window.location.hostname.replace(/^www\./, '');
+      const aiModelData = AI_MODEL_ENERGY_DATABASE[currentHost] || AI_MODEL_ENERGY_DATABASE['www.' + currentHost];
+
+      // Calculate backend energy
       let backendEnergyWh = 0;
+      let backendWatts = 0;
       let totalAiQueries = 0;
 
+      // First, try to get from history
       backendHistory.forEach(entry => {
-        // Sum up all backend energy - energyWh, energy, or calculate from kWh
         if (entry.energyWh) {
           backendEnergyWh += entry.energyWh;
         } else if (entry.energy) {
@@ -653,13 +647,30 @@
         totalAiQueries++;
       });
 
+      // If we're on an AI site and have model data, use the database values
+      if (aiModelData) {
+        // Use the watts equivalent from the database (this is what AI backend uses)
+        backendWatts = aiModelData.wattsEquivalent;
+
+        // Estimate queries based on session duration (rough estimate: 1 query per 2 minutes active)
+        const sessionMinutes = frontendDuration / 60000;
+        const estimatedQueries = Math.max(1, Math.floor(sessionMinutes / 2));
+
+        // If we have more history queries, use that number instead
+        const queryCount = Math.max(estimatedQueries, totalAiQueries);
+
+        // Calculate backend energy: queries * energy per query
+        const calculatedBackendEnergy = queryCount * aiModelData.energyWhPerQuery;
+
+        // Use the larger of calculated or history-based backend energy
+        backendEnergyWh = Math.max(backendEnergyWh, calculatedBackendEnergy);
+      }
+
       // Calculate total energy (frontend + backend)
       const totalEnergyWh = frontendEnergyWh + backendEnergyWh;
 
-      // Estimate combined watts (backend energy converted to average watts over session)
-      const sessionHours = frontendDuration > 0 ? frontendDuration / 3600000 : 1/60; // default 1 min
-      const backendWattsEquivalent = sessionHours > 0 ? backendEnergyWh / sessionHours : 0;
-      const totalWatts = frontendWatts + Math.min(backendWattsEquivalent, 30); // Cap backend contribution
+      // Calculate total watts: frontend + backend (backend comes from database)
+      const totalWatts = frontendWatts + backendWatts;
 
       // Calculate water usage (data centers use ~1.8 liters per kWh for cooling)
       // AI queries use additional water - approximately 0.5ml per query for cooling
@@ -766,6 +777,7 @@
   /**
    * Update statistics display
    * Includes water usage and combined cost calculations
+   * Uses AI model database for accurate backend energy
    */
   async function updateStatistics() {
     try {
@@ -786,6 +798,7 @@
       let totalPower = 0;
       let peakPower = 0;
       let count = 0;
+      let totalDurationMs = 0;
 
       // From history
       history.forEach(entry => {
@@ -794,6 +807,9 @@
         if (power > peakPower) peakPower = power;
         if (entry.energyConsumption?.kWh) {
           frontendEnergy += entry.energyConsumption.kWh * 1000; // Convert to Wh
+        }
+        if (entry.duration) {
+          totalDurationMs += entry.duration;
         }
         count++;
       });
@@ -806,14 +822,23 @@
         if (tab.energyConsumption?.kWh) {
           frontendEnergy += tab.energyConsumption.kWh * 1000;
         }
+        if (tab.duration) {
+          totalDurationMs += tab.duration;
+        }
         count++;
       });
 
       const avgPower = count > 0 ? totalPower / count : 0;
 
-      // Calculate backend (AI) statistics - sum ALL entries
+      // Get AI model data for current site
+      const currentHost = window.location.hostname.replace(/^www\./, '');
+      const aiModelData = AI_MODEL_ENERGY_DATABASE[currentHost] || AI_MODEL_ENERGY_DATABASE['www.' + currentHost];
+
+      // Calculate backend (AI) statistics
       let aiQueries = backendHistory.length;
       let aiEnergy = 0;
+
+      // Sum energy from history
       backendHistory.forEach(entry => {
         if (entry.energyWh) {
           aiEnergy += entry.energyWh;
@@ -826,8 +851,33 @@
         }
       });
 
+      // Backend watts from database
+      let backendWatts = 0;
+
+      // If on AI site, calculate backend energy from database
+      if (aiModelData) {
+        // Use the watts equivalent from the database
+        backendWatts = aiModelData.wattsEquivalent;
+
+        // Estimate queries from session duration (1 query per 2 minutes)
+        const sessionMinutes = totalDurationMs / 60000;
+        const estimatedQueries = Math.max(1, Math.floor(sessionMinutes / 2));
+        const queryCount = Math.max(estimatedQueries, aiQueries);
+
+        // Calculate AI energy from database
+        const calculatedAiEnergy = queryCount * aiModelData.energyWhPerQuery;
+        aiEnergy = Math.max(aiEnergy, calculatedAiEnergy);
+        aiQueries = queryCount;
+
+        // Add AI backend watts to peak power
+        peakPower = Math.max(peakPower, avgPower + backendWatts);
+      }
+
       // Calculate total energy (frontend + backend)
       const totalEnergy = frontendEnergy + aiEnergy;
+
+      // Calculate total average power (frontend + backend)
+      const totalAvgPower = avgPower + backendWatts;
 
       // Calculate water usage
       // Data centers: ~1.8 L/kWh for cooling
@@ -849,7 +899,10 @@
       }
 
       const avgPowerEl = panelElement?.querySelector('#ph-stat-avg-power');
-      if (avgPowerEl) avgPowerEl.textContent = avgPower.toFixed(1);
+      if (avgPowerEl) {
+        avgPowerEl.textContent = totalAvgPower.toFixed(1);
+        avgPowerEl.title = `Frontend: ${avgPower.toFixed(1)}W, AI Backend: ${backendWatts}W`;
+      }
 
       const peakPowerEl = panelElement?.querySelector('#ph-stat-peak-power');
       if (peakPowerEl) peakPowerEl.textContent = peakPower.toFixed(1);
@@ -873,7 +926,9 @@
       if (aiEnergyEl) aiEnergyEl.textContent = aiEnergy.toFixed(2);
 
       // Calculate efficiency (lower power = better, 0-100)
-      const efficiencyScore = Math.max(0, Math.min(100, 100 - (avgPower / 65 * 100)));
+      // Use total power (frontend + backend) for efficiency calculation
+      // Scale: 0W = 100% efficient, 100W+ = 0% efficient
+      const efficiencyScore = Math.max(0, Math.min(100, 100 - (totalAvgPower / 100 * 100)));
 
       const efficiencyFillEl = panelElement?.querySelector('#ph-efficiency-fill');
       if (efficiencyFillEl) {
@@ -1125,50 +1180,6 @@
     }
   }
 
-  /**
-   * Throttled reposition handler
-   */
-  function handleReposition() {
-    if (repositionThrottle) return;
-
-    repositionThrottle = setTimeout(() => {
-      positionWidget();
-      if (panelElement?.classList.contains('ph-panel-visible')) {
-        positionPanel();
-      }
-      repositionThrottle = null;
-    }, 100);
-  }
-
-  /**
-   * Start checking if the input has moved significantly
-   */
-  function startPositionCheck() {
-    if (positionCheckInterval) {
-      clearInterval(positionCheckInterval);
-    }
-
-    positionCheckInterval = setInterval(() => {
-      if (!currentInput || !widgetElement) return;
-
-      // Check if input is still in DOM
-      if (!document.body.contains(currentInput)) {
-        const newInput = findChatInput();
-        if (newInput) {
-          currentInput = newInput;
-          lastKnownInputTop = null;
-          positionWidget();
-        }
-        return;
-      }
-
-      // Check if input position changed significantly (more than 20px)
-      const inputRect = currentInput.getBoundingClientRect();
-      if (lastKnownInputTop !== null && Math.abs(inputRect.top - lastKnownInputTop) > 20) {
-        positionWidget();
-      }
-    }, 1000); // Check every 1 second - very gentle
-  }
 
   /**
    * Try to initialize the widget - called when input might be available
@@ -1179,8 +1190,7 @@
     currentInput = findChatInput();
     if (currentInput) {
       createWidget();
-      positionWidget();
-      startPositionCheck();
+      positionWidget(); // Fixed bottom-right, no sliding
     }
   }
 
@@ -1194,22 +1204,17 @@
       return;
     }
 
-    // Find input and create widget
+    // Find input and create widget - position is FIXED bottom-right
     tryInitWidget();
 
-    // Set up MutationObserver to detect DOM changes
+    // Set up MutationObserver only to create widget if not yet created
     const observer = new MutationObserver((mutations) => {
-      // Check if we need to re-find the input or create widget
-      if (!widgetElement || !currentInput || !document.body.contains(currentInput)) {
+      if (!widgetElement) {
         const newInput = findChatInput();
-        if (newInput && newInput !== currentInput) {
+        if (newInput) {
           currentInput = newInput;
-          lastKnownInputTop = null;
-          if (!widgetElement) {
-            createWidget();
-          }
-          positionWidget();
-          startPositionCheck();
+          createWidget();
+          positionWidget(); // Fixed bottom-right
         }
       }
     });
@@ -1217,27 +1222,6 @@
     observer.observe(document.body, {
       childList: true,
       subtree: true
-    });
-
-    // Reposition on resize only (fixed positioning handles viewport changes)
-    window.addEventListener('resize', handleReposition, { passive: true });
-
-    // Also watch for input focus to update position
-    document.addEventListener('focusin', (e) => {
-      const target = e.target;
-      if (target && (target.tagName === 'TEXTAREA' || target.contentEditable === 'true')) {
-        const config = getSiteConfig();
-        if (config) {
-          for (const selector of config.inputSelectors) {
-            if (target.matches(selector)) {
-              currentInput = target;
-              lastKnownInputTop = null;
-              positionWidget();
-              break;
-            }
-          }
-        }
-      }
     });
 
     // Close panel when clicking outside
