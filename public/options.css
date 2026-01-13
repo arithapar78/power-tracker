@@ -3771,4 +3771,181 @@ body::before {
     background: var(--surface-solid);
     color: #f1f5f9;
   }
+
+  /* ===== ABOUT PAGE SPECIFIC FIXES ===== */
+
+  /* About cards */
+  .about-card,
+  .about-card .card-content {
+    color: #f1f5f9;
+  }
+
+  .about-card h2,
+  .about-card h3,
+  .about-card h4 {
+    color: #ffffff !important;
+  }
+
+  .about-card p,
+  .about-card li,
+  .about-card span {
+    color: #cbd5e1 !important;
+  }
+
+  .card-description {
+    color: #94a3b8 !important;
+  }
+
+  .card-content p,
+  .card-content li,
+  .card-content span:not(.badge) {
+    color: #cbd5e1 !important;
+  }
+
+  /* Card headers */
+  .card-header h2 {
+    color: #ffffff !important;
+  }
+
+  /* About stats */
+  .about-stats .stat-value {
+    color: #ffffff !important;
+  }
+
+  .about-stats .stat-label {
+    color: #94a3b8 !important;
+  }
+
+  /* About description */
+  .about-description {
+    color: #cbd5e1 !important;
+  }
+
+  /* Section headers */
+  .section-header h2 {
+    color: #ffffff !important;
+  }
+
+  .section-subtitle {
+    color: #94a3b8 !important;
+  }
+
+  /* Technical section */
+  .technical-section h3,
+  .technical-section h4 {
+    color: #ffffff !important;
+  }
+
+  .technical-section p,
+  .technical-section li {
+    color: #cbd5e1 !important;
+  }
+
+  /* Validation section */
+  .validation-section h3,
+  .validation-section h4 {
+    color: #ffffff !important;
+  }
+
+  .validation-section p,
+  .validation-section li {
+    color: #cbd5e1 !important;
+  }
+
+  /* LearnTAV section */
+  .learntav-section h3,
+  .learntav-section h4 {
+    color: #ffffff !important;
+  }
+
+  .learntav-section p {
+    color: #cbd5e1 !important;
+  }
+
+  /* CTA section */
+  .cta-section h3 {
+    color: #ffffff !important;
+  }
+
+  .cta-section p {
+    color: #cbd5e1 !important;
+  }
+
+  /* Testimonials section */
+  .testimonials-section h3 {
+    color: #ffffff !important;
+  }
+
+  .testimonials-section p,
+  .testimonials-section blockquote {
+    color: #cbd5e1 !important;
+  }
+
+  /* Setting cards content */
+  .setting-card .card-content p,
+  .setting-card .card-content span,
+  .setting-card .card-content li {
+    color: #cbd5e1 !important;
+  }
+
+  .setting-info .setting-label {
+    color: #ffffff !important;
+  }
+
+  .setting-info .setting-description {
+    color: #94a3b8 !important;
+  }
+
+  /* Energy cards */
+  .energy-card h3,
+  .energy-card h4 {
+    color: #ffffff !important;
+  }
+
+  .energy-card p,
+  .energy-card li {
+    color: #cbd5e1 !important;
+  }
+
+  /* History cards */
+  .history-card h3,
+  .history-card h4 {
+    color: #ffffff !important;
+  }
+
+  .history-card p,
+  .history-card li {
+    color: #cbd5e1 !important;
+  }
+
+  /* Insight cards */
+  .insight-card h3,
+  .insight-card h4 {
+    color: #ffffff !important;
+  }
+
+  .insight-card p,
+  .insight-card li {
+    color: #cbd5e1 !important;
+  }
+
+  /* Generic card text fallback */
+  .card-content {
+    color: #cbd5e1;
+  }
+
+  /* All paragraph text in tab content */
+  .tab-content p {
+    color: #cbd5e1 !important;
+  }
+
+  .tab-content li {
+    color: #cbd5e1 !important;
+  }
+
+  .tab-content h2,
+  .tab-content h3,
+  .tab-content h4 {
+    color: #ffffff !important;
+  }
 }

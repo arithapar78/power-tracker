@@ -3404,22 +3404,31 @@ body::before {
     color: #94a3b8;
   }
 
-  /* Stat cards */
-  .stat-card .stat-value {
-    color: #f8fafc;
+  /* Stat cards - Today's Summary grid */
+  .stat-card .stat-value,
+  .stats-cards-grid .stat-value {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    background: none !important;
   }
 
-  .stat-card .stat-label {
-    color: #94a3b8;
+  .stat-card .stat-label,
+  .stats-cards-grid .stat-label {
+    color: #cbd5e1 !important;
+  }
+
+  /* Override the base .stat-value color */
+  .stat-value {
+    color: #ffffff !important;
   }
 
   /* Quick stat cards */
   .quick-stat-card .stat-value {
-    color: var(--primary-light);
+    color: var(--primary-light) !important;
   }
 
   .quick-stat-card .stat-label {
-    color: var(--text-secondary);
+    color: var(--text-secondary) !important;
   }
 
   /* Token analysis */
@@ -3634,26 +3643,70 @@ body::before {
     color: var(--text-muted);
   }
 
-  /* Compare tabs strip */
+  /* Compare tabs strip - Top Energy Consumers */
+  .compare-tabs-strip {
+    background: var(--surface-elevated);
+  }
+
   .strip-header h3 {
-    color: #f8fafc;
+    color: #ffffff !important;
   }
 
   .strip-subtitle {
-    color: #94a3b8;
+    color: #94a3b8 !important;
   }
 
-  /* Tab cards */
+  /* Tab cards in compare strip */
+  .tab-card {
+    background: var(--surface);
+  }
+
   .tab-card-title {
-    color: #f8fafc;
+    color: #ffffff !important;
   }
 
   .tab-domain {
-    color: #94a3b8;
+    color: #94a3b8 !important;
   }
 
   .tab-action-btn {
     color: #cbd5e1;
+  }
+
+  /* Tab power display */
+  .tab-power-display {
+    background: rgba(15, 23, 42, 0.5);
+  }
+
+  .tab-power-value {
+    color: #ffffff !important;
+  }
+
+  .tab-power-unit {
+    color: #94a3b8 !important;
+  }
+
+  .tab-power-label {
+    color: #94a3b8 !important;
+  }
+
+  /* Energy level colors in dark mode - brighter for visibility */
+  .tab-card.energy-low .tab-power-value {
+    color: #86efac !important;
+  }
+
+  .tab-card.energy-medium .tab-power-value {
+    color: #fcd34d !important;
+  }
+
+  .tab-card.energy-high .tab-power-value {
+    color: #fca5a5 !important;
+  }
+
+  /* Tab card header text */
+  .tab-card-header,
+  .tab-title-section {
+    color: #ffffff;
   }
 
   /* LearnTAV card text - already on gradient, ensure white */
@@ -3690,11 +3743,16 @@ body::before {
   }
 
   .summary-stat .stat-value {
-    color: var(--primary-light);
+    color: #ffffff !important;
   }
 
   .summary-stat .stat-label {
     color: #94a3b8;
+  }
+
+  /* Summary stats grid */
+  .summary-stats .stat-value {
+    color: #ffffff !important;
   }
 
   /* Status indicator */
@@ -3732,6 +3790,22 @@ body::before {
 
   .tab-info-left .tab-url {
     color: #94a3b8;
+  }
+
+  /* CRITICAL: Force white text on all stat values in dark mode */
+  /* Today's Summary stats - highest specificity override */
+  .stats-cards-grid .stat-card .stat-value,
+  .stats-cards-grid .stat-card div.stat-value,
+  div.stat-card div.stat-value,
+  #totalTabs,
+  #avgPower,
+  #highPowerAlerts,
+  #totalTime,
+  #totalTabsCount,
+  #highEnergyCount,
+  #potentialSavings {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
   }
 }
 
