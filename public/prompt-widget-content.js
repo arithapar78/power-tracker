@@ -976,42 +976,13 @@
   }
 
   /**
-   * Position the panel near the widget (uses fixed positioning)
+   * Position the panel - centered on screen via CSS
+   * No dynamic positioning needed - CSS handles centering
    */
   function positionPanel() {
-    if (!panelElement || !currentInput) return;
-
-    const inputRect = currentInput.getBoundingClientRect();
-    const panelWidth = 360;
-    const panelHeight = panelElement.offsetHeight || 400;
-    const offset = 10;
-
-    // Try to position above the input
-    let left = inputRect.left;
-    let top = inputRect.top - panelHeight - offset;
-
-    // If not enough space above, position below
-    if (top < 10) {
-      top = inputRect.bottom + offset;
-    }
-
-    // Ensure panel stays within viewport
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    if (left + panelWidth > viewportWidth - 10) {
-      left = viewportWidth - panelWidth - 10;
-    }
-    if (left < 10) {
-      left = 10;
-    }
-    if (top + panelHeight > viewportHeight - 10) {
-      top = viewportHeight - panelHeight - 10;
-    }
-
-    // Fixed positioning - no scroll offset needed
-    panelElement.style.left = `${left}px`;
-    panelElement.style.top = `${top}px`;
+    // Panel is centered via CSS (top: 50%, left: 50%, transform: translate(-50%, -50%))
+    // No dynamic positioning needed
+    return;
   }
 
   /**

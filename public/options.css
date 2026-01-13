@@ -3433,3 +3433,342 @@ body::before {
     gap: var(--space-4);
   }
 }
+
+/* ===== COMPREHENSIVE DARK MODE TEXT VISIBILITY FIXES ===== */
+/* Ensure all text has proper contrast in dark mode */
+
+[data-theme="dark"] {
+  /* Headers and titles */
+  h1, h2, h3, h4, h5, h6 {
+    color: #f1f5f9;
+  }
+
+  /* Card titles and section headers */
+  .card-title,
+  .section-header h3,
+  .setting-group-title {
+    color: #f1f5f9;
+  }
+
+  /* Setting labels and descriptions */
+  .setting-label {
+    color: #f1f5f9;
+  }
+
+  .setting-description {
+    color: #94a3b8;
+  }
+
+  /* Form elements */
+  .form-label {
+    color: #cbd5e1;
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    color: #f1f5f9;
+    background: var(--surface-solid);
+  }
+
+  .form-input::placeholder,
+  .form-textarea::placeholder {
+    color: #64748b;
+  }
+
+  /* Status text */
+  .status-title {
+    color: #f1f5f9;
+  }
+
+  .status-text {
+    color: #94a3b8;
+  }
+
+  /* Timer labels and values */
+  .timer-label {
+    color: #94a3b8;
+  }
+
+  .timer-value {
+    color: #93c5fd;
+    background: rgba(59, 130, 246, 0.15);
+  }
+
+  /* Nav tabs */
+  .nav-tab {
+    color: #94a3b8;
+  }
+
+  .nav-tab:hover {
+    color: #f1f5f9;
+  }
+
+  .nav-tab.active {
+    color: var(--primary-light);
+  }
+
+  /* Card content */
+  .card p,
+  .card span:not(.badge) {
+    color: #cbd5e1;
+  }
+
+  /* Table text */
+  .table th {
+    color: #f1f5f9;
+  }
+
+  .table td {
+    color: #cbd5e1;
+  }
+
+  /* Stats and metrics */
+  .stat-value {
+    color: #f1f5f9;
+  }
+
+  .stat-label {
+    color: #94a3b8;
+  }
+
+  /* Charts legend */
+  .legend-label {
+    color: #cbd5e1;
+  }
+
+  /* Tip categories and items */
+  .tip-category h4 {
+    color: var(--primary-light);
+  }
+
+  .tip-category li {
+    color: #cbd5e1;
+  }
+
+  .tip-item h5 {
+    color: var(--primary-light);
+  }
+
+  .tip-item p {
+    color: #94a3b8;
+  }
+
+  /* Usage tips */
+  .usage-tips h4 {
+    color: #f1f5f9;
+  }
+
+  .usage-tips li {
+    color: #cbd5e1;
+  }
+
+  /* Model rows */
+  .model-row .model {
+    color: #f1f5f9;
+  }
+
+  .model-row .energy {
+    color: var(--primary-light);
+  }
+
+  /* Power level descriptions */
+  .power-level p {
+    color: #94a3b8;
+  }
+
+  .level-range {
+    color: var(--primary-light);
+  }
+
+  /* Accuracy note */
+  .accuracy-note {
+    color: #94a3b8;
+  }
+
+  /* Impact summary */
+  .impact-summary h4 {
+    color: var(--primary-light);
+  }
+
+  /* Savings values and labels */
+  .savings-value {
+    color: #86efac;
+  }
+
+  .savings-label {
+    color: #94a3b8;
+  }
+
+  /* Feature descriptions */
+  .feature h5 {
+    color: var(--primary-light);
+  }
+
+  .feature p {
+    color: #94a3b8;
+  }
+
+  /* Example code blocks */
+  .example {
+    color: #f1f5f9;
+    background: var(--surface-elevated);
+  }
+
+  .example .before {
+    color: #fca5a5;
+  }
+
+  .example .after {
+    color: #86efac;
+  }
+
+  /* History items */
+  .history-item-date {
+    color: #94a3b8;
+  }
+
+  .history-item-value {
+    color: #f1f5f9;
+  }
+
+  /* Help modal content */
+  .help-modal-content h3,
+  .help-modal-content h4,
+  .help-modal-content h5 {
+    color: #f1f5f9;
+  }
+
+  .help-modal-content p,
+  .help-modal-content li {
+    color: #cbd5e1;
+  }
+
+  /* Help nav items */
+  .help-nav-item {
+    color: #94a3b8;
+  }
+
+  .help-nav-item:hover {
+    color: #f1f5f9;
+  }
+
+  .help-nav-item.active {
+    color: #ffffff;
+  }
+
+  /* Disclaimer and limitations cards */
+  .disclaimer-card p,
+  .limitations-card p,
+  .disclaimer-card li,
+  .limitations-card li {
+    color: #fef3c7;
+  }
+
+  .disclaimer-card h4,
+  .limitations-card h4 {
+    color: #fcd34d;
+  }
+
+  /* Agent dashboard */
+  .agent-status-text {
+    color: #f1f5f9;
+  }
+
+  .agent-action-label {
+    color: #94a3b8;
+  }
+
+  /* Learning data */
+  .learning-label {
+    color: #94a3b8;
+  }
+
+  .learning-value {
+    color: #f1f5f9;
+  }
+
+  /* Delete buttons and danger zones */
+  .danger-zone p {
+    color: #fca5a5;
+  }
+
+  /* Empty states */
+  .empty-state-text {
+    color: #94a3b8;
+  }
+
+  /* Footer */
+  .footer-text {
+    color: #64748b;
+  }
+
+  /* Info messages */
+  .info-message {
+    color: #93c5fd;
+  }
+
+  /* Warning messages */
+  .warning-message {
+    color: #fdba74;
+  }
+
+  /* Success messages */
+  .success-message {
+    color: #86efac;
+  }
+
+  /* Ensure buttons have visible text */
+  .btn-secondary {
+    color: #f1f5f9;
+  }
+
+  /* Section descriptions */
+  .section-description {
+    color: #94a3b8;
+  }
+
+  /* Help section specific */
+  .help-section p {
+    color: #cbd5e1;
+  }
+
+  .help-step-text h4 {
+    color: #f1f5f9;
+  }
+
+  .help-step-text p {
+    color: #94a3b8;
+  }
+
+  /* Feature grid items */
+  .feature-item h5 {
+    color: #f1f5f9;
+  }
+
+  .feature-item p {
+    color: #94a3b8;
+  }
+
+  /* Version and update info */
+  .version-info {
+    color: #94a3b8;
+  }
+
+  /* Checkbox and radio labels */
+  .checkbox-label,
+  .radio-label {
+    color: #cbd5e1;
+  }
+
+  /* Slider values */
+  .slider-value {
+    color: #f1f5f9;
+  }
+
+  /* Dropdown options - ensure visibility in select elements */
+  select option {
+    background: var(--surface-solid);
+    color: #f1f5f9;
+  }
+}

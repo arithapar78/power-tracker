@@ -49,9 +49,12 @@
   object-fit: contain;
 }
 
-/* Panel */
+/* Panel - Centered on screen */
 .ph-panel {
   position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
   width: 360px;
   max-height: 80vh;
   background: #ffffff;
@@ -60,7 +63,6 @@
   z-index: 2147483641;
   overflow: hidden;
   opacity: 0;
-  transform: scale(0.95) translateY(-10px);
   pointer-events: none;
   transition: opacity 0.2s ease, transform 0.2s ease;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -71,7 +73,7 @@
 
 .ph-panel.ph-panel-visible {
   opacity: 1;
-  transform: scale(1) translateY(0);
+  transform: translate(-50%, -50%) scale(1);
   pointer-events: auto;
 }
 
