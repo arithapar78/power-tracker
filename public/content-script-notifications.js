@@ -651,16 +651,32 @@
               transition: 'all 0.2s',
               textAlign: 'center'
             },
-            onclick: async () => {
-              await this.disableAllNotifications();
+            onclick: async (e) => {
+              const button = e.target;
+              // Show checkmark feedback immediately
+              button.textContent = '✓';
+              button.style.background = '#10b981';
+              button.style.color = 'white';
+              button.style.border = '1px solid #10b981';
+              button.style.cursor = 'default';
+              button.disabled = true;
+
+              // Wait 1 second, then disable notifications
+              setTimeout(async () => {
+                await this.disableAllNotifications();
+              }, 1000);
             },
             onmouseenter: (e) => {
-              e.target.style.background = this.settings?.darkMode ? '#f87171' : '#ef4444';
-              e.target.style.color = 'white';
+              if (!e.target.disabled) {
+                e.target.style.background = this.settings?.darkMode ? '#f87171' : '#ef4444';
+                e.target.style.color = 'white';
+              }
             },
             onmouseleave: (e) => {
-              e.target.style.background = 'transparent';
-              e.target.style.color = this.settings?.darkMode ? '#f87171' : '#ef4444';
+              if (!e.target.disabled) {
+                e.target.style.background = 'transparent';
+                e.target.style.color = this.settings?.darkMode ? '#f87171' : '#ef4444';
+              }
             }
           });
 
@@ -866,13 +882,8 @@
         // Always update local settings immediately (works even without API)
         this.settings.notificationsEnabled = false;
 
-        // Close all current notifications first
+        // Close all current notifications
         this.hideAllTips();
-
-        // Show confirmation popup after a brief delay to ensure cleanup is complete
-        setTimeout(() => {
-          this.showDisabledConfirmation();
-        }, 100);
 
       } catch (error) {
         console.error('[PowerAI] Failed to disable notifications:', error);
