@@ -133,7 +133,17 @@ LED bulbs      = energy_kWh × 100       (10W LED reference)
 
 ## Privacy
 
-All processing happens locally on your device. No data is sent to external servers. The extension uses only standard Chrome APIs: `activeTab`, `tabs`, `storage`, `alarms`, `scripting`.
+All energy data and settings are stored locally on your device via the Chrome Storage API. No personal data is sent to external servers.
+
+---
+
+## Backend / Database
+
+The final product uses **Google Firebase (Firestore)** as its backend database for cloud sync and persistent storage across devices.
+
+> **Status: In progress.** The Firebase integration is not yet working. All data currently falls back to Chrome's local storage (`chrome.storage.local`). Completing the Firebase integration is a planned milestone before the production release.
+
+Relevant files: `public/firebase-config.js`, `public/firebase-manager.js`, `public/firebase-helpers.js`
 
 ---
 
@@ -141,8 +151,8 @@ All processing happens locally on your device. No data is sent to external serve
 
 - **Platform**: Google Chrome (desktop), Manifest V3
 - **Language**: Vanilla JavaScript — no frameworks, no build step
-- **Storage**: Chrome Storage API (local + sync)
-- **No backend**: runs entirely in the browser
+- **Local storage**: Chrome Storage API (local + sync)
+- **Backend database**: Google Firebase / Firestore (integrated but currently non-functional)
 
 ---
 
