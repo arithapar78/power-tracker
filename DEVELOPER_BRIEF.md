@@ -43,6 +43,8 @@ Power Tracker is a Chrome extension that:
 ├── power-calculator.js            ← Frontend watts estimation
 ├── backend-power-calculator.js    ← AI backend energy estimation
 ├── ai-energy-database.js          ← AI model energy profiles (one file, not multiple)
+├── prompt-optimizer.html / prompt-optimizer.js / prompt-optimizer.css  ← Standalone optimizer page
+├── filler-words-database.js       ← Complete list of all words, phrases, and patterns the optimizer removes (see Prompt Optimizer section for full contents). Exported as a JS object with named categories: PREAMBLES, FILLER_WORDS, VERBOSE_PHRASES (with replacements that use LESS tokens than the original word), POLITENESS, META_SETTERS, and PROTECTED_PATTERNS (words that must never be removed). prompt-optimizer.js imports and uses this file exclusively — no removal logic is hardcoded in the optimizer itself.
 ├── data-migration.js              ← Storage migration utility
 ├── icon-16.png / icon-48.png / icon-128.png
 ```
@@ -69,10 +71,30 @@ The view when clicking the extension icon.
 - **Energy Recommendations**: List of high-energy open tabs with a suggestion to close them; bulk-close button
 - **Today's Summary**: Tabs tracked today, average power, high-power alert count, total active time
 - **Action Buttons**: "View History" (opens options page), "Settings"
+- **"Eco Boost" Button**: Prominent button in the popup that opens the Prompt Optimizer as a full-page tab (not a popup — it needs space)
 
 ---
 
-### 2. Options / Settings Page
+### 2. Prompt Optimizer Page (`prompt-optimizer.html`)
+
+A standalone full-page tab opened when the user clicks "Optimize My Prompt" from the popup.
+
+**Layout:**
+
+- Page title: "AI Prompt Optimizer"
+- Subtitle: "Reduce tokens, reduce energy"
+- **Input area**: Large textarea labeled "Paste your prompt here" with a character/token counter below it (live, updates as user types)
+- **"Optimize" button**: Single large button — no mode selector, no level selector. One click, maximum reduction.
+- **Results area** (shown after optimization):
+  - Optimized prompt in a read-only textarea
+  - "Copy" button
+  - Stats row: Original tokens | Optimized tokens | Tokens saved | Energy saved (mWh)
+  - "What was removed" collapsible section: a list of removed words/phrases grouped by category (filler words, redundant phrases, preambles, etc.)
+- **Session stats** (bottom of page): Total prompts optimized this session, total tokens saved, total energy saved (mWh)
+
+---
+
+### 3. Options / Settings Page
 
 Accessed from the popup. Tabs:
 
@@ -200,6 +222,184 @@ These are shown live in the popup's Environmental Impact Grid.
 
 ---
 
+## Prompt Optimizer: How It Works
+
+The optimizer runs entirely in the browser — no API calls. The goal is maximum token reduction while keeping the core meaning of the prompt intact. There is **one mode only**: reduce as aggressively as possible.
+
+### Token Counting
+
+Use this approximation throughout:
+
+```
+tokens = characterCount / 4
+```
+
+(1 token ≈ 4 characters)
+
+Display token counts live as the user types in the input textarea. Show them again in the results after optimization.
+
+---
+
+### Optimization Steps (applied in order)
+
+Run all steps sequentially on the input text. Each step feeds its output into the next.
+
+#### Step 1 — Strip Preambles and Openers
+
+Remove common prompt openers that add no information:
+
+```
+"I want you to..."
+"Please can you..."
+"Could you please..."
+"I need you to..."
+"Your task is to..."
+"I would like you to..."
+"Can you help me..."
+"I am looking for..."
+"I need help with..."
+"Help me to..."
+"For this task..."
+"In this exercise..."
+```
+
+Replace with nothing. The instruction that follows is what matters.
+
+#### Step 2 — Remove Filler and Hedge Words
+
+Strip words and short phrases that add length but not meaning. Remove all of the following (case-insensitive, whole-word match):
+
+**Intensifiers / qualifiers:**
+very, really, quite, rather, somewhat, fairly, pretty, basically, essentially, generally, typically, usually, often, sometimes, kind of, sort of, a bit, a little, just, simply, merely, only, actually, literally, honestly, truly, certainly, definitely, absolutely, totally, completely, entirely, fully, highly, greatly, extremely, incredibly, remarkably, particularly, especially, specifically, certainly
+
+**Filler transitions:**
+additionally, furthermore, moreover, in addition, also, as well, on top of that, besides, likewise, similarly, in the same way, at the same time, meanwhile, in fact, indeed, of course, naturally, obviously, clearly, needless to say, as you know, it goes without saying, it is worth noting, it should be noted, please note that, note that
+
+**Hedges and softeners:**
+I think, I believe, I feel, I suppose, I assume, I guess, in my opinion, from my perspective, it seems to me, it appears that, it looks like, arguably, possibly, perhaps, maybe, probably, likely, might be, could be, may be, tends to, appears to
+
+**Redundant endings:**
+"if that makes sense", "does that make sense", "if you understand what I mean", "you know what I mean", "that sort of thing", "and so on", "etc.", "and so forth", "or something like that", "or whatever"
+
+#### Step 3 — Collapse Redundant Phrases to Shorter Equivalents
+
+Replace verbose phrases with their concise equivalents:
+
+| Remove | Replace with |
+|--------|-------------|
+| in order to | to |
+| for the purpose of | to |
+| with the aim of | to |
+| so as to | to |
+| due to the fact that | because |
+| owing to the fact that | because |
+| in the event that | if |
+| in the case that | if |
+| on the condition that | if |
+| at this point in time | now |
+| at the present time | now |
+| currently at this time | now |
+| in the near future | soon |
+| in the not too distant future | soon |
+| a large number of | many |
+| a significant number of | many |
+| a great deal of | much |
+| a majority of | most |
+| the majority of | most |
+| in close proximity to | near |
+| in the vicinity of | near |
+| make a decision | decide |
+| make an attempt | try |
+| provide assistance to | help |
+| take into consideration | consider |
+| give consideration to | consider |
+| come to the conclusion | conclude |
+| reach a conclusion | conclude |
+| it is important to note | note: |
+| it is important to | [remove entirely] |
+| please be aware that | [remove entirely] |
+| I wanted to let you know | [remove entirely] |
+
+#### Step 4 — Remove Explicit Politeness
+
+Remove courtesy phrases that are unnecessary in prompts:
+
+```
+"please", "thank you", "thanks", "thank you in advance",
+"I appreciate your help", "I appreciate it", "much appreciated",
+"if possible", "when you get a chance", "at your convenience",
+"I hope that's okay", "if you don't mind"
+```
+
+Note: Only remove standalone politeness — do not remove "please" if it is structural to the sentence meaning.
+
+#### Step 5 — Strip Unnecessary Context-Setting
+
+Remove sentences that only set up what the user is about to say, rather than saying it:
+
+Patterns to detect and remove:
+- Sentences that start with "I am going to ask you about..." (then the next sentence IS the actual question — keep only the next sentence)
+- "The following is a question about X:" → remove the meta-sentence, keep the question
+- "Below is my prompt:" → remove
+- "Here is what I need:" → remove
+- "My question is as follows:" → remove
+
+#### Step 6 — Whitespace and Punctuation Cleanup
+
+- Collapse multiple spaces to one
+- Collapse 3+ newlines to 2 newlines
+- Remove trailing spaces on each line
+- Remove spaces before punctuation (e.g., `word .` → `word.`)
+
+---
+
+### What Gets Preserved
+
+The optimizer must NOT remove:
+
+- Specific nouns, names, technical terms, or domain vocabulary
+- Numbers, dates, quantities, measurements
+- Quoted text (anything inside `"..."` or `'...'`)
+- Code blocks (anything inside backticks)
+- The actual instruction or question — the core request must survive intact
+- Negations (`not`, `never`, `no`, `don't`) — removing these would invert meaning
+
+---
+
+### Energy Savings Calculation
+
+After optimization, calculate energy saved:
+
+```
+tokensSaved = originalTokens - optimizedTokens
+energySavedWh = tokensSaved × 0.000003    // 3 µWh per token, conservative estimate
+energySavedMwh = energySavedWh × 1000
+```
+
+Display as: `X tokens saved · Y mWh saved`
+
+---
+
+### Storage for Prompt Optimizer Stats
+
+Add to `chrome.storage.local`:
+
+```javascript
+promptOptimizerHistory: [
+  {
+    timestamp: 1234567890000,
+    originalTokens: 120,
+    optimizedTokens: 74,
+    tokensSaved: 46,
+    energySavedMwh: 138
+  }
+]
+```
+
+The History tab in the options page shows a chart of tokens saved over time from this array.
+
+---
+
 ## Data Storage
 
 ### Chrome Storage — Local (`chrome.storage.local`)
@@ -208,6 +408,7 @@ These are shown live in the popup's Environmental Impact Grid.
 |-----|------|----------|
 | `energyHistory` | Array | Per-tab readings: `{ timestamp, watts, url, domNodes, activeTime }` |
 | `backendEnergyHistory` | Array | AI sessions: `{ timestamp, model, whPerQuery, sessionWh, url }` |
+| `promptOptimizerHistory` | Array | Optimization records: `{ timestamp, originalTokens, optimizedTokens, tokensSaved, energySavedMwh }` |
 | `settings` | Object | User preferences (see below) |
 
 ### Settings Object
