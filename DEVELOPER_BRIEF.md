@@ -4,6 +4,51 @@
 
 ---
 
+## Work Completed (Current Status)
+
+The following features have been implemented as of v8.2.1:
+
+### Core Features
+- **Real-time browser energy monitoring** (1–65W) using DOM nodes, JS execution time, network requests, media playback, canvas/WebGL, and memory signals
+- **AI site detection** for ChatGPT, Claude, Gemini, Perplexity, Grok, and DeepSeek via URL matching
+- **Backend energy estimation** for AI sites — server-side AI model cost added on top of frontend watts, pulled from `ai-energy-database.js`
+- **Environmental impact display** — CO2 (kg/hr), water usage (gal/hr), and LED bulb equivalents shown live in popup
+- **Energy history tracking** — per-tab readings stored in `chrome.storage.local` with timestamp, watts, URL, DOM nodes, and active time
+- **Settings/options page** — tracking toggle, sampling interval, data retention, power alert threshold
+- **Backend energy history** — AI session log viewable and deletable in options (Tab 2)
+- **Prompt Optimizer ("Eco Boost")** — full-page standalone optimizer that removes filler words, preambles, redundant phrases, and unnecessary context; shows tokens saved and energy saved (mWh)
+- **Data export** — JSON export of energy history
+- **Light/dark theme** — synced via `chrome.storage.sync`
+- **In-page widget on AI sites** — `prompt-widget-content.js` overlays a prompt optimization widget on AI sites
+- **In-page notifications** — `content-script-notifications.js` shows energy-saving tips as popups while browsing
+
+### Bonus Systems (Beyond Brief)
+- **OODA Loop Energy Agent** (`energy-agent-core.js`) — rule-based intelligent optimization using Observe, Analyze, Decide, Act, Learn cycle
+- **Pattern Recognition System** (`pattern-recognition-system.js`) — detects temporal, behavioral, and energy patterns with anomaly detection
+- **Deterministic Predictor** (`deterministic-predictor.js`) — local trend forecasting using linear regression, moving average, and exponential smoothing
+- **Advanced Learning System** (`advanced-learning-system.js`) — user behavior modeling with reinforcement learning concepts
+- **Intelligent Actions** (`intelligent-actions.js`) — automated suggestions with user override support
+- **Agent Dashboard** (`agent-dashboard.js`) — analytics dashboard for the advanced agent systems
+- **Firebase integration** (`firebase-config.js`, `firebase-manager.js`, `firebase-helpers.js`) — configured but not yet functional; all data falls back to Chrome Storage
+
+---
+
+## Known Bugs & Issues
+
+The following bugs have been identified and need to be fixed:
+
+### Bug 1 — Gemini Backend Energy Not Calculating Correctly
+**Description:** On the Gemini AI site (`gemini.google.com`), the total energy display is not calculating the backend energy specifically. The AI backend watts figure either fails to update, shows zero, or does not aggregate correctly into the total watts shown in the popup.
+**Impact:** Users on Gemini see an incorrect or incomplete total energy reading.
+**Files likely involved:** `backend-power-calculator.js`, `ai-energy-database.js`, `service-worker.js`, `popup.js`
+
+### Bug 2 — Notification Tips Appearing as Activities / Cannot Be Dismissed
+**Description:** The in-page energy-saving tip notifications (`content-script-notifications.js`) are incorrectly appearing inside the activity list or overlapping with the activities section of the popup/options page. They show up labeled as "writing" activity, appear at random, and cannot be removed or dismissed by the user.
+**Impact:** The activity list is polluted with phantom entries that look like real tracked activities, confusing users and making the history unreliable.
+**Files likely involved:** `content-script-notifications.js`, `energy-saving-tips.js`, `popup.js`, `options.js`, `service-worker.js`
+
+---
+
 ## Platform & Framework
 
 | Item | Details |
