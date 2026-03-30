@@ -14,7 +14,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
     contextWindow: 400000,
     apiId: 'gpt-5-2025-08-07',
     aiIntelligenceIndex: 69.0,
-    
+
     // Performance Benchmarks
     benchmarks: {
       longContextReasoning: 76,
@@ -22,7 +22,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       math500: 99,
       humanEval: 99
     },
-    
+
     // Energy Consumption (Wh per query)
     energy: {
       meanMax: 11.620659451847496,
@@ -32,7 +32,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 4.668677748282628,
       stdCombined: 5.20840864333184
     },
-    
+
     // Carbon Emissions (gCO2e per query)
     carbon: {
       meanMax: 4.099768654611796,
@@ -42,7 +42,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 1.6471095095941108,
       stdCombined: 1.837526569367473
     },
-    
+
     // Water Consumption (mL per query) - Site & Source combined
     water: {
       meanMax: 36.51211199770482,
@@ -52,7 +52,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 14.668985485104015,
       stdCombined: 16.36481995734864
     },
-    
+
     // Large scale impact metrics (per billion prompts)
     scaleImpact: {
       energyMWh: 10700.861671913275,
@@ -64,7 +64,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       gasolineCarEquiv: 820.7095647502183,
       atlanticFlightEquiv: 62.92106663085006
     },
-    
+
     // Hardware and Infrastructure
     hardware: {
       type: 'DGX H200/H100',
@@ -76,14 +76,14 @@ const ENHANCED_AI_MODEL_DATABASE = {
       wueSource: 3.142,
       carbonIntensityFactor: 0.3528
     },
-    
+
     // Performance Metrics
     performance: {
       medianTokensPerSecond: 165.0,
       medianFirstChunk: 37.34,
       queryLength: 'Short (300 tokens)'
     },
-    
+
     pricing: '$0.030/1k tokens',
     sites: ['chat.openai.com', 'chatgpt.com', 'openai.com', 'platform.openai.com'],
     detectionPatterns: [
@@ -101,14 +101,14 @@ const ENHANCED_AI_MODEL_DATABASE = {
     contextWindow: 400000,
     apiId: 'gpt-5-2025-08-07',
     aiIntelligenceIndex: 68.0,
-    
+
     benchmarks: {
       longContextReasoning: 73,
       aime2024: 92,
       math500: 99,
       humanEval: 98
     },
-    
+
     energy: {
       meanMax: 4.396310830559365,
       meanMin: 3.700357737947846,
@@ -117,7 +117,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.9708988218154773,
       stdCombined: 1.1214697012464687
     },
-    
+
     carbon: {
       meanMax: 1.5510184610213436,
       meanMin: 1.305486209948,
@@ -126,7 +126,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.3425331043365003,
       stdCombined: 0.39565451059975426
     },
-    
+
     water: {
       meanMax: 13.813208629617524,
       meanMin: 11.62652401263213,
@@ -135,7 +135,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 3.0505640981442292,
       stdCombined: 3.523657801316405
     },
-    
+
     scaleImpact: {
       energyMWh: 4048.3342842536053,
       carbonTonsCO2e: 1428.2523354846726,
@@ -146,7 +146,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       gasolineCarEquiv: 310.4896381488419,
       atlanticFlightEquiv: 23.80420559141121
     },
-    
+
     hardware: {
       type: 'DGX H200/H100',
       host: 'Azure',
@@ -157,13 +157,13 @@ const ENHANCED_AI_MODEL_DATABASE = {
       wueSource: 3.142,
       carbonIntensityFactor: 0.3528
     },
-    
+
     performance: {
       medianTokensPerSecond: 198.7,
       medianFirstChunk: 17.01,
       queryLength: 'Short (300 tokens)'
     },
-    
+
     pricing: '$0.020/1k tokens',
     sites: ['chat.openai.com', 'chatgpt.com', 'openai.com'],
     detectionPatterns: [
@@ -180,14 +180,14 @@ const ENHANCED_AI_MODEL_DATABASE = {
     contextWindow: 400000,
     apiId: 'gpt-5-mini-2025-08-07',
     aiIntelligenceIndex: 64.0,
-    
+
     benchmarks: {
       longContextReasoning: 66,
       aime2024: null,
       math500: null,
       humanEval: null
     },
-    
+
     energy: {
       meanMax: 2.3406137816613373,
       meanMin: 1.8438063081059304,
@@ -196,7 +196,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.5217086515732694,
       stdCombined: 0.6458348417276651
     },
-    
+
     carbon: {
       meanMax: 0.8257685421701199,
       meanMin: 0.6504948654997722,
@@ -205,7 +205,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.18405881227504942,
       stdCombined: 0.2278505321615203
     },
-    
+
     water: {
       meanMax: 7.354208501979923,
       meanMin: 5.793239420068834,
@@ -214,7 +214,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 1.639208583243212,
       stdCombined: 2.0292130727083237
     },
-    
+
     scaleImpact: {
       energyMWh: 2092.2100448836336,
       carbonTonsCO2e: 738.131703834946,
@@ -225,7 +225,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       gasolineCarEquiv: 160.4634138771622,
       atlanticFlightEquiv: 12.302195063915768
     },
-    
+
     hardware: {
       type: 'DGX H200/H100',
       host: 'Azure',
@@ -236,13 +236,13 @@ const ENHANCED_AI_MODEL_DATABASE = {
       wueSource: 3.142,
       carbonIntensityFactor: 0.3528
     },
-    
+
     performance: {
       medianTokensPerSecond: 79.0,
       medianFirstChunk: 12.13,
       queryLength: 'Short (300 tokens)'
     },
-    
+
     pricing: '$0.005/1k tokens',
     sites: ['chat.openai.com', 'chatgpt.com', 'openai.com'],
     detectionPatterns: [
@@ -252,6 +252,266 @@ const ENHANCED_AI_MODEL_DATABASE = {
     category: 'efficient-medium'
   },
 
+  // Google Gemini Models
+  'gemini-1-5-pro': {
+    name: 'Gemini 1.5 Pro',
+    company: 'Google',
+    size: 'Large',
+    contextWindow: 1000000,
+    apiId: 'gemini-1.5-pro-latest',
+    aiIntelligenceIndex: 65.0,
+
+    benchmarks: {
+      longContextReasoning: 82,
+      aime2024: 85,
+      math500: 94,
+      humanEval: 92
+    },
+
+    energy: {
+      meanMax: 3.5872,
+      meanMin: 3.0128,
+      meanCombined: 3.3,
+      stdMax: 0.9412,
+      stdMin: 0.7904,
+      stdCombined: 0.9135
+    },
+
+    carbon: {
+      meanMax: 1.2715,
+      meanMin: 1.0685,
+      meanCombined: 1.17,
+      stdMax: 0.3342,
+      stdMin: 0.2806,
+      stdCombined: 0.3241
+    },
+
+    water: {
+      meanMax: 11.3024,
+      meanMin: 9.4976,
+      meanCombined: 10.4,
+      stdMax: 2.9692,
+      stdMin: 2.4944,
+      stdCombined: 2.8782
+    },
+
+    scaleImpact: {
+      energyMWh: 3300.0,
+      carbonTonsCO2e: 1170.0,
+      waterKiloliters: 10400.0,
+      householdEnergyEquiv: 3013.7,
+      universitiesEquiv: 2.74,
+      olympicPoolsWater: 4.16,
+      gasolineCarEquiv: 254.3,
+      atlanticFlightEquiv: 19.4
+    },
+
+    hardware: {
+      type: 'TPU v5p',
+      host: 'Google Cloud',
+      gpuPowerDraw: 4.8,
+      nonGpuPowerDraw: 3.2,
+      pue: 1.12,
+      wueSite: 0.25,
+      wueSource: 2.8,
+      carbonIntensityFactor: 0.35
+    },
+
+    performance: {
+      medianTokensPerSecond: 125.0,
+      medianFirstChunk: 15.2,
+      queryLength: 'Short (300 tokens)'
+    },
+
+    pricing: '$0.007/1k tokens',
+    sites: ['gemini.google.com', 'ai.google.dev'],
+    detectionPatterns: [
+      /gemini-1\.5-pro/i,
+      /gemini.*pro/i
+    ],
+    category: 'frontier-large'
+  },
+
+  'gemini-1-5-flash': {
+    name: 'Gemini 1.5 Flash',
+    company: 'Google',
+    size: 'Medium',
+    contextWindow: 1000000,
+    apiId: 'gemini-1.5-flash-latest',
+    aiIntelligenceIndex: 58.0,
+
+    benchmarks: {
+      longContextReasoning: 70,
+      aime2024: 65,
+      math500: 82,
+      humanEval: 88
+    },
+
+    energy: {
+      meanMax: 0.8912,
+      meanMin: 0.7488,
+      meanCombined: 0.82,
+      stdMax: 0.2341,
+      stdMin: 0.1965,
+      stdCombined: 0.2271
+    },
+
+    carbon: {
+      meanMax: 0.3153,
+      meanMin: 0.2647,
+      meanCombined: 0.29,
+      stdMax: 0.0828,
+      stdMin: 0.0695,
+      stdCombined: 0.0803
+    },
+
+    water: {
+      meanMax: 2.8024,
+      meanMin: 2.3576,
+      meanCombined: 2.58,
+      stdMax: 0.7362,
+      stdMin: 0.6184,
+      stdCombined: 0.7142
+    },
+
+    scaleImpact: {
+      energyMWh: 820.0,
+      carbonTonsCO2e: 290.0,
+      waterKiloliters: 2580.0,
+      householdEnergyEquiv: 748.8,
+      universitiesEquiv: 0.68,
+      olympicPoolsWater: 1.03,
+      gasolineCarEquiv: 63.2,
+      atlanticFlightEquiv: 4.8
+    },
+
+    hardware: {
+      type: 'TPU v5e',
+      host: 'Google Cloud',
+      gpuPowerDraw: 3.2,
+      nonGpuPowerDraw: 2.8,
+      pue: 1.1,
+      wueSite: 0.2,
+      wueSource: 2.5,
+      carbonIntensityFactor: 0.35
+    },
+
+    performance: {
+      medianTokensPerSecond: 280.0,
+      medianFirstChunk: 8.5,
+      queryLength: 'Short (300 tokens)'
+    },
+
+    pricing: '$0.0003/1k tokens',
+    sites: ['gemini.google.com', 'ai.google.dev'],
+    detectionPatterns: [
+      /gemini-1\.5-flash/i,
+      /gemini.*flash/i,
+      /flash/i
+    ],
+    category: 'efficient-medium'
+  },
+
+  'gemini-pro': {
+    name: 'Gemini Pro (Legacy)',
+    company: 'Google',
+    size: 'Large',
+    contextWindow: 32000,
+    apiId: 'gemini-pro',
+    aiIntelligenceIndex: 52.0,
+    energy: {
+      meanMax: 3.5872,
+      meanMin: 3.0128,
+      meanCombined: 3.3,
+      stdMax: 0.9412,
+      stdMin: 0.7904,
+      stdCombined: 0.9135
+    },
+    carbon: {
+      meanMax: 1.2715,
+      meanMin: 1.0685,
+      meanCombined: 1.17,
+      stdMax: 0.3342,
+      stdMin: 0.2806,
+      stdCombined: 0.3241
+    },
+    water: {
+      meanMax: 11.3024,
+      meanMin: 9.4976,
+      meanCombined: 10.4,
+      stdMax: 2.9692,
+      stdMin: 2.4944,
+      stdCombined: 2.8782
+    },
+    scaleImpact: {
+      energyMWh: 3300.0,
+      carbonTonsCO2e: 1170.0,
+      waterKiloliters: 10400.0,
+      householdEnergyEquiv: 3013.7,
+      universitiesEquiv: 2.74,
+      olympicPoolsWater: 4.16,
+      gasolineCarEquiv: 254.3,
+      atlanticFlightEquiv: 19.4
+    },
+    hardware: { type: 'TPU v4', host: 'Google Cloud', gpuPowerDraw: 4.2, nonGpuPowerDraw: 3.1, pue: 1.12, wueSite: 0.3, wueSource: 3.1, carbonIntensityFactor: 0.36 },
+    performance: { medianTokensPerSecond: 85.0, medianFirstChunk: 25.5, queryLength: 'Short (300 tokens)' },
+    pricing: '$0.001/1k tokens',
+    sites: ['gemini.google.com', 'bard.google.com'],
+    detectionPatterns: [/gemini/i, /bard/i],
+    category: 'large-multimodal'
+  },
+
+  'palm-2': {
+    name: 'PaLM 2',
+    company: 'Google',
+    size: 'Large',
+    contextWindow: 8000,
+    apiId: 'palm-2-bison',
+    aiIntelligenceIndex: 45.0,
+    energy: {
+      meanMax: 4.2384,
+      meanMin: 3.5616,
+      meanCombined: 3.9,
+      stdMax: 1.1124,
+      stdMin: 0.9344,
+      stdCombined: 1.0782
+    },
+    carbon: {
+      meanMax: 1.5034,
+      meanMin: 1.2634,
+      meanCombined: 1.38,
+      stdMax: 0.3952,
+      stdMin: 0.3326,
+      stdCombined: 0.3841
+    },
+    water: {
+      meanMax: 13.3524,
+      meanMin: 11.2376,
+      meanCombined: 12.3,
+      stdMax: 3.5092,
+      stdMin: 2.9482,
+      stdCombined: 3.4042
+    },
+    scaleImpact: {
+      energyMWh: 3900.0,
+      carbonTonsCO2e: 1380.0,
+      waterKiloliters: 12300.0,
+      householdEnergyEquiv: 3561.6,
+      universitiesEquiv: 3.24,
+      olympicPoolsWater: 4.92,
+      gasolineCarEquiv: 300.3,
+      atlanticFlightEquiv: 22.9
+    },
+    hardware: { type: 'TPU v4', host: 'Google Cloud', gpuPowerDraw: 4.2, nonGpuPowerDraw: 3.1, pue: 1.12, wueSite: 0.3, wueSource: 3.1, carbonIntensityFactor: 0.36 },
+    performance: { medianTokensPerSecond: 60.0, medianFirstChunk: 35.5, queryLength: 'Short (300 tokens)' },
+    pricing: '$0.001/1k tokens',
+    sites: ['makersuite.google.com', 'ai.google.dev'],
+    detectionPatterns: [/palm/i, /makersuite/i],
+    category: 'large-language'
+  },
+
+
+
   'o3': {
     name: 'OpenAI o3',
     company: 'OpenAI',
@@ -259,14 +519,14 @@ const ENHANCED_AI_MODEL_DATABASE = {
     contextWindow: 200000,
     apiId: 'o3-2025-04-16',
     aiIntelligenceIndex: 67.0,
-    
+
     benchmarks: {
       longContextReasoning: 69,
       aime2024: 90,
       math500: 99,
       humanEval: 99
     },
-    
+
     energy: {
       meanMax: 1.2565837323545013,
       meanMin: 1.0576616432750605,
@@ -275,7 +535,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.3127437168946128,
       stdCombined: 0.35752846727598225
     },
-    
+
     carbon: {
       meanMax: 0.443322740774668,
       meanMin: 0.3731430277474414,
@@ -284,7 +544,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.1103359833204194,
       stdCombined: 0.12613604325496652
     },
-    
+
     water: {
       meanMax: 3.948186087057843,
       meanMin: 3.32317288317024,
@@ -293,7 +553,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.9826407584828736,
       stdCombined: 1.1233544441811363
     },
-    
+
     scaleImpact: {
       energyMWh: 1157.1226878147809,
       carbonTonsCO2e: 408.2328842610548,
@@ -304,7 +564,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       gasolineCarEquiv: 88.74627918718583,
       atlanticFlightEquiv: 6.803881404350913
     },
-    
+
     hardware: {
       type: 'DGX H200/H100',
       host: 'Azure',
@@ -315,13 +575,13 @@ const ENHANCED_AI_MODEL_DATABASE = {
       wueSource: 3.142,
       carbonIntensityFactor: 0.3528
     },
-    
+
     performance: {
       medianTokensPerSecond: 237.3,
       medianFirstChunk: 3.74,
       queryLength: 'Short (300 tokens)'
     },
-    
+
     pricing: '$0.050/1k tokens',
     sites: ['chat.openai.com', 'openai.com'],
     detectionPatterns: [
@@ -338,14 +598,14 @@ const ENHANCED_AI_MODEL_DATABASE = {
     contextWindow: 200000,
     apiId: 'o4-mini-2025-04-16',
     aiIntelligenceIndex: 65.0,
-    
+
     benchmarks: {
       longContextReasoning: 55,
       aime2024: 94,
       math500: 99,
       humanEval: 99
     },
-    
+
     energy: {
       meanMax: 2.769351861619209,
       meanMin: 2.1815424961712915,
@@ -354,7 +614,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 1.026569146792869,
       stdCombined: 1.2093115114891755
     },
-    
+
     carbon: {
       meanMax: 0.9770273367792569,
       meanMin: 0.7696481926492315,
@@ -363,7 +623,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.3621735949885242,
       stdCombined: 0.4266451012533811
     },
-    
+
     water: {
       meanMax: 8.701303549207555,
       meanMin: 6.854406522970197,
@@ -372,7 +632,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 3.225480259223194,
       stdCombined: 3.799656769098989
     },
-    
+
     scaleImpact: {
       energyMWh: 2475.44717889525,
       carbonTonsCO2e: 873.337764714244,
@@ -383,7 +643,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       gasolineCarEquiv: 189.85603580744436,
       atlanticFlightEquiv: 14.555629411904068
     },
-    
+
     hardware: {
       type: 'DGX H200/H100',
       host: 'Azure',
@@ -394,13 +654,13 @@ const ENHANCED_AI_MODEL_DATABASE = {
       wueSource: 3.142,
       carbonIntensityFactor: 0.3528
     },
-    
+
     performance: {
       medianTokensPerSecond: 116.4,
       medianFirstChunk: 19.22,
       queryLength: 'Short (300 tokens)'
     },
-    
+
     pricing: '$0.010/1k tokens',
     sites: ['chat.openai.com', 'openai.com'],
     detectionPatterns: [
@@ -418,14 +678,14 @@ const ENHANCED_AI_MODEL_DATABASE = {
     contextWindow: 1000000,
     apiId: 'claude-sonnet-4-20250514',
     aiIntelligenceIndex: 59.0,
-    
+
     benchmarks: {
       longContextReasoning: 65,
       aime2024: 77,
       math500: 99,
       humanEval: null
     },
-    
+
     energy: {
       meanMax: 1.5029903643709916,
       meanMin: 1.2650611476790463,
@@ -434,7 +694,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.3120308599271675,
       stdCombined: 0.362697762109703
     },
-    
+
     carbon: {
       meanMax: 0.5786512902828318,
       meanMin: 0.4870485418564328,
@@ -443,7 +703,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.12013188107195949,
       stdCombined: 0.13963863841223567
     },
-    
+
     water: {
       meanMax: 4.722395724853655,
       meanMin: 3.974822126007563,
@@ -452,7 +712,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.9804009618911602,
       stdCombined: 1.139596368548687
     },
-    
+
     scaleImpact: {
       energyMWh: 1384.0257560250186,
       carbonTonsCO2e: 532.8499160696323,
@@ -463,7 +723,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       gasolineCarEquiv: 115.83693827600703,
       atlanticFlightEquiv: 8.880831934493871
     },
-    
+
     hardware: {
       type: 'DGX H200/H100',
       host: 'Anthropic',
@@ -474,13 +734,13 @@ const ENHANCED_AI_MODEL_DATABASE = {
       wueSource: 3.142,
       carbonIntensityFactor: 0.385
     },
-    
+
     performance: {
       medianTokensPerSecond: 63.6,
       medianFirstChunk: 1.17,
       queryLength: 'Short (300 tokens)'
     },
-    
+
     pricing: '$0.015/1k tokens',
     sites: ['claude.ai', 'anthropic.com'],
     detectionPatterns: [
@@ -498,14 +758,14 @@ const ENHANCED_AI_MODEL_DATABASE = {
     contextWindow: 200000,
     apiId: 'claude-opus-4-20250514',
     aiIntelligenceIndex: 55.0,
-    
+
     benchmarks: {
       longContextReasoning: 34,
       aime2024: 76,
       math500: 98,
       humanEval: null
     },
-    
+
     energy: {
       meanMax: 3.3203642530243633,
       meanMin: 2.7947376857611417,
@@ -514,7 +774,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 1.104219689400973,
       stdCombined: 1.2406691508034433
     },
-    
+
     carbon: {
       meanMax: 1.2783402374143797,
       meanMin: 1.0759740090180394,
@@ -523,7 +783,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.4251245804193747,
       stdCombined: 0.47765762305932563
     },
-    
+
     water: {
       meanMax: 10.43258448300255,
       meanMin: 8.781065808661507,
@@ -532,7 +792,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 3.4694582640978577,
       stdCombined: 3.898182471824419
     },
-    
+
     scaleImpact: {
       energyMWh: 3057.550969392753,
       carbonTonsCO2e: 1177.1571232162096,
@@ -543,7 +803,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       gasolineCarEquiv: 255.90372243830646,
       atlanticFlightEquiv: 19.619285386936827
     },
-    
+
     hardware: {
       type: 'DGX H200/H100',
       host: 'Anthropic',
@@ -554,13 +814,13 @@ const ENHANCED_AI_MODEL_DATABASE = {
       wueSource: 3.142,
       carbonIntensityFactor: 0.385
     },
-    
+
     performance: {
       medianTokensPerSecond: 30.2,
       medianFirstChunk: 1.7,
       queryLength: 'Short (300 tokens)'
     },
-    
+
     pricing: '$0.030/1k tokens',
     sites: ['claude.ai', 'anthropic.com'],
     detectionPatterns: [
@@ -579,14 +839,14 @@ const ENHANCED_AI_MODEL_DATABASE = {
     contextWindow: 256000,
     apiId: 'grok-4-0709',
     aiIntelligenceIndex: 68.0,
-    
+
     benchmarks: {
       longContextReasoning: 68,
       aime2024: 94,
       math500: 99,
       humanEval: 98
     },
-    
+
     energy: {
       meanMax: 3.983662395487847,
       meanMin: 3.353033154081997,
@@ -595,7 +855,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.5111935063142664,
       stdCombined: 0.6438261045476379
     },
-    
+
     carbon: {
       meanMax: 1.5337100222628215,
       meanMin: 1.2909177643215688,
@@ -604,7 +864,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.1968094999309926,
       stdCombined: 0.2478730502508406
     },
-    
+
     water: {
       meanMax: 12.51666724662282,
       meanMin: 10.535230170125635,
@@ -613,7 +873,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 1.6061699968394252,
       stdCombined: 2.0229016204886783
     },
-    
+
     scaleImpact: {
       energyMWh: 3668.347774784923,
       carbonTonsCO2e: 1412.3138932921952,
@@ -624,7 +884,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       gasolineCarEquiv: 307.0247594113468,
       atlanticFlightEquiv: 23.538564888203254
     },
-    
+
     hardware: {
       type: 'DGX H200/H100',
       host: 'xAI',
@@ -635,13 +895,13 @@ const ENHANCED_AI_MODEL_DATABASE = {
       wueSource: 3.142,
       carbonIntensityFactor: 0.385
     },
-    
+
     performance: {
       medianTokensPerSecond: 61.5,
       medianFirstChunk: 7.97,
       queryLength: 'Short (300 tokens)'
     },
-    
+
     pricing: '$0.025/1k tokens',
     sites: ['grok.x.ai', 'x.ai'],
     detectionPatterns: [
@@ -659,14 +919,14 @@ const ENHANCED_AI_MODEL_DATABASE = {
     contextWindow: 131000,
     apiId: 'grok-3-mini-beta',
     aiIntelligenceIndex: 58.0,
-    
+
     benchmarks: {
       longContextReasoning: 50,
       aime2024: 93,
       math500: 99,
       humanEval: 98
     },
-    
+
     energy: {
       meanMax: 0.3575785646495295,
       meanMin: 0.2816806507378163,
@@ -675,7 +935,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.018451790784721697,
       stdCombined: 0.04341300853800856
     },
-    
+
     carbon: {
       meanMax: 0.13766774739006887,
       meanMin: 0.1084470505340593,
@@ -684,7 +944,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.0071039394521178545,
       stdCombined: 0.0167140082871333
     },
-    
+
     water: {
       meanMax: 1.1235118501288217,
       meanMin: 0.8850406046182189,
@@ -693,7 +953,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.05797552664559558,
       stdCombined: 0.13640367282642288
     },
-    
+
     scaleImpact: {
       energyMWh: 319.629607693673,
       carbonTonsCO2e: 123.05739896206408,
@@ -704,7 +964,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       gasolineCarEquiv: 26.751608470013934,
       atlanticFlightEquiv: 2.050956649367735
     },
-    
+
     hardware: {
       type: 'DGX H200/H100',
       host: 'xAI',
@@ -715,13 +975,13 @@ const ENHANCED_AI_MODEL_DATABASE = {
       wueSource: 3.142,
       carbonIntensityFactor: 0.385
     },
-    
+
     performance: {
       medianTokensPerSecond: 187.6,
       medianFirstChunk: 0.55,
       queryLength: 'Short (300 tokens)'
     },
-    
+
     pricing: '$0.005/1k tokens',
     sites: ['grok.x.ai', 'x.ai'],
     detectionPatterns: [
@@ -740,14 +1000,14 @@ const ENHANCED_AI_MODEL_DATABASE = {
     contextWindow: 128000,
     apiId: 'deepseek-reasoner',
     aiIntelligenceIndex: 60.0,
-    
+
     benchmarks: {
       longContextReasoning: 53,
       aime2024: null,
       math500: null,
       humanEval: null
     },
-    
+
     energy: {
       meanMax: 29.15769820295388,
       meanMin: 24.541921243617004,
@@ -756,7 +1016,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 13.640089994266894,
       stdCombined: 15.154576100362815
     },
-    
+
     carbon: {
       meanMax: 17.494618921772325,
       meanMin: 14.725152746170203,
@@ -765,7 +1025,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 8.184053996560136,
       stdCombined: 9.09274566021769
     },
-    
+
     water: {
       meanMax: 175.4127123889705,
       meanMin: 147.64419820159992,
@@ -774,7 +1034,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 82.05878140550963,
       stdCombined: 91.16992981978268
     },
-    
+
     scaleImpact: {
       energyMWh: 26849.80972328544,
       carbonTonsCO2e: 16109.885833971266,
@@ -785,7 +1045,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       gasolineCarEquiv: 3502.1490943415797,
       atlanticFlightEquiv: 268.49809723285443
     },
-    
+
     hardware: {
       type: 'DGX H800',
       host: 'DeepSeek',
@@ -796,13 +1056,13 @@ const ENHANCED_AI_MODEL_DATABASE = {
       wueSource: 6.016,
       carbonIntensityFactor: 0.6
     },
-    
+
     performance: {
       medianTokensPerSecond: 20.2,
       medianFirstChunk: 101.89,
       queryLength: 'Short (300 tokens)'
     },
-    
+
     pricing: '$0.014/1k tokens',
     sites: ['chat.deepseek.com', 'platform.deepseek.com'],
     detectionPatterns: [
@@ -820,14 +1080,14 @@ const ENHANCED_AI_MODEL_DATABASE = {
     contextWindow: 128000,
     apiId: 'deepseek-chat',
     aiIntelligenceIndex: 49.0,
-    
+
     benchmarks: {
       longContextReasoning: 45,
       aime2024: null,
       math500: null,
       humanEval: null
     },
-    
+
     energy: {
       meanMax: 4.457247702930414,
       meanMin: 3.7516480665654566,
@@ -836,7 +1096,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.25578944985161994,
       stdCombined: 0.45095311986914977
     },
-    
+
     carbon: {
       meanMax: 2.6743486217582477,
       meanMin: 2.250988839939274,
@@ -845,7 +1105,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.153473669910972,
       stdCombined: 0.27057187192148985
     },
-    
+
     water: {
       meanMax: 26.81480218082937,
       meanMin: 22.569914768457785,
@@ -854,7 +1114,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 1.5388293303073455,
       stdCombined: 2.712933969132805
     },
-    
+
     scaleImpact: {
       energyMWh: 4104.447884747935,
       carbonTonsCO2e: 2462.6687308487612,
@@ -865,7 +1125,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       gasolineCarEquiv: 535.3627675758177,
       atlanticFlightEquiv: 41.044478847479354
     },
-    
+
     hardware: {
       type: 'DGX H800',
       host: 'DeepSeek',
@@ -876,13 +1136,13 @@ const ENHANCED_AI_MODEL_DATABASE = {
       wueSource: 6.016,
       carbonIntensityFactor: 0.6
     },
-    
+
     performance: {
       medianTokensPerSecond: 20.3,
       medianFirstChunk: 3.03,
       queryLength: 'Short (300 tokens)'
     },
-    
+
     pricing: '$0.008/1k tokens',
     sites: ['chat.deepseek.com', 'platform.deepseek.com'],
     detectionPatterns: [
@@ -901,14 +1161,14 @@ const ENHANCED_AI_MODEL_DATABASE = {
     contextWindow: 128000,
     apiId: 'us.meta.llama4-maverick-17b-instruct-v1:0',
     aiIntelligenceIndex: 42.0,
-    
+
     benchmarks: {
       longContextReasoning: 46,
       aime2024: 39,
       math500: 89,
       humanEval: 88
     },
-    
+
     energy: {
       meanMax: 0.050504846968538596,
       meanMin: 0.03765140472968129,
@@ -917,7 +1177,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.004575993978051244,
       stdCombined: 0.008403037077157746
     },
-    
+
     carbon: {
       meanMax: 0.019444366082887358,
       meanMin: 0.014495790820927296,
@@ -926,7 +1186,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.0017617576815497288,
       stdCombined: 0.0032351692747057325
     },
-    
+
     water: {
       meanMax: 0.15868622917514827,
       meanMin: 0.11830071366065861,
@@ -935,7 +1195,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.014377773079037006,
       stdCombined: 0.026402342496429636
     },
-    
+
     scaleImpact: {
       energyMWh: 44.07812584910994,
       carbonTonsCO2e: 16.97007845190733,
@@ -946,7 +1206,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       gasolineCarEquiv: 3.689147489545072,
       atlanticFlightEquiv: 0.28283464086512217
     },
-    
+
     hardware: {
       type: 'DGX H200/H100',
       host: 'AWS',
@@ -957,13 +1217,13 @@ const ENHANCED_AI_MODEL_DATABASE = {
       wueSource: 3.142,
       carbonIntensityFactor: 0.385
     },
-    
+
     performance: {
       medianTokensPerSecond: 316.3,
       medianFirstChunk: 0.54,
       queryLength: 'Short (300 tokens)'
     },
-    
+
     pricing: '$0.002/1k tokens',
     sites: ['aws.amazon.com', 'bedrock.aws.com'],
     detectionPatterns: [
@@ -981,14 +1241,14 @@ const ENHANCED_AI_MODEL_DATABASE = {
     contextWindow: 128000,
     apiId: 'us.meta.llama3-3-70b-instruct-v1:0',
     aiIntelligenceIndex: 31.0,
-    
+
     benchmarks: {
       longContextReasoning: 15,
       aime2024: 30,
       math500: 77,
       humanEval: 86
     },
-    
+
     energy: {
       meanMax: 0.22213176741769938,
       meanMin: 0.1749831421161536,
@@ -997,7 +1257,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.02279899663930676,
       stdCombined: 0.035134999904643735
     },
-    
+
     carbon: {
       meanMax: 0.08552073045581424,
       meanMin: 0.06736850971471912,
@@ -1006,7 +1266,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.0087776137061331,
       stdCombined: 0.013526974963287839
     },
-    
+
     water: {
       meanMax: 0.6979380132264114,
       meanMin: 0.5497970325289545,
@@ -1015,7 +1275,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.07163444744070184,
       stdCombined: 0.11039416970039062
     },
-    
+
     scaleImpact: {
       energyMWh: 198.5574547669265,
       carbonTonsCO2e: 76.4446200852667,
@@ -1026,7 +1286,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       gasolineCarEquiv: 16.618395670710154,
       atlanticFlightEquiv: 1.2740770014211118
     },
-    
+
     hardware: {
       type: 'DGX H200/H100',
       host: 'AWS',
@@ -1037,13 +1297,13 @@ const ENHANCED_AI_MODEL_DATABASE = {
       wueSource: 3.142,
       carbonIntensityFactor: 0.385
     },
-    
+
     performance: {
       medianTokensPerSecond: 247.2,
       medianFirstChunk: 0.45,
       queryLength: 'Short (300 tokens)'
     },
-    
+
     pricing: '$0.004/1k tokens',
     sites: ['aws.amazon.com', 'bedrock.aws.com', 'meta.ai'],
     detectionPatterns: [
@@ -1062,14 +1322,14 @@ const ENHANCED_AI_MODEL_DATABASE = {
     contextWindow: 131000,
     apiId: 'mistral-medium-2505',
     aiIntelligenceIndex: 39.0,
-    
+
     benchmarks: {
       longContextReasoning: 28,
       aime2024: 44,
       math500: 91,
       humanEval: 90
     },
-    
+
     energy: {
       meanMax: 1.8527325495330398,
       meanMin: 1.559437785508021,
@@ -1078,7 +1338,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.6143022120039782,
       stdCombined: 0.6903051224779202
     },
-    
+
     carbon: {
       meanMax: 0.6536440434752564,
       meanMin: 0.5501696507272298,
@@ -1087,7 +1347,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.21672582039500352,
       stdCombined: 0.24353964721021026
     },
-    
+
     water: {
       meanMax: 5.821285670632809,
       meanMin: 4.899753522066201,
@@ -1096,7 +1356,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 1.9301375501164995,
       stdCombined: 2.168938694825625
     },
-    
+
     scaleImpact: {
       energyMWh: 1706.08516752053,
       carbonTonsCO2e: 601.906847101243,
@@ -1107,7 +1367,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       gasolineCarEquiv: 130.84931458722676,
       atlanticFlightEquiv: 10.031780785020716
     },
-    
+
     hardware: {
       type: 'DGX H200/H100',
       host: 'Azure',
@@ -1118,13 +1378,13 @@ const ENHANCED_AI_MODEL_DATABASE = {
       wueSource: 3.142,
       carbonIntensityFactor: 0.3528
     },
-    
+
     performance: {
       medianTokensPerSecond: 48.2,
       medianFirstChunk: 0.32,
       queryLength: 'Short (300 tokens)'
     },
-    
+
     pricing: '$0.012/1k tokens',
     sites: ['mistral.ai', 'chat.mistral.ai'],
     detectionPatterns: [
@@ -1142,14 +1402,14 @@ const ENHANCED_AI_MODEL_DATABASE = {
     contextWindow: 128000,
     apiId: 'Mistral-Large-2411',
     aiIntelligenceIndex: 29.0,
-    
+
     benchmarks: {
       longContextReasoning: 5,
       aime2024: 11,
       math500: 74,
       humanEval: 90
     },
-    
+
     energy: {
       meanMax: 1.9752948378068138,
       meanMin: 1.6625979871575367,
@@ -1158,7 +1418,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.2446510066613624,
       stdCombined: 0.3108291389192815
     },
-    
+
     carbon: {
       meanMax: 0.6968840187782438,
       meanMin: 0.586564569869179,
@@ -1167,7 +1427,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.08631287515012864,
       stdCombined: 0.10966052021072252
     },
-    
+
     water: {
       meanMax: 6.206376380389007,
       meanMin: 5.223882875648981,
@@ -1176,7 +1436,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       stdMin: 0.7686934629300006,
       stdCombined: 0.9766251544843824
     },
-    
+
     scaleImpact: {
       energyMWh: 1818.9464124821752,
       carbonTonsCO2e: 641.7242943237114,
@@ -1187,7 +1447,7 @@ const ENHANCED_AI_MODEL_DATABASE = {
       gasolineCarEquiv: 139.50528137471989,
       atlanticFlightEquiv: 10.69540490539519
     },
-    
+
     hardware: {
       type: 'DGX H200/H100',
       host: 'Azure',
@@ -1198,13 +1458,13 @@ const ENHANCED_AI_MODEL_DATABASE = {
       wueSource: 3.142,
       carbonIntensityFactor: 0.3528
     },
-    
+
     performance: {
       medianTokensPerSecond: 34.5,
       medianFirstChunk: 0.39,
       queryLength: 'Short (300 tokens)'
     },
-    
+
     pricing: '$0.018/1k tokens',
     sites: ['mistral.ai', 'chat.mistral.ai'],
     detectionPatterns: [
@@ -1348,6 +1608,31 @@ const ENHANCED_AI_SITE_PATTERNS = {
   }
 };
 
+// Google Platform
+const GOOGLE_PLATFORM_PATTERNS = {
+  google: {
+    domains: ['gemini.google.com', 'bard.google.com', 'ai.google.dev', 'makersuite.google.com'],
+    defaultModel: 'gemini-1-5-pro',
+    pathPatterns: [
+      { pattern: /gemini.*1\.5.*pro/i, model: 'gemini-1-5-pro' },
+      { pattern: /gemini.*1\.5.*flash/i, model: 'gemini-1-5-flash' },
+      { pattern: /gemini/i, model: 'gemini-1-5-pro' },
+      { pattern: /bard/i, model: 'gemini-pro' },
+      { pattern: /flash/i, model: 'gemini-1-5-flash' },
+      { pattern: /palm/i, model: 'palm-2' }
+    ],
+    performanceHints: {
+      highPerformance: 'gemini-1-5-pro',
+      efficient: 'gemini-1-5-flash',
+      balanced: 'gemini-1-5-pro'
+    }
+  }
+};
+
+// Merge Google patterns into the main site patterns
+Object.assign(ENHANCED_AI_SITE_PATTERNS, GOOGLE_PLATFORM_PATTERNS);
+
+
 /**
  * Enhanced AI Energy Manager with comprehensive model data and environmental impact
  */
@@ -1372,7 +1657,7 @@ class EnhancedAIEnergyManager {
         atlanticFlights: 0
       }
     };
-    
+
     // Initialize Enhanced Query Estimation Engine
     this.queryEstimationEngine = null;
     this.initializeQueryEstimation();
@@ -1408,10 +1693,10 @@ class EnhancedAIEnergyManager {
       // Enhanced detection logic
       for (const [platform, config] of Object.entries(ENHANCED_AI_SITE_PATTERNS)) {
         if (this.matchesDomain(domain, config.domains)) {
-          
+
           // Context-aware model selection
           let selectedModel = this.selectModelByContext(config, context);
-          
+
           if (!selectedModel) {
             // Pattern-based detection
             for (const pathPattern of config.pathPatterns || []) {
@@ -1424,7 +1709,7 @@ class EnhancedAIEnergyManager {
 
           // Use default if no specific model detected
           selectedModel = selectedModel || config.defaultModel;
-          
+
           if (ENHANCED_AI_MODEL_DATABASE[selectedModel]) {
             const detection = {
               platform,
@@ -1449,7 +1734,7 @@ class EnhancedAIEnergyManager {
 
       // Fallback to individual model detection
       return this.detectByModelPatterns(url, title, content, context);
-      
+
     } catch (error) {
       return null;
     }
@@ -1462,12 +1747,12 @@ class EnhancedAIEnergyManager {
     if (!config.performanceHints || !context) return null;
 
     const { batteryLevel, performanceMode, userPreference } = context;
-    
+
     // Battery-aware model selection
     if (batteryLevel !== undefined && batteryLevel < 0.3) {
       return config.performanceHints.efficient || config.performanceHints.ultraEfficient;
     }
-    
+
     // Performance mode based selection
     if (performanceMode) {
       const hint = config.performanceHints[performanceMode];
@@ -1475,12 +1760,12 @@ class EnhancedAIEnergyManager {
         return hint;
       }
     }
-    
+
     // User preference based selection
     if (userPreference && config.performanceHints[userPreference]) {
       return config.performanceHints[userPreference];
     }
-    
+
     return null;
   }
 
@@ -1495,23 +1780,23 @@ class EnhancedAIEnergyManager {
     const { model } = detectedModel;
     const duration = tabData.duration || 0;
     const interactions = context.interactions || this.estimateInteractions(tabData, duration);
-    
+
     // Enhanced query estimation using model characteristics
     const queryEstimation = this.calculateQueryEstimate(tabData, interactions, context, detectedModel);
     const estimatedQueries = typeof queryEstimation === 'object' ? queryEstimation.queries : queryEstimation;
-    
+
     // Energy consumption calculation with uncertainty
     const energyStats = this.calculateEnergyWithUncertainty(model.energy, estimatedQueries);
-    
+
     // Carbon footprint calculation
     const carbonStats = this.calculateCarbonWithUncertainty(model.carbon, estimatedQueries);
-    
+
     // Water usage calculation
     const waterStats = this.calculateWaterWithUncertainty(model.water, estimatedQueries);
-    
+
     // Environmental impact equivalents
     const environmental = this.calculateEnvironmentalImpact(model, estimatedQueries);
-    
+
     const result = {
       queries: estimatedQueries,
       energy: energyStats,
@@ -1526,7 +1811,7 @@ class EnhancedAIEnergyManager {
       },
       confidence: detectedModel.confidence || 0.7
     };
-    
+
     // Add enhanced query estimation metadata if available
     if (typeof queryEstimation === 'object' && queryEstimation.method) {
       result.queryEstimation = {
@@ -1535,13 +1820,13 @@ class EnhancedAIEnergyManager {
         method: queryEstimation.method,
         breakdown: queryEstimation.breakdown
       };
-      
+
       // Use query estimation confidence to adjust overall confidence
       if (queryEstimation.confidence !== undefined) {
         result.confidence = (result.confidence + queryEstimation.confidence) / 2;
       }
     }
-    
+
     return result;
   }
 
@@ -1593,7 +1878,7 @@ class EnhancedAIEnergyManager {
   calculateEnvironmentalImpact(model, queries) {
     const scaleImpact = model.scaleImpact;
     const scaleFactor = queries / 1000000000; // Scale from billion prompts to actual queries
-    
+
     return {
       energyMWh: scaleImpact.energyMWh * scaleFactor,
       carbonTonsCO2e: scaleImpact.carbonTonsCO2e * scaleFactor,
@@ -1623,9 +1908,9 @@ class EnhancedAIEnergyManager {
           isActiveTab: context.isActiveTab || false,
           userEngagement: context.userEngagement || 'medium'
         };
-        
+
         const estimation = this.queryEstimationEngine.estimateQueries(tabData, detectedModel, enhancedContext);
-        
+
         return {
           queries: estimation.queries,
           confidence: estimation.confidence,
@@ -1636,7 +1921,7 @@ class EnhancedAIEnergyManager {
       } catch (error) {
       }
     }
-    
+
     // Fallback to basic estimation
     return this.calculateBasicQueryEstimate(tabData, interactions, context);
   }
@@ -1647,21 +1932,21 @@ class EnhancedAIEnergyManager {
   calculateBasicQueryEstimate(tabData, interactions, context) {
     const duration = tabData.duration || 0;
     const baseQueries = Math.max(1, Math.floor(duration / 60000)); // Base: 1 query per minute
-    
+
     // Interaction-based scaling
     let interactionMultiplier = 1.0;
     if (interactions) {
       interactionMultiplier = 1 + (interactions.clicks || 0) * 0.5 + (interactions.scrolls || 0) * 0.1;
     }
-    
+
     // Context-based adjustments
     let contextMultiplier = 1.0;
     if (context.isActiveTab) contextMultiplier *= 1.5;
     if (context.userEngagement === 'high') contextMultiplier *= 2.0;
     if (context.userEngagement === 'low') contextMultiplier *= 0.5;
-    
+
     const queries = Math.max(1, Math.floor(baseQueries * interactionMultiplier * contextMultiplier));
-    
+
     return {
       queries,
       confidence: 0.6,
@@ -1675,24 +1960,24 @@ class EnhancedAIEnergyManager {
    */
   calculateUserActivityLevel(tabData, context) {
     let activityLevel = 0.5; // Default moderate activity
-    
+
     // Duration-based activity
     const duration = tabData.duration || 0;
     const minutes = duration / 60000;
     if (minutes > 30) activityLevel += 0.2;
     if (minutes > 60) activityLevel += 0.1;
-    
+
     // Context-based adjustments
     if (context.userEngagement === 'high') activityLevel += 0.3;
     if (context.userEngagement === 'low') activityLevel -= 0.2;
     if (context.isActiveTab) activityLevel += 0.2;
-    
+
     // Battery level influence (users are less active on low battery)
     if (context.batteryLevel !== undefined) {
       if (context.batteryLevel < 0.3) activityLevel *= 0.7;
       else if (context.batteryLevel > 0.8) activityLevel *= 1.1;
     }
-    
+
     return Math.max(0.1, Math.min(1.0, activityLevel));
   }
 
@@ -1701,7 +1986,7 @@ class EnhancedAIEnergyManager {
    */
   estimateInteractions(tabData, duration) {
     if (!duration) return { clicks: 0, scrolls: 0 };
-    
+
     // Simple heuristic based on duration
     const minutes = duration / 60000;
     return {
@@ -1731,17 +2016,17 @@ class EnhancedAIEnergyManager {
    */
   calculateDetectionConfidence(platform, modelKey, context) {
     let confidence = 0.7; // Base confidence
-    
+
     // Platform-specific confidence boost
     if (platform) confidence += 0.1;
-    
+
     // Model-specific patterns detected
     if (context.url && context.url.includes(modelKey)) confidence += 0.1;
-    
+
     // Additional context indicators
     if (context.userAgent && context.userAgent.includes('Chrome')) confidence += 0.05;
     if (context.timestamp) confidence += 0.05;
-    
+
     return Math.min(1.0, confidence);
   }
 
@@ -1754,7 +2039,7 @@ class EnhancedAIEnergyManager {
       ...detection,
       timestamp: Date.now()
     });
-    
+
     // Clean old cache entries (older than 5 minutes)
     const now = Date.now();
     for (const [key, cached] of this.detectedModels.entries()) {
@@ -1771,7 +2056,7 @@ class EnhancedAIEnergyManager {
     const urlLower = url.toLowerCase();
     const titleLower = (title || '').toLowerCase();
     const contentLower = (content || '').toLowerCase();
-    
+
     // Search through all models for pattern matches
     for (const [modelKey, model] of Object.entries(ENHANCED_AI_MODEL_DATABASE)) {
       if (model.detectionPatterns) {
@@ -1793,7 +2078,7 @@ class EnhancedAIEnergyManager {
         }
       }
     }
-    
+
     return null;
   }
 
@@ -1802,16 +2087,16 @@ class EnhancedAIEnergyManager {
    */
   updateSessionTotals(usageData) {
     if (!usageData) return;
-    
+
     this.totalSessionEnergy += usageData.energy?.mean || 0;
     this.totalSessionCarbon += usageData.carbon?.mean || 0;
     this.totalSessionWater += usageData.water?.mean || 0;
-    
+
     // Update environmental metrics
     this.environmentalMetrics.totalEnergyWh += usageData.energy?.mean || 0;
     this.environmentalMetrics.totalCarbongCO2e += usageData.carbon?.mean || 0;
     this.environmentalMetrics.totalWaterML += usageData.water?.mean || 0;
-    
+
     if (usageData.environmental?.equivalents) {
       const eq = this.environmentalMetrics.energyEquivalents;
       const newEq = usageData.environmental.equivalents;
@@ -1821,7 +2106,7 @@ class EnhancedAIEnergyManager {
       eq.gasolineCars += newEq.gasolineCarMiles || 0;
       eq.atlanticFlights += newEq.atlanticFlights || 0;
     }
-    
+
     // Add to usage history
     this.modelUsageHistory.push({
       timestamp: Date.now(),
@@ -1833,7 +2118,7 @@ class EnhancedAIEnergyManager {
         water: this.totalSessionWater
       }
     });
-    
+
     // Keep history limited to last 100 entries
     if (this.modelUsageHistory.length > 100) {
       this.modelUsageHistory = this.modelUsageHistory.slice(-100);
@@ -1863,7 +2148,7 @@ class EnhancedAIEnergyManager {
    */
   compareModels(modelKeys) {
     const comparisons = [];
-    
+
     for (const key of modelKeys) {
       const model = ENHANCED_AI_MODEL_DATABASE[key];
       if (model) {
@@ -1881,7 +2166,7 @@ class EnhancedAIEnergyManager {
         });
       }
     }
-    
+
     return comparisons.sort((a, b) => b.efficiency - a.efficiency);
   }
 
@@ -1900,13 +2185,13 @@ class EnhancedAIEnergyManager {
   getModelRecommendations(context = {}) {
     const { useCase, batteryLevel, performancePreference } = context;
     const models = Object.entries(ENHANCED_AI_MODEL_DATABASE);
-    
+
     let recommendations = models.map(([key, model]) => ({
       key,
       model,
       score: this.calculateRecommendationScore(model, context)
     }));
-    
+
     // Sort by score and return top 5
     recommendations.sort((a, b) => b.score - a.score);
     return recommendations.slice(0, 5).map(r => ({
@@ -1924,27 +2209,27 @@ class EnhancedAIEnergyManager {
    */
   calculateRecommendationScore(model, context) {
     let score = model.aiIntelligenceIndex || 50;
-    
+
     // Battery level considerations
     if (context.batteryLevel !== undefined) {
       const energyPenalty = model.energy.meanCombined * (1 - context.batteryLevel);
       score -= energyPenalty;
     }
-    
+
     // Performance preference
     if (context.performancePreference === 'efficiency') {
       score += this.calculateEfficiencyScore(model) * 10;
     } else if (context.performancePreference === 'performance') {
       score += model.aiIntelligenceIndex * 0.5;
     }
-    
+
     // Use case specific scoring
     if (context.useCase === 'reasoning' && model.category.includes('reasoning')) {
       score += 20;
     } else if (context.useCase === 'creative' && model.category.includes('creative')) {
       score += 20;
     }
-    
+
     return score;
   }
 
@@ -1953,7 +2238,7 @@ class EnhancedAIEnergyManager {
    */
   getRecommendationReason(model, context) {
     const reasons = [];
-    
+
     if (model.category.includes('efficient')) {
       reasons.push('energy efficient');
     }
@@ -1966,7 +2251,7 @@ class EnhancedAIEnergyManager {
     if (model.energy.meanCombined < 1.0) {
       reasons.push('low energy consumption');
     }
-    
+
     return reasons.join(', ') || 'balanced performance';
   }
 
@@ -1976,10 +2261,10 @@ class EnhancedAIEnergyManager {
    */
   convertEnergyToWatts(energyStats, durationMs) {
     if (!energyStats || !durationMs || durationMs === 0) return 0;
-    
+
     const durationHours = durationMs / 3600000; // Convert ms to hours
     const energyWh = typeof energyStats === 'object' ? energyStats.mean : energyStats;
-    
+
     return energyWh / durationHours; // Watts = Wh / hours
   }
 
@@ -1995,17 +2280,17 @@ class EnhancedAIEnergyManager {
           this.detectedModels.delete(key);
         }
       }
-      
+
       // Clean old usage history (keep last 50 entries)
       if (this.modelUsageHistory.length > 50) {
         this.modelUsageHistory = this.modelUsageHistory.slice(-50);
       }
-      
+
       // Query estimation engine cleanup
       if (this.queryEstimationEngine && typeof this.queryEstimationEngine.cleanup === 'function') {
         this.queryEstimationEngine.cleanup();
       }
-      
+
     } catch (error) {
     }
   }
